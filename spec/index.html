@@ -456,6 +456,7 @@ interface AccessibleElement {
 
   readonly attribute Node? DOMNode;
   attribute AccessibleSource? source;
+  void sourceUpdated();
 };
 </pre>
       <section>
@@ -900,12 +901,75 @@ interface DocumentAccessibleElement : AccessibleElement {
       </section>
       <section>
         <h2>
-          Using the AccessibleElement interface.
+          Using an AccessibleElement backed by a DOM Node
         </h2>
         <p>
-          All of the semantic properties of an AccessibleElement can be
-          either queried or set.
+          This section applies to accessible elements that were obtained
+          using the <code>Node.accessibleElement</code> interface.
+          The section below on virtual accessible elements covers
+          additional cases.
         </p>
+        <p>
+          Initially, querying a property on an AccessibleElement backed by
+          a node will return the computed value of that property. For example,
+          suppose our HTML document contains the following element:
+        </p>
+        <pre class="highlight">
+          &lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
+        </pre>
+        <p>
+          We can obtain the accessible element for this heading like this:
+        </p>
+        <pre class="highlight">
+          var contents = document.getElementById("contents");
+          var axContents = contents.accessibleElement;
+        </pre>
+        <p>
+          Accessing the properties of the resulting object returns
+          computed accessibility attributes of the DOM element, such as
+          its role, level, and label:
+        </p>
+        <pre class="highlight">
+          axContents.role;   // returns "heading"
+          axContents.level;  // returns 2
+          axContents.label;  // returns "Contents"
+        </pre>
+        <p>
+          Any of these properties can be modified to any value allowed
+          for the corresponding feature in the [[!WAI-ARIA]] spec:
+        </p>
+        <pre class="highlight">
+          axContents.role = "region";
+          axContents.label = "Table of contents";
+        </pre>
+        <p>
+          Changing a property immediately affects the accessibility
+          tree and the browser notifies any accessibility clients about
+          the change.
+        </p>
+        <p>
+          Setting the value of a property to <code>undefined</code>
+          will have the effect of reverting any user-modified value
+          and the property will have its computed value instead:
+        </p>
+        <pre class="highlight">
+          axContents.role = "region";
+          axContents.role;  // Returns "region"
+
+          axContents.role = undefined;
+          axContents.role;  // Returns "heading"
+        </pre>
+        <p>
+          Setting the value of a property to an illegal value will
+          have the same effect as setting it to <code>undefined</code>,
+          it will revert any user-modified value. This is useful as
+          a form of feature detection.
+        </p>
+        <pre class="highlight">
+          axContents.role = "butler";
+          axContents.role;  // Returns "heading", because "butler" is not a valid role.
+        </pre>
+
       </section>
       <section>
         <h2>
@@ -914,7 +978,7 @@ interface DocumentAccessibleElement : AccessibleElement {
       </section>
       <section>
         <h2>
-          Creating virtual AccessibleElements
+          Virtual AccessibleElements
         </h2>
       </section>
       <section>
