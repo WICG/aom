@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<!--
+  JS Accessibility API Demos
+  2016
+
+  Based on:
+  Using ARIA to create accessible interactive web apps
+  Dominic Mazzoni and Rachel Shearer
+  2011
+
+  Based on the Google I/O 2011 HTML slides template
+  Created by Luke Mahé and Marcin Wichary
+
+  Copyright Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<html>
+  <head>
+    <title>JS A11y API Demos</title>
+
+    <meta charset='utf-8' />
+    <script src='slides.js'></script>
+    <script>
+      var slides;
+      var showAllSlidesButton;
+      var ignoreFocusEvents = false;
+
+      function $(element) {
+        return document.getElementById(element);
+      }
+
+      function onSlideEnter() {
+        console.log('onSlideEnter');
+        window.setTimeout(function() {
+          document.activeElement.blur();
+          window.setTimeout(function() {
+            var slideIndex = parseInt(location.hash.substr(1), 10) - 1;
+            ignoreFocusEvents = true;
+            slides[slideIndex].focus();
+            console.log('onSlideEnter focus');
+            window.setTimeout(function() {
+              ignoreFocusEvents = false;
+            }, 0);
+          }, 600);
+        }, 600);
+      }
+
+      function onFocus(e) {
+        console.log('focus ' + e.target);
+        document.pageXOffset = 0;
+        if (ignoreFocusEvents) {
+          console.log('ignore focus');
+          return true;
+        }
+        var t = e.target;
+        while (t && t.tagName != 'ARTICLE') {
+          t = t.parentElement;
+        }
+        if (t) {
+          var slideIndex = parseInt(t.getAttribute('slideIndex'), 10);
+          if (curSlide != slideIndex) {
+            console.log('Focus switch from ' +
+                        (curSlide + 1) + ' to ' + (slideIndex + 1));
+            curSlide = slideIndex;
+            updateSlides();
+            document.body.scrollLeft = 0;
+          }
+        }
+        return true;
+      }
+
+      function onScroll(e) {
+        console.log('scroll');
+        document.body.scrollLeft = 0;
+        e.preventDefault();
+        return false;
+      }
+
+      // Called when the page loads.
+      function initAriaPreso() {
+        slides = document.querySelectorAll('section.slides > article');
+
+        for (var i = 0; i < slides.length; i++) {
+          slides[i].setAttribute('tabindex', '-1');
+          slides[i].setAttribute('slideIndex', i);
+          slides[i].setAttribute('title', 'Slide ' + (i + 1));
+        }
+
+        document.addEventListener('slideenter', onSlideEnter, true);
+        document.addEventListener('focus', onFocus, true);
+        document.addEventListener('scroll', onScroll, true);
+      }
+
+      function refreshLiveCoding(basename) {
+        var src = $(basename + '_src');
+        var dst = $(basename + '_embed');
+        var html = src.innerText;
+        dst.innerHTML = html;
+        return false;
+      }
+
+      function addLiveCodingEventListeners(basename, src) {
+        src.addEventListener('keydown', function(e) {
+          if (e.keyCode == 9)  // tab
+            return true;
+          window.setTimeout(function() {
+            refreshLiveCoding(basename);
+          }, 0);
+          e.stopPropagation();
+          return false;
+        }, false);
+        src.addEventListener('blur', function(e) {
+          window.setTimeout(function() {
+            prettyPrint();
+          }, 0);
+        }, false);
+      }
+
+      function generateOutput(basename) {
+        var script = $(basename + '_script');
+        var output = $(basename + '_output');
+        output.innerHTML = '';
+        var js = script.innerText;
+        js = 'function print(str) {\n' +
+             '  var o = document.createElement("xmp");\n' +
+             '  o.innerText = str;\n' +
+             '  $("' + basename + '_output").appendChild(o);' +
+             '}' + js;
+        try {
+          eval(js);
+        } catch (e) {
+          output.innerText += e;
+        }
+        var run = document.createElement('button');
+        run.className = 'run_again';
+        run.style.marginTop = "1em";
+        run.innerText = 'Run again';
+        output.appendChild(run);
+        run.addEventListener('click', function() {
+          refreshLiveCoding(basename);
+          generateOutput(basename);
+        }, false);
+        run.focus();
+      }
+
+      // Sync a contenteditable containing html with a div containing the result.
+      function manageLiveCoding(basename) {
+        var src = $(basename + '_src');
+        src.title = "HTML source";
+        var code = src.innerHTML;
+        if (code[0] == '\n')
+          code = code.substr(1);
+        code = code.replace(/\n\n/g, '\n');
+        code = code.replace(/</g, '&lt;');
+        code = code.replace(/>/g, '&gt;');
+        src.innerHTML = code;
+
+        refreshLiveCoding(basename);
+        addLiveCodingEventListeners(basename, src);
+
+        var output = $(basename + '_output');
+        output.title = "JavaScript output";
+        var run = document.createElement('button');
+        run.className = 'run';
+        run.innerText = 'Run';
+        run.addEventListener('click', function() {
+          generateOutput(basename);
+        }, false);
+        output.appendChild(run);
+
+        $(basename + '_script').title = "JavaScript Source";
+        $(basename + '_embed').title = "HTML Output";
+      }
+
+      // Override keys used by interactive controls so they don't move
+      // to the next slide.
+      function overrideKeys(e) {
+        if (e.keyCode == 32 ||  // space
+            e.keyCode == 13 ||  // return
+            e.keyCode == 8 ||   // tab
+            e.keyCode == 38 ||  // up-arrow
+            e.keyCode == 40) {  // down-arrow
+          e.stopPropagation();
+        }
+        var active = document.activeElement;
+        if ((e.keyCode == 37 || e.keyCode == 39) &&  // left/right arrows
+            active.getAttribute("contentEditable") != "") {
+          e.stopPropagation();
+        }
+        return true;
+      }
+    </script>
+</head>
+
+  <style>
+    article:focus {
+      outline: none;
+    }
+
+    .slides > article {
+      -webkit-transition: -webkit-transform .4s ease-out !important;
+    }
+
+    iframe {
+      height: 800px !important;
+    }
+
+    h3 {
+      margin-bottom: 30px !important;
+    }
+
+    h3 + iframe {
+      height: 740px !important;
+    }
+
+    .parenthetical {
+      margin: 0 0.5em 0 0.5em;
+      color: #aaa;
+    }
+
+    .livecell {
+      margin: 0 20px 20px 0;
+      float: left;
+      width: 594px;
+      height: 340px;
+      line-height: 24px;
+      color: black;
+      border: 1px solid #696969;
+      padding: 5px 10px;
+    }
+
+    .lefthalf_src {
+      font-family: 'Droid Sans Mono', 'Courier New', monospace;
+      font-size: 15px;
+      background: rgb(240, 240, 240);
+      overflow: auto;
+    }
+
+    div.righthalf_embed {
+      overflow: hidden;
+      font-size: 24px;
+      line-height: 36px;
+    }
+    div.righthalf_embed * {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    div.righthalf_embed label {
+      display: block;
+      margin: 0 0 10px 0;
+    }
+    div.righthalf_embed input[type=text],input[type=password] {
+      border: 1px solid #666;
+    }
+    div.righthalf_embed input[type=submit],button {
+      display: block;
+      padding: 10px 20px;
+      border: 1px solid #666;
+      background: #eee;
+      border-radius: 6px;
+    }
+
+    .lefthalf_script {
+      font-family: 'Droid Sans Mono', 'Courier New', monospace;
+      font-size: 15px;
+      background: rgb(240, 240, 240);
+      overflow: auto;
+    }
+
+    div.righthalf_output {
+      font-family: 'Droid Sans Mono', 'Courier New', monospace;
+      font-size: 15px;
+      overflow: auto;
+    }
+
+    .run {
+      font-size: 24pt;
+      padding: 10px 20px;
+      color: #060;
+      font-weight: bold;
+      margin: 20px;
+    }
+
+    .run_again {
+      font-size: 18pt;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      color: #060;
+      background: none !important;
+      margin-top: 20px;
+    }
+
+    button.refresh {
+      cursor: pointer;
+      margin: 0px;
+      padding: 0px;
+      font-size: 12px;
+      background: none;
+      border: 0px;
+      text-decoration: underline;
+      color: #00f;
+    }
+
+    article.title {
+      background-color: #69f;
+    }
+    .twoimages div {
+      margin-top: 30px;
+      float: left;
+      width: 450px;
+      height: 300px;
+      line-height: 300px;
+      text-align: center;
+      position: relative;
+    }
+    .twoimages div img {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      max-width: 470px;
+      max-height: 300px;
+    }
+
+    .medimage {
+      margin-top: 30px;
+      width: 1100px;
+      text-align: center;
+    }
+    .medimage img {
+      max-width: 1100px;
+      max-height: 450px;
+    }
+
+    .largeimage {
+      margin-top: 30px;
+      width: 1100px;
+      text-align: center;
+    }
+    .largeimage img {
+      max-width: 1100px;
+      max-height: 800px;
+    }
+
+    .flushbottom {
+      position: fixed;
+      bottom: 0px;
+      margin: 0;
+      width: 900px;
+      text-align: center;
+    }
+    .flushbottom img {
+      max-width: 900px;
+      max-height: 300px;
+    }
+
+    .bkgnd {
+      width: 900px;
+      text-align: center;
+    }
+    .bkgnd img {
+      opacity: 0.1;
+      max-width: 900px;
+    }
+
+    .largevideo {
+      margin-top: 20px;
+      text-align: center;
+      max-width: 1100px;
+    }
+
+    .largevideo video {
+      max-width: 1100px;
+      height: 650px;
+    }
+
+</style>
+
+<body style='display: none' onload='initAriaPreso()'>
+<section class='slides' onkeydown="return overrideKeys(event)">
+
+<article class="title">
+  <h1>
+    JS Accessibility API Demos
+  </h1>
+  <p>
+    Dominic Mazzoni
+  </p>
+</article>
+
+<article><h3>Example 1: Query role, label</h3>
+<pre id="rolelabel_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<h2>Starfleet academy</h2>
+<label>
+  Username: <input id="username" type="text">
+</label>
+<label>
+  Password: <input type="password">
+</label>
+<input id="sign_in" type="submit">
+</pre>
+<div id="rolelabel_embed" class="livecell righthalf_embed"></div>
+<pre id="rolelabel_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axUsername = $("username").accessibleElement;
+print("Username field role: " + axUsername.role);
+print("Username field label: " + axUsername.label);
+
+var axSignIn = $("sign_in").accessibleElement;
+print("Sign in role: " + axSignIn.role);
+print("Sign in label: " + axSignIn.label);
+</pre>
+<div id="rolelabel_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('rolelabel');</script>
+</article>
+
+<article><h3>Example 2: Explore tree</h3>
+<pre id="exploretree_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<ol id="list1">
+  <li>The Original Series</li>
+  <li>The Next Generation</li>
+  <li>Deep Space Nine</li>
+  <li>Voyager</li>
+  <li>Enterprise</li>
+</ul>
+</pre>
+<div id="exploretree_embed" class="livecell righthalf_embed"></div>
+<pre id="exploretree_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axList = $("list1").accessibleElement;
+print("List role: " + axList.role);
+
+var axItem1 = axList.firstChild;
+print("Item 1 role: " + axItem1.role);
+print("Item 1 label: " + axItem1.label);
+
+var axItem2 = axItem1.nextSibling;
+print("Item 2 role: " + axItem2.role);
+print("Item 2 label: " + axItem2.label);
+
+print("axItem1.parent == axList: " + (axItem1.parent == axList));
+</pre>
+<div id="exploretree_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('exploretree');</script>
+</article>
+
+<article><h3>Example 3: Modify role, label</h3>
+<pre id="modify_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<button id="bridge">Bridge</button>
+<button id="engineering">Engineering</button>
+<button id="sick_bay">Sick Bay</button>
+</pre>
+<div id="modify_embed" class="livecell righthalf_embed"></div>
+<pre id="modify_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+$("engineering").accessibleElement.role = "link";
+$("sick_bay").accessibleElement.label = "Ten forward";
+print("Done.");
+</pre>
+<div id="modify_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('modify');</script>
+</article>
+
+<article><h3>Example 4: Feature detection</h3>
+<pre id="feature_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<label>
+  <input type="checkbox" id="stun">Phasers on stun
+</label>
+</pre>
+<div id="feature_embed" class="livecell righthalf_embed"></div>
+<pre id="feature_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axStun = $("stun").accessibleElement;
+print("Original role: " + axStun.role);
+
+axStun.role = "switch";
+print("Trying to set role to switch: " + axStun.role);
+
+axStun.role = "quantum-checkbox";
+print("Trying to set role to quantum-checkbox: " + axStun.role);
+</pre>
+<div id="feature_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('feature');</script>
+</article>
+
+<article><h3>Example 5: Modify position</h3>
+<pre id="position_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<h2>Landing party checklist</h2>
+<label><input type="checkbox" id="phaser">Phaser</label>
+<label><input type="checkbox" id="tricorder">Tricorder</label>
+<label><input type="checkbox" id="communicator">Communicator</label>
+</pre>
+<div id="position_embed" class="livecell righthalf_embed"></div>
+<pre id="position_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+$("tricorder").accessibleElement.offsetLeft += 50;
+$("communicator").accessibleElement.offsetTop += 25;
+print("Done.");
+</pre>
+<div id="position_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('position');</script>
+</article>
+
+<article><h3>Example 6: Modify CSS generated text</h3>
+<pre id="cssgen_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<style>
+#gen:before { content: "Before, "; }
+#gen:after { content: ", After"; }
+</style>
+<h2 id="time_heading"><span id="gen">Present</span></h2>
+</div>
+
+</pre>
+<div id="cssgen_embed" class="livecell righthalf_embed"></div>
+<pre id="cssgen_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axHeading = $("time_heading").accessibleElement;
+axHeading.firstChild.label = "Past, ";
+axHeading.lastChild.label = ", Future";
+print("Heading label is now: " + axHeading.label);
+</pre>
+<div id="cssgen_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('cssgen');</script>
+</article>
+
+<article><h3>Example 7: Accessible click listener</h3>
+<pre id="click_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<button id="kirk">James T Kirk</button>
+<button id="picard">Jean-Luc Picard</button>
+</pre>
+<div id="click_embed" class="livecell righthalf_embed"></div>
+<pre id="click_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+$("kirk").addEventListener("click", function() {
+  print("Clicked on Kirk");
+});
+$("picard").addEventListener("click", function() {
+  print("Clicked on Picard");
+});
+$("picard").accessibleElement.ondefaultaction = function() {
+  print("Accessible click on Picard");
+  return false;
+};
+</pre>
+<div id="click_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('click');</script>
+</article>
+
+<article><h3>Example 8: Virtual element</h3>
+<pre id="virtual_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+  <img src="enterprise.gif" id="enterprise">
+</pre>
+<div id="virtual_embed" class="livecell righthalf_embed"></div>
+<pre id="virtual_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axEnterprise = $("enterprise").accessibleElement;
+axEnterprise.role = "group";
+
+var axText = new AccessibleElement({
+    "role": function() { return "text"; },
+    "label": function() { return "Space, the final frontier"; },
+    "offsetWidth": function() { return 300; },
+    "offsetHeight": function() { return 100; }});
+axEnterprise.appendChild(axText);
+</pre>
+<div id="virtual_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('virtual');</script>
+</article>
+
+<article><h3>IDL of what's implemented so far</h3>
+<pre style="width:600px; float: left;">
+[ Constructor(AccessibleSource source) ]
+interface AccessibleElement : EventTarget {
+  attribute DOMString role;
+  attribute DOMString label;
+
+  attribute long? offsetLeft;
+  attribute long? offsetTop;
+  attribute long? offsetWidth;
+  attribute long? offsetHeight;
+
+  readonly attribute AccessibleElement parent;
+  readonly attribute AccessibleElement firstChild;
+  readonly attribute AccessibleElement lastChild;
+  readonly attribute AccessibleElement nextSibling;
+  readonly attribute AccessibleElement previousSibling;
+
+  void appendChild(AccessibleElement child);
+
+  attribute EventHandler ondefaultaction;
+
+  void setSource(AccessibleSource source);
+};
+</pre>
+<pre style="width:600px; float: left; margin-left: 20px;">
+partial interface Node {
+  readonly attribute AccessibleElement?
+      accessibleElement;
+};
+
+dictionary AccessibleSource {
+  Function role;
+  Function label;
+  Function offsetTop;
+  Function offsetLeft;
+  Function offsetWidth;
+  Function offsetHeight;
+};
+</pre>
+</article>
+</section>
+</body>
+</html>
