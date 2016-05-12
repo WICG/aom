@@ -340,36 +340,30 @@ partial interface Node {
 [Constructor(AccessibleSource source)]
 interface AccessibleNode {
   attribute DOMString role;
-  attribute DOMString? roleDescription;
 
   // Accessible label and description.
   attribute DOMString? label;
   attribute DOMString? description;
 
   // Global properties.
-  attribute boolean hasPopUp;
-  attribute DOMString? current;
-  attribute boolean hidden;
-  attribute boolean offscreen;
+  readonly attribute boolean visible;
 
   // Widget properties.
-  attribute DOMString? autocomplete;
+  attribute enum [ "inline", "list", "both" ] autocomplete;  // TODO: enum
   attribute boolean focusable;
-  attribute DOMString? keyboardShortcuts;
-  attribute boolean? modal;
-  attribute boolean? multiline;
   attribute boolean? multiselectable;
-  attribute DOMString? orientation;
-  attribute boolean? readOnly;
+  attribute enum orientation;                                // TODO: enum
+  attribute boolean? readonly;
   attribute boolean? required;
-  attribute DOMString? sort;
+  attribute enum sort;                                       // TODO: enum
 
   // Widget states.
-  attribute DOMString? checked;
+  attribute enum checked;                                    // TODO: enum
   attribute boolean? expanded;
   attribute boolean? disabled;
   attribute boolean? invalid;
-  attribute boolean? pressed;
+  attribute enum pressed;                                    // TODO: enum
+  attribute boolean hasPopUp;
 
   // Control values.
   attribute DOMString? value;
@@ -456,7 +450,18 @@ interface AccessibleNode {
   readonly attribute Node? DOMNode;
   attribute AccessibleSource? source;
   void sourceUpdated();
-};
+};</pre>
+      <h2>
+        Deferred
+      </h2>
+      <pre class="idl">
+  attribute DOMString? roleDescription;
+  attribute DOMString? text;  // Returns value if control, otherwise name.
+  attribute DOMString? current;  // Still being implemented
+  attribute boolean offscreen;  // needed because of clipping
+  attribute DOMString? keyboardShortcuts;
+  attribute boolean? modal;
+  attribute boolean? multiline;
 </pre>
       <section>
         <h3>
@@ -636,6 +641,8 @@ interface AccessibleNode {
               <td>aria-label</td>
               <td>label</td>
               <td>
+                Note that in ARIA, aria-labelledby takes precedence over
+                aria-label.
               </td>
             </tr>
             <tr>
