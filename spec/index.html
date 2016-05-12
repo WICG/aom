@@ -56,13 +56,6 @@
               ,   companyURL: "http://microsoft.com/"
               },
               {
-                  name:       "Marcos Caceres"
-              ,   url:        "http://mozilla.org/"
-              ,   mailto:     "mcaceres@mozilla.com"
-              ,   company:    "Mozilla"
-              ,   companyURL: "http://mozilla.org/"
-              },
-              {
                   name:       "James Craig"
               ,   url:        "http://apple.com"
               ,   mailto:     "jcraig@apple.com"
@@ -89,13 +82,6 @@
               ,   mailto:     "surkov.alexander@gmail.com"
               ,   company:    "Mozilla"
               ,   companyURL: "http://mozilla.org/"
-              },
-              {
-                  name:       "Nan Wang"
-              ,   url:        "http://apple.com"
-              ,   mailto:     "n_wang@apple.com"
-              ,   company:    "Apple"
-              ,   companyURL: "http://apple.com/"
               },
           ],
           // name of the WG
@@ -353,16 +339,14 @@ interface AccessibleNode {
   attribute boolean focusable;
   attribute boolean? multiselectable;
   attribute enum orientation;                                // TODO: enum
-  attribute boolean? readonly;
+  attribute boolean? readonly;                               // TODO: escape this for respec
   attribute boolean? required;
   attribute enum sort;                                       // TODO: enum
 
   // Widget states.
-  attribute enum checked;                                    // TODO: enum
   attribute boolean? expanded;
   attribute boolean? disabled;
-  attribute boolean? invalid;
-  attribute enum pressed;                                    // TODO: enum
+  attribute enum? invalid;                                    // TODO: enum
   attribute boolean hasPopUp;
 
   // Control values.
@@ -462,6 +446,10 @@ interface AccessibleNode {
   attribute DOMString? keyboardShortcuts;
   attribute boolean? modal;
   attribute boolean? multiline;
+
+  // Use value instead.
+  attribute enum checked;                                    // TODO: enum
+  attribute enum pressed;                                    // TODO: enum
 </pre>
       <section>
         <h3>
@@ -1109,6 +1097,22 @@ interface DocumentAccessibleNode : AccessibleNode {
       <p>
         Many thanks to Robin Berjon for making our lives so much easier with
         his cool tool.
+
+              {
+                  name:       "Marcos Caceres"
+              ,   url:        "http://mozilla.org/"
+              ,   mailto:     "mcaceres@mozilla.com"
+              ,   company:    "Mozilla"
+              ,   companyURL: "http://mozilla.org/"
+              },
+              {
+                  name:       "Nan Wang"
+              ,   url:        "http://apple.com"
+              ,   mailto:     "n_wang@apple.com"
+              ,   company:    "Apple"
+              ,   companyURL: "http://apple.com/"
+              },
+
       </p>
     </section>
   </body>
