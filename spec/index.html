@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>
-      Accessible Object Model
+      Accessibility Object Model
     </title>
     <meta charset='utf-8'>
     <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
@@ -202,10 +202,10 @@
     </section>
     <section>
       <h2>
-        Accessible Object Model
+        Accessibility Object Model
       </h2>
       <p>
-        This API is called the Accessible Object Model because it's based
+        This API is called the Accessibility Object Model because it's based
         around the idea that all modern operating systems, including
         both desktop and mobile operating systems, have native APIs that
         allow an application to be explored and controlled via a high-level
@@ -318,15 +318,15 @@
       </p>
       <pre class="idl">
 partial interface Node {
-  readonly attribute AccessibleElement? accessibleElement;
+  readonly attribute AccessibleNode? accessibleNode;
 };
 </pre>
       <section>
         <h3>
-          <code>accessibleElement</code> attribute
+          <code>accessibleNode</code> attribute
         </h3>
         <p>
-          The <code>accessibleElement</code> attribute returns the <a>accessible
+          The <code>accessibleNode</code> attribute returns the <a>accessible
           element</a> associated with this <code>Node</code> (if any).
           Otherwise, it returns <code>null</code>.
         </p>
@@ -334,11 +334,11 @@ partial interface Node {
     </section>
     <section>
       <h2>
-        AccessibleElement interface
+        AccessibleNode interface
       </h2>
       <pre class="idl">
 [Constructor(AccessibleSource source)]
-interface AccessibleElement {
+interface AccessibleNode {
   attribute DOMString role;
   attribute DOMString? roleDescription;
 
@@ -386,13 +386,13 @@ interface AccessibleElement {
   attribute DOMString liveRelevant;
 
   // Relationships.
-  attribute AccessibleElement? activeDescendant;
-  attribute iterable&lt;AccessibleElement&gt; controls;
-  attribute iterable&lt;AccessibleElement&gt; describedBy;
-  attribute AccessibleElement? details;
-  attribute AccessibleElement? errorMessage;
-  attribute AccessibleElement? flowTo;
-  attribute iterable&lt;AccessibleElement&gt; labelledBy;
+  attribute AccessibleNode? activeDescendant;
+  attribute iterable&lt;AccessibleNode&gt; controls;
+  attribute iterable&lt;AccessibleNode&gt; describedBy;
+  attribute AccessibleNode? details;
+  attribute AccessibleNode? errorMessage;
+  attribute AccessibleNode? flowTo;
+  attribute iterable&lt;AccessibleNode&gt; labelledBy;
 
   // Collections.
   attribute long? colCount;
@@ -406,7 +406,7 @@ interface AccessibleElement {
   attribute long? level;
 
   // Position.
-  attribute AccessibleElement? offsetParent;
+  attribute AccessibleNode? offsetParent;
   attribute long offsetLeft;
   attribute long offsetTop;
   attribute long offsetWidth;
@@ -422,16 +422,16 @@ interface AccessibleElement {
   attribute double scrollYMax;
 
   // Exploring the accessibility tree.
-  readonly attribute AccessibleElement parent;
-  readonly attribute AccessibleElement firstChild;
-  readonly attribute AccessibleElement lastChild;
-  readonly attribute AccessibleElement nextSibling;
-  readonly attribute AccessibleElement previousSibling;
+  readonly attribute AccessibleNode parent;
+  readonly attribute AccessibleNode firstChild;
+  readonly attribute AccessibleNode lastChild;
+  readonly attribute AccessibleNode nextSibling;
+  readonly attribute AccessibleNode previousSibling;
 
   // Adding, removing, and rearranging the accessibility tree.
-  void appendChild(AccessibleElement child);
-  void insertChild(AccessibleElement child, long index);
-  void removeChild(AccessibleElement child);
+  void appendChild(AccessibleNode child);
+  void insertChild(AccessibleNode child, long index);
+  void removeChild(AccessibleNode child);
 
   // Events.
   attribute EventHandler ondefaultaction;
@@ -465,20 +465,20 @@ interface AccessibleElement {
         <p>
           Wherever possible, this spec does not define new semantics, but
           instead defers to the existing [[!WAI-ARIA]] spec. The majority of
-          ARIA attributes have an <code>AccessibleElement</code> property with
+          ARIA attributes have an <code>AccessibleNode</code> property with
           identical semantics and usage. The following table matches ARIA
-          attributes with their corresponding <code>AccessibleElement</code>
+          attributes with their corresponding <code>AccessibleNode</code>
           property and notes relevant differences.
         </p>
 
         <table>
           <caption>
-            [[!WAI-ARIA]] to AccessibleElement mapping table.
+            [[!WAI-ARIA]] to AccessibleNode mapping table.
           </caption>
           <thead>
             <tr>
               <th style="min-width:200px;">ARIA attribute</th>
-              <th>AccessibleElement property</th>
+              <th>AccessibleNode property</th>
               <th>Notes</th>
             </tr>
           </thead>
@@ -487,7 +487,7 @@ interface AccessibleElement {
               <td>aria-activedescendant</td>
               <td>activeDescendant</td>
               <td>
-                The AccessibleElement property takes an AccessibleElement
+                The AccessibleNode property takes an AccessibleNode
                 as its value, rather than an ID. This allows the author
                 to reference any other accessible element within the same
                 [[!origin]], rather than only elements within the same
@@ -540,8 +540,8 @@ interface AccessibleElement {
               <td>aria-controls</td>
               <td>controls</td>
               <td>
-                The AccessibleElement property takes a sequence of
-                AccessibleElements as its value, rather than IDREFs.
+                The AccessibleNode property takes a sequence of
+                AccessibleNodes as its value, rather than IDREFs.
               </td>
             </tr>
             <tr>
@@ -554,15 +554,15 @@ interface AccessibleElement {
               <td>aria-describedby</td>
               <td>describedby</td>
               <td>
-                The AccessibleElement property takes a sequence of
-                AccessibleElements as its value, rather than IDREFs.
+                The AccessibleNode property takes a sequence of
+                AccessibleNodes as its value, rather than IDREFs.
               </td>
             </tr>
             <tr>
               <td>aria-details</td>
               <td>details</td>
               <td>
-                The AccessibleElement property takes an AccessibleElement
+                The AccessibleNode property takes an AccessibleNode
                 as its value, rather than an IDREF.
               </td>
             </tr>
@@ -583,7 +583,7 @@ interface AccessibleElement {
               <td>aria-errormessage</td>
               <td>errormessage</td>
               <td>
-                The AccessibleElement property takes an AccessibleElement
+                The AccessibleNode property takes an AccessibleNode
                 as its value, rather than an IDREF.
               </td>
             </tr>
@@ -597,7 +597,7 @@ interface AccessibleElement {
               <td>aria-flowto</td>
               <td>flowto</td>
               <td>
-                The AccessibleElement property takes an AccessibleElement
+                The AccessibleNode property takes an AccessibleNode
                 as its value, rather than an IDREF.
               </td>
             </tr>
@@ -642,7 +642,7 @@ interface AccessibleElement {
               <td>aria-labelledby</td>
               <td>labelledBy</td>
               <td>
-                Unlike in ARIA, an AccessibleElement's label is not
+                Unlike in ARIA, an AccessibleNode's label is not
                 computed when setting the labelledBy property, it
                 simply expresses the relationship. To set the accessible
                 label, set the <code>label</code> property directly.
@@ -808,26 +808,26 @@ interface AccessibleElement {
           Properties that don't correspond with [[!WAI-ARIA]]
         </h3>
         <p>
-          There are a few AccessibleElement properties that provide
+          There are a few AccessibleNode properties that provide
           semantic information about an accessible element but don't correspond
           directly to [[!WAI-ARIA]] attributes, because this information is
           available from host languages (like HTML) in some other way.
         </p>
         <p>
-          AccessibleElement also has additional properties that don't
+          AccessibleNode also has additional properties that don't
           correspond to ARIA, but these have to do with the tree structure
-          or the usage of the AccessibleElement API and not the semantics
-          of a particular AccessibleElement, so they're described separately
+          or the usage of the AccessibleNode API and not the semantics
+          of a particular AccessibleNode, so they're described separately
           below.
         </p>
 
         <table
           <caption>
-            AccessibleElement properties that don't correspond with [[!WAI-ARIA]]
+            AccessibleNode properties that don't correspond with [[!WAI-ARIA]]
           </caption>
           <thead>
             <tr>
-              <th>AccessibleElement property</th>
+              <th>AccessibleNode property</th>
               <th>Notes</th>
             </tr>
           </thead>
@@ -881,35 +881,35 @@ interface AccessibleElement {
 
     <section>
       <h2>
-        DocumentAccessibleElement interface
+        DocumentAccessibleNode interface
       </h2>
       <p>
-        When calling <code>accessibleElement</code> on the DOM
+        When calling <code>accessibleNode</code> on the DOM
         <code>Document</code> object, a special subclass of
-        AccessibleElement is returned, DocumentAccessibleElement.
+        AccessibleNode is returned, DocumentAccessibleNode.
         It just contains one additional property, <code>focus</code>,
-        which can be used to query or set the AccessibleElement
+        which can be used to query or set the AccessibleNode
         within this document's accessibility tree that should be
         considered to be focused.
       </p>
       <pre class="idl">
-interface DocumentAccessibleElement : AccessibleElement {
-  attribute AccessibleElement focus;
+interface DocumentAccessibleNode : AccessibleNode {
+  attribute AccessibleNode focus;
   attribute DocumentAccessibleSource? source;
 }</pre>
       </section>
       <section>
         <h2>
-          Using an AccessibleElement backed by a DOM Node
+          Using an AccessibleNode backed by a DOM Node
         </h2>
         <p>
           This section applies to accessible elements that were obtained
-          using the <code>Node.accessibleElement</code> interface.
+          using the <code>Node.accessibleNode</code> interface.
           The section below on virtual accessible elements covers
           additional cases.
         </p>
         <p>
-          Initially, querying a property on an AccessibleElement backed by
+          Initially, querying a property on an AccessibleNode backed by
           a node will return the computed value of that property. For example,
           suppose our HTML document contains the following element:
         </p>
@@ -921,7 +921,7 @@ interface DocumentAccessibleElement : AccessibleElement {
         </p>
         <pre class="highlight">
           var contents = document.getElementById("contents");
-          var axContents = contents.accessibleElement;
+          var axContents = contents.accessibleNode;
         </pre>
         <p>
           Accessing the properties of the resulting object returns
@@ -972,11 +972,11 @@ interface DocumentAccessibleElement : AccessibleElement {
           Optional properties
         </h3>
         <p>
-          Some properties of AccessibleElement are optional, they are allowed to be
+          Some properties of AccessibleNode are optional, they are allowed to be
           null. For example, <code>rangeValue</code> only applies to elements
           with certain roles (like "slider" and "progressbar"), while
           <code>liveRelevant</code> only applies to elements thta are live
-          regions. Other properties of AccessibleElement apply to all elements
+          regions. Other properties of AccessibleNode apply to all elements
           and are never null, for example <code>focusable</code> must always be
           true or false.
         </p>
@@ -984,13 +984,13 @@ interface DocumentAccessibleElement : AccessibleElement {
           Relationship properties
         </h3>
         <p>
-          Some properties express relationships between one AccessibleElement
+          Some properties express relationships between one AccessibleNode
           and one or more others, for example, <code>activeDescendant</code>
           and <code>labelledBy</code>. The semantics of these relationships
           are identical to their corresponding ARIA attributes. In ARIA, a
           relationship can only be expressed with an IDREF, i.e. by passing
           the ID of another element in the Document. With the
-          AccessibleElement interface, it isn't necessary for the target
+          AccessibleNode interface, it isn't necessary for the target
           element to have an ID. Furthermore, it isn't necessary for
           the the target element to be in the same Document, as long as
           it is form the same origin. This means it's possible to reference
@@ -1003,39 +1003,39 @@ interface DocumentAccessibleElement : AccessibleElement {
       </section>
       <section>
         <h2>
-          Virtual AccessibleElements
+          Virtual AccessibleNodes
         </h2>
         <p>
-          A virtual AccessibleElement can be created that does not correspond to
+          A virtual AccessibleNode can be created that does not correspond to
           a DOM node. This is intended to be used to represent an object on the screen
           that's drawn using some other mechanism, such as an HTML Canvas.
-          The AccessibleElement constructor takes a single argument that can be
-          used to initialize the AccessibleElement and update its properties
+          The AccessibleNode constructor takes a single argument that can be
+          used to initialize the AccessibleNode and update its properties
           dynamically.
         </p>
         <pre class="highlight">
-          var axVirtualButton = new AccessibleElement(
+          var axVirtualButton = new AccessibleNode(
               {{ "role": function() { return "button"; }},
                { "label": function() { return "Enable Audio Descriptions"; } },
                { "offsetWidth": function() { return 224; }},
                { "offsetHeight": function() { return 72; }}});
         </pre>
         <p>
-          A virtual AccessibleElement isn't part of the document's
+          A virtual AccessibleNode isn't part of the document's
           accessibility tree until it's added as the child of another element,
           using one of the methods used to add or remove children:
         </p>
         <pre class="idl">
-          void appendChild(AccessibleElement child);
-          void insertChild(AccessibleElement child, long index);
-          void removeChild(AccessibleElement child);
+          void appendChild(AccessibleNode child);
+          void insertChild(AccessibleNode child, long index);
+          void removeChild(AccessibleNode child);
         </pre>
         <p>
           For example, this code would add the virtual button we created
           above as a child of the HTML body element's accessible element:
         </p>
         <pre class="highlight">
-          document.body.accessibleElement.appendChild(axVirtualButton);
+          document.body.accessibleNode.appendChild(axVirtualButton);
         </pre>
       </section>
       <section>
@@ -1062,7 +1062,7 @@ interface DocumentAccessibleElement : AccessibleElement {
           from the document's accessibility tree.
         </p>
         <p>
-          The only case where it's illegal to add an AccessibleElement as the
+          The only case where it's illegal to add an AccessibleNode as the
           child of another is if it's backed by a DOM element that comes from
           a different Document. That will raise an exception. The
           accessibility tree can only be rearranged within one Document.
