@@ -109,6 +109,8 @@
         var dst = $(basename + '_embed');
         var html = src.innerText;
         dst.innerHTML = html;
+        if (window[basename + '_hook'])
+          window[basename + '_hook']();
         return false;
       }
 
@@ -591,6 +593,129 @@ axEnterprise.appendChild(axText);
 <script>manageLiveCoding('virtual');</script>
 </article>
 
+<article><h3>Example 8: Canvas slider</h3>
+<script>
+window['canvas_slider_hook'] = function() {
+    var canvas = document.getElementById('slider');
+    canvas.addEventListener('keydown', function(event) {
+        var min = parseInt(canvas.getAttribute('min'), 10);
+        var max = parseInt(canvas.getAttribute('max'), 10);
+        var value = parseInt(canvas.getAttribute('value'), 10);
+        if (event.keyIdentifier == 'Left')
+            value--;
+        if (event.keyIdentifier == 'Right')
+            value++;
+        if (value > max)
+            value = max;
+        if (value < min)
+            value = min;
+        canvas.setAttribute('value', value);
+        canvas.setAttribute('aria-valuenow', value);
+        canvas.setAttribute('aria-valuetext', value);
+    });
+
+    window.setInterval(function() {
+    var canvas = document.getElementById('slider');
+        var context = canvas.getContext('2d');
+        var margin = 30;
+        var left = margin;
+        var top = margin;
+        var width = canvas.offsetWidth - 2 * margin;
+        var height = canvas.offsetHeight - 2 * margin;
+        var right = left + width;
+        var bottom = top + height;
+        var cy = top + height / 2;
+        var r = 10;
+        var rr = r / 2;
+        context.globalAlpha = 1.0;
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+        context.lineWidth = 1;
+        context.globalAlpha = 1.0;
+
+        context.beginPath();
+        context.moveTo(left - r, cy);
+        context.bezierCurveTo(left - r, cy - rr, left - rr, cy - r, left, cy - r);
+        context.lineTo(right, cy - r);
+        context.bezierCurveTo(right + rr, cy - r, right + r, cy - rr, right + r, cy);
+        context.bezierCurveTo(right + r, cy + rr, right + rr, cy + r, right, cy + r);
+        context.lineTo(left, cy + r);
+        context.bezierCurveTo(left - rr, cy + r, left - r, cy + rr, left - r, cy);
+        context.shadowColor = '#555577';
+        context.shadowBlur = 10;
+        context.fillStyle = '#aaaaee';
+        context.fill();
+
+        var min = parseInt(canvas.getAttribute('min'), 10);
+        var max = parseInt(canvas.getAttribute('max'), 10);
+        var value = parseInt(canvas.getAttribute('value'), 10);
+        var steps = max - min;
+        for (var i = min; i <= max; i++) {
+            var x = left + (i - min) * (width / steps);
+            context.beginPath();
+            context.ellipse(x, cy, 3, 3, 0, 0, 2 * Math.PI, true);
+            context.shadowColor = '#ffffff';
+            context.shadowBlur = 2;
+            context.fillStyle = '#ffffff';
+            context.fill();
+            context.font = "14px sans-serif";
+            var text = "" + i;
+            var metrics = context.measureText(text);
+            context.fillStyle = '#000000';
+            context.fillText(text, x - metrics.width / 2, cy + 3 * r);
+        }
+        var x = left + (value - min) * (width / steps);
+        var cy1 = cy - 10;
+        var cy2 = cy + 30;
+        context.beginPath();
+        context.moveTo(x - r, cy1);
+        context.bezierCurveTo(x - r, cy1 - rr, x - rr, cy1 - r, x, cy1 - r);
+        context.bezierCurveTo(x + rr, cy1 - r, x + r, cy1 - rr, x + r, cy1);
+        context.lineTo(x + r, cy2);
+        context.bezierCurveTo(x + r, cy2 + rr, x + rr, cy2 + r, x, cy2 + r);
+        context.bezierCurveTo(x - rr, cy2 + r, x - r, cy2 + rr, x - r, cy2);
+        context.lineTo(x - r, cy1);
+        context.lineWidth = 3;
+        context.strokeStyle = '#ff6666';
+        context.shadowColor = '#ff6666';
+        context.shadowBlur = 2;
+        context.globalAlpha = 0.5;
+        context.stroke();
+    }, 50);
+}
+</script>
+<style>
+  canvas {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 400px;
+    height: 120px;
+  }
+</style>
+<pre id="canvas_slider_src" class="livecell lefthalf_src" tabindex="0"
+     contenteditable="true" spellcheck="false">
+<canvas id="slider" width="400" height="120" tabIndex=0
+        role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5"
+        value="5" min="1" max="10">
+</canvas>
+</pre>
+<div id="canvas_slider_embed" class="livecell righthalf_embed"></div>
+<pre id="canvas_slider_script" class="livecell lefthalf_script" tabindex="0"
+     contenteditable="true" spellcheck="false">
+var axSlider = $("slider").accessibleElement;
+axSlider.role = "slider";
+axSlider.onaccessiblesetvalue = function(event) {
+    $("slider").setAttribute('value', event.value);
+    $("slider").setAttribute('aria-valuenow', event.value);
+    $("slider").setAttribute('aria-valuetext', event.value);
+}
+</pre>
+<div id="canvas_slider_output" class="livecell righthalf_output"></div>
+<script>manageLiveCoding('canvas_slider');</script>
+</article>
+
 <article><h3>IDL of what's implemented so far</h3>
 <pre style="width:600px; float: left;">
 [ Constructor(AccessibleSource source) ]
@@ -612,6 +737,7 @@ interface AccessibleElement : EventTarget {
   void appendChild(AccessibleElement child);
 
   attribute EventHandler ondefaultaction;
+  attribute EventHandler onaccessiblesetvalue;
 
   void setSource(AccessibleSource source);
 };
@@ -633,5 +759,6 @@ dictionary AccessibleSource {
 </pre>
 </article>
 </section>
+
 </body>
 </html>
