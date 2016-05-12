@@ -245,9 +245,9 @@
       <p>
         A fundamental assumption of [[!WAI-ARIA]], though, is that there's
         essentially a one-to-one correspondence between a DOM element
-        and an accessible element. While there are ways to hide
+        and an accessible node. While there are ways to hide
         presentational DOM elements from the accessibility tree, there are
-        no ways to create accessible elements that don't correspond to
+        no ways to create accessible nodes that don't correspond to
         DOM elements. This is one of the gaps this spec aims to address.
       </p>
       <section class="informative">
@@ -255,12 +255,12 @@
           Understanding the terms
         </h3>
         <p>
-          A web page or web app is made up of a tree of accessible elements.
-          Typically each DOM node gets a corresponding accessible element,
+          A web page or web app is made up of a tree of accessible nodes.
+          Typically each DOM node gets a corresponding accessible node,
           but this API allows the author to create additional accessible
-          elements and create relationships between accessible elements
+          elements and create relationships between accessible nodes
           that aren't present in the DOM.
-          Each <a>accessible element</a> is described by
+          Each <a>accessible node</a> is described by
           accessible properties like <a>role</a>, <a>name</a>, <a>relations</a>
           etc.
         </p>
@@ -271,18 +271,18 @@
           </figcaption>
         </figure>
         <p>
-          <a>Accessible elements</a> can be related to each other
+          <a>accessible nodes</a> can be related to each other
           in a number of ways.
         </p>
         <figure>
           <img src="images/rels.png" alt="accessible relations diagram">
           <figcaption>
-            Relations. A color of arrows connecting accessible element
+            Relations. A color of arrows connecting accessible node
             represent own relation type.
           </figcaption>
         </figure>
         <p>
-          All <a>accessible elements</a> are organized into an
+          All <a>accessible nodes</a> are organized into an
           accessibility tree, with strict parent-child relationships.
         </p>
         <figure>
@@ -494,7 +494,7 @@ interface AccessibleNode {
               <td>
                 The AccessibleNode property takes an AccessibleNode
                 as its value, rather than an ID. This allows the author
-                to reference any other accessible element within the same
+                to reference any other accessible node within the same
                 [[!origin]], rather than only elements within the same
                 <i>tree scope</i>.
               </td>
@@ -816,7 +816,7 @@ interface AccessibleNode {
         </h3>
         <p>
           There are a few AccessibleNode properties that provide
-          semantic information about an accessible element but don't correspond
+          semantic information about an accessible node but don't correspond
           directly to [[!WAI-ARIA]] attributes, because this information is
           available from host languages (like HTML) in some other way.
         </p>
@@ -850,7 +850,7 @@ interface AccessibleNode {
             <tr>
               <td>offsetParent</td>
               <td>
-                The parent or ancestor of this accessible element that should be
+                The parent or ancestor of this accessible node that should be
                 used to anchor the relative position of this element expressed
                 by <code>offsetLeft</code> and <code>offsetTop</code>.
               </td>
@@ -863,7 +863,7 @@ interface AccessibleNode {
                 offsetHeight
               </td>
               <td>
-                The position of this accessible element (relative to the position of its
+                The position of this accessible node (relative to the position of its
                 <code>offsetParent</code>, and its width and height, all in CSS pixels.
               </td>
             </tr>
@@ -910,9 +910,9 @@ interface DocumentAccessibleNode : AccessibleNode {
           Using an AccessibleNode backed by a DOM Node
         </h2>
         <p>
-          This section applies to accessible elements that were obtained
+          This section applies to accessible nodes that were obtained
           using the <code>Node.accessibleNode</code> interface.
-          The section below on virtual accessible elements covers
+          The section below on virtual accessible nodes covers
           additional cases.
         </p>
         <p>
@@ -924,7 +924,7 @@ interface DocumentAccessibleNode : AccessibleNode {
           &lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
         </pre>
         <p>
-          We can obtain the accessible element for this heading like this:
+          We can obtain the accessible node for this heading like this:
         </p>
         <pre class="highlight">
           var contents = document.getElementById("contents");
@@ -1039,7 +1039,7 @@ interface DocumentAccessibleNode : AccessibleNode {
         </pre>
         <p>
           For example, this code would add the virtual button we created
-          above as a child of the HTML body element's accessible element:
+          above as a child of the HTML body element's accessible node:
         </p>
         <pre class="highlight">
           document.body.accessibleNode.appendChild(axVirtualButton);
