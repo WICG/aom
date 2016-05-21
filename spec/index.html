@@ -293,31 +293,81 @@
         </figure>
       </section>
     </section>
+
     <section>
       <h2>
-        Extensions to the <code>Node</code> interface
+        Accessibility attributes
       </h2>
       <p>
-        Assistive technology, or the developer, can request an <a>accessible
-        element</a> from a [[!DOM]] <code>Node</code> if the <code>Node</code>
-        is accessible, i.e. it expresses semantics to the assistive technology.
+        An <dfn>Accessibility Attribute</dfn> is an abstract concept that is not
+        exposed as an object in the DOM. An Accessibility Attribute has
+        the following associated properties:
       </p>
-      <pre class="idl">
-partial interface Node {
-  readonly attribute AccessibleNode? accessibleNode;
+      <dl>
+        <dt>name</dt>
+        <dd>The name of the attribute.</dd>
+        <dt>type</dt>
+        <dd>The data type that values of this attribute take</dd>
+        <dt>supported roles</dt>
+        <dd>A list of roles on which this attribute is allowed to be set</dd>
+        <dt>associated ARIA attribute</dt>
+        <dd>The corresponding ARIA attribute with the same semantics, if any</dd>
+      </dl>
+      <p>
+      </p>
+
+     <pre class="idl">
+enum AccessibleRole {
+  "alert",
+  "alertdialog",
+  "application",
+  "article",
+  ...,
+  "treeitem"
 };
+
+enum AccessiblePropertyType {
+  "long",
+  "double",
+  "boolean",
+  "string",
+  "enum",
+  "ref",
+  "reflist"
+};
+
+interface AccessibleAttribute {
+  DOMString              name;
+  AccessibleAttributeType type;
+  iterable<DOMString>? enumValues;
+};
+
+interface AccessibleRoleInfo {
+  static AccessibleRoleInfo get(DOMString roleName);
+  static iterable<AccessibleRoleInfo> getAll();
+  readonly iterable<AccessibleAttribute> properties;
+  readonly enum roleName;
+  readonly iterable<AccessibleRole> parentRoles;
+  readonly boolean abstract;
+};
+
+interface AccessibleNode : EventTarget {
+  DOMString roleName;
+  any getAttribute(DOMString attributeName);
+  any setAttribute(DOMString attributeName, any attributeValue);
+};
+
+DOMAccessibleNode : AccessibleNode {
+  readonly attribute checked;
+  readonly attribute hidden;
+  DOMNode domNode;
+};
+
+VirtualAccessibleNode : AccessibleNode {
+  readonly attribute checked;
+};
+
 </pre>
-      <section>
-        <h3>
-          <code>accessibleNode</code> attribute
-        </h3>
-        <p>
-          The <code>accessibleNode</code> attribute returns the <a>accessible
-          element</a> associated with this <code>Node</code> (if any).
-          Otherwise, it returns <code>null</code>.
-        </p>
-      </section>
-    </section>
     <section>
       <h2>
         AccessibleNode interface

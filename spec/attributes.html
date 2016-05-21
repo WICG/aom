@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Accessibility Object Model - Attributes
+    </title>
+    <meta charset='utf-8'>
+    <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
+    class='remove'>
+    </script>
+    <script class='remove'>
+    /*Make tidy happy*/
+    var respecConfig = {
+          // specification status (e.g. WD, LCWD, WG-NOTE, etc.). If in doubt use ED.
+          specStatus:           "unofficial",
+          // the specification's short name, as in http://www.w3.org/TR/short-name/
+          shortName:            "aom",
+
+          // if your specification has a subtitle that goes below the main
+          // formal title, define it here
+          // subtitle   :  "an excellent document",
+
+          // if you wish the publication date to be other than the last modification, set this
+          // publishDate:  "2009-08-06",
+
+          // if the specification's copyright date is a range of years, specify
+          // the start date here:
+          // copyrightStart: "2005"
+
+          // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+          // and its maturity status
+          // previousPublishDate:  "1977-03-15",
+          // previousMaturity:  "WD",
+
+          // if there a publicly available Editor's Draft, this is the link
+          // edDraftURI:           "http://berjon.com/",
+
+          // if this is a LCWD, uncomment and set the end of its review period
+          // lcEnd: "2009-08-05",
+
+          // editors, add as many as you like
+          // only "name" is required
+          editors:  [
+          ],
+          // name of the WG
+          //         wg:           "None",
+
+          // URI of the public WG page
+          //         wgURI:        "http://example.org/really-cool-wg",
+
+          // name (without the @w3c.org) of the public mailing to which comments are due
+          //          wgPublicList: "spec-writers-anonymous",
+
+          // URI of the patent status for this WG, for Rec-track documents
+          // !!!! IMPORTANT !!!!
+          // This is important for Rec-track documents, do not copy a patent URI from a random
+          // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+          // Team Contact.
+          //        wgPatentURI:  "",
+          // !!!! IMPORTANT !!!! MAKE THE ABOVE BLINK IN YOUR HEAD
+      };
+    </script>
+    <style>
+      table{
+        border:solid 2px #999;
+        border-width:1px 0 0 1px;
+        margin:0.1em 0 1em;
+        padding:0;
+        border-spacing:0;
+        border-collapse:collapse;
+      }
+      th, td{
+        border:solid 2px #999;
+        border-width:0 1px 1px 0;
+        padding:0.15em 0.3em 0.1em;
+        /*min-width:20em;*/
+        vertical-align:top;
+        text-align:left;
+      }
+      th+th, td+td{
+        width:auto;
+      }
+      th{
+        background-color:#eee;
+      }
+      caption{
+        text-align:left;
+        color:#555;
+        font-style:normal;
+        margin:1em 0 0.1em;
+        padding:0 0 0 0.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      <a href="index.html">Main Document</a>
+    </h1>
+    <section>
+      <h2>
+        The Accessibility Tree and Accessible Nodes
+      </h2>
+      <p>
+        An <dfn>Accessibility Tree</dfn> is a semantic representation of an
+        application's user interface enabling it to be observed and
+        controlled by other client software programs, like assistive
+        technology and automation software, via a platform-native
+        <dfn>Accessibility API</dfn>. User agents typically provide
+        support for one or more native accessibility APIs.
+      </p>
+      <p>
+        The Accessibility Tree is made up of <dfn>Accessible Nodes</dfn>.
+        Accessible Nodes have a <em>role</em> and several <a href="#attributes">
+        Accessibility Attributes</a> that describe the node's current
+        state, and other properties.
+      </p>
+      <p>
+        In many cases, the Accessibility Tree exposed by a user agent
+        corresponds closely to a web page's DOM tree, with one
+        Accessible Node for every DOM Node. However, sometimes the trees
+        need to differ - for example, several DOM elements may create a
+        media player seek control, but in the Accessibility Tree that
+        whole collection might be represented by a single Accessible Node
+        with a role of "slider" and other attributes indicating its
+        min, max, and current value.
+      </p>
+      <p>
+        Authors can modify the way a DOM node is converted into the
+        accessibility tree using [[!WAI-ARIA]] attributes. However, this
+        approach is sometimes limited, so this spec provides the author
+        with a richer programmatic interface to complement ARIA.
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        Extensions to the <code>Node</code> interface
+      </h2>
+      <p>
+        The author can request an <a>accessible node</a> from any [[!DOM]]
+        <code>Node</code> that is rendered as part of a web page.
+      </p>
+      <pre class="idl">
+        partial interface Node {
+          readonly attribute AccessibleDOMNode? accessibleNode;
+        };
+      </pre>
+      <section>
+        <h3>
+          <code>accessibleNode</code> attribute
+        </h3>
+        <p>
+          The <code>accessibleNode</code> attribute returns the <a>accessible
+          node</a> associated with this <code>DOM node</code>, or
+          <code>null</code> if this DOM node is not currently rendered as
+          part of a web page.
+        </p>
+      </section>
+    </section>
+    <section>
+      <h2>
+        AccessibleNode and AccessibleDOMNode interfaces
+      </h2>
+      <p>
+        An AccessibleNode is an interface that represents one node in the
+        user agent's accessibility tree. A subclass, AccessibleDOMNode,
+        can be retrieved directly from a DOM Node, or a new AccessibleNode
+        can be constructed and inserted into the accessibility tree.
+      </p>
+      <pre class="idl">
+        [Constructor]
+        interface AccessibleNode : EventTarget {
+          attribute DOMString role;
+
+          void setAttribute(DOMString attributeName, any value);
+          any getAttribute(DOMString attributeName);
+
+          readonly attribute AccessibleNode parent;
+          readonly attribute AccessibleNode firstChild;
+          readonly attribute AccessibleNode lastChild;
+          readonly attribute AccessibleNode nextSibling;
+          readonly attribute AccessibleNode previousSibling;
+
+          void appendChild(AccessibleNode child);
+          void insertBefore(AccessibleNode child, AccessibleNode before);
+          void insertAfter(AccessibleNode child, AccessibleNode after);
+          void removeChild(AccessibleNode child);
+        };
+
+        interface AccessibleDOMNode : AccessibleNode {
+          readonly attribute Node node;
+        };
+      </pre>
+      <p id="source">
+        Let an AccessibleNode's <dfn>source</dfn> be an internal
+        dictionary containing attributes that the author has set.
+        Attributes in an AccessibleNode's <em>source</em>, when valid,
+        supercede all other rules in the computation of that attribute.
+      </p>
+      <p>
+        The <dfn>role</dfn> attribute, on getting, returns the node's
+        <em>computed role</em>, which will be the <a href="#source">
+          source</a> role if valid, and if this is an
+          AccessibleDOMNode then it will be the role computed from the
+          DOM node and its ARIA attributes, and the empty string
+          otherwise.  On setting, the provided DOMString gets stored
+          in the AccessibleNode's
+        <a href="#source">source</a>, overriding all other potential
+        sources of the computed role if valid.
+      </p>
+      <p>
+        The <dfn>getAttribute</dfn> method, when called with the
+        name of an <a href="#attribute">accessibility attribute</a>,
+        returns the <em>computed</em> value of that attribue, which
+        which will be the <a href="#source">source</a> value if valid,
+        and if this is an AccessibleDOMNode then it will be the value
+        of this attribute computed from the DOM node and its ARIA
+          attributes, and the empty string otherwise.
+      </p>
+      <p>
+        The <dfn>setAttribute</dfn> method stores the provided value
+        in the AccessibleNode's <a href="#source">source</a>,
+        and if valid it overrides all other potential sources of the computed
+        attribute value.
+      </p>
+      <p>
+        For each supported <a href="#attribute">accessibility
+        attribute</a>, the following partial interface applies.
+        <pre>
+          partial interface AccessibleNode {
+            attribute <em>typename</em> attributeName;
+          };
+        </pre>
+        Setting the attribute must invoke setAttribute() with the first
+        argument being the attribute name, and the second argument the
+        given value.  Getting the attribute must invoke getAttribute()
+        with the argument being the attribute name, and return the result.
+      </p>
+      <p>
+        The <dfn>parent</dfn> attribute must return the parent
+        AccessibleNode in the accessibility tree, if any.
+      </p>
+      <p>
+        The <dfn></dfn> attribute must return the
+        AccessibleNode in the accessibility tree, if any.
+      </p>
+      <p>
+        The <dfn></dfn> attribute must return the
+        AccessibleNode in the accessibility tree, if any.
+      </p>
+      <p>
+        The <dfn></dfn> attribute must return the
+        AccessibleNode in the accessibility tree, if any.
+      </p>
+      <p>
+        The <dfn></dfn> attribute must return the
+        AccessibleNode in the accessibility tree, if any.
+      </p>
+    </section>
+
+    <section>
+      <h2>
+        Accessibility attributes
+      </h2>
+      <p>
+        An <dfn>Accessibility Attribute</dfn> is an abstract concept that is not
+        exposed as an object in the DOM. An Accessibility Attribute has
+        the following associated properties:
+      </p>
+      <dl>
+        <dt>name</dt>
+        <dd>The name of the attribute.</dd>
+        <dt>type</dt>
+        <dd>The data type that values of this attribute take</dd>
+        <dt>supported roles</dt>
+        <dd>A list of roles on which this attribute is allowed to be set</dd>
+        <dt>related ARIA attribute</dt>
+        <dd>The corresponding ARIA attributes, if any</dd>
+      </dl>
+      <p>
+      </p>
+
+     <pre class="idl">
+enum AccessibleRole {
+  "alert",
+  "alertdialog",
+  "application",
+  "article",
+  ...,
+  "treeitem"
+};
+
+enum AccessiblePropertyType {
+  "long",
+  "double",
+  "boolean",
+  "string",
+  "enum",
+  "ref",
+  "reflist"
+};
+
+interface AccessibleAttribute {
+  DOMString              name;
+  AccessibleAttributeType type;
+  iterable<DOMString>? enumValues;
+};
+
+interface AccessibleRoleInfo {
+  static AccessibleRoleInfo get(DOMString roleName);
+  static iterable<AccessibleRoleInfo> getAll();
+  readonly iterable<AccessibleAttribute> properties;
+  readonly enum roleName;
+  readonly iterable<AccessibleRole> parentRoles;
+  readonly boolean abstract;
+};
+
+interface AccessibleNode : EventTarget {
+  DOMString roleName;
+  any getAttribute(DOMString attributeName);
+  any setAttribute(DOMString attributeName, any attributeValue);
+};
+
+DOMAccessibleNode : AccessibleNode {
+  readonly attribute checked;
+  readonly attribute hidden;
+  DOMNode domNode;
+};
+
+VirtualAccessibleNode : AccessibleNode {
+  readonly attribute checked;
+};
+
+</pre>
+    <section>
+      <h2>
+        Extensions to the <code>Node</code> interface
+      </h2>
+      <p>
+        Assistive technology, or the developer, can request an <a>accessible
+        element</a> from a [[!DOM]] <code>Node</code> if the <code>Node</code>
+        is accessible, i.e. it expresses semantics to the assistive technology.
+      </p>
+      <pre class="idl">
+partial interface Node {
+  readonly attribute AccessibleNode? accessibleNode;
+};
+</pre>
+      <section>
+        <h3>
+          <code>accessibleNode</code> attribute
+        </h3>
+        <p>
+          The <code>accessibleNode</code> attribute returns the <a>accessible
+          element</a> associated with this <code>Node</code> (if any).
+          Otherwise, it returns <code>null</code>.
+        </p>
+      </section>
+    </section>
+    <section>
+      <h2>
+        AccessibleNode interface
+      </h2>
+      <pre class="idl">
+[Constructor(AccessibleSource source)]
+interface AccessibleNode {
+  attribute DOMString role;
+
+  // Accessible label and description.
+  attribute DOMString? label;
+  attribute DOMString? description;
+
+  // Global properties.
+  readonly attribute boolean visible;
+
+  // Widget properties.
+  attribute enum autocomplete;                               // TODO: enum
+  attribute boolean focusable;
+  attribute boolean? multiselectable;
+  attribute enum orientation;                                // TODO: enum
+  attribute boolean? readonly;                               // TODO: escape this for respec
+  attribute boolean? required;
+  attribute enum sort;                                       // TODO: enum
+
+  // Widget states.
+  attribute boolean? expanded;
+  attribute boolean? disabled;
+  attribute enum? invalid;                                    // TODO: enum
+  attribute boolean hasPopUp;
+
+  // Control values.
+  attribute DOMString? value;
+  attribute DOMString? placeholder;
+  attribute double? rangeValue;
+  attribute double? rangeMin;
+  attribute double? rangeMax;
+  attribute double? rangeStep;
+
+  // Live regions.
+  attribute boolean? liveAtomic;
+  attribute boolean? liveBusy;
+  attribute DOMString liveStatus;
+  attribute DOMString liveRelevant;
+
+  // Relationships.
+  attribute AccessibleNode? activeDescendant;
+  attribute iterable&lt;AccessibleNode&gt; controls;
+  attribute iterable&lt;AccessibleNode&gt; describedBy;
+  attribute AccessibleNode? details;
+  attribute AccessibleNode? errorMessage;
+  attribute AccessibleNode? flowTo;
+  attribute iterable&lt;AccessibleNode&gt; labelledBy;
+
+  // Collections.
+  attribute long? colCount;
+  attribute long? colIndex;
+  attribute long? colSpan;
+  attribute long? posInSet;
+  attribute long? rowCount;
+  attribute long? rowIndex;
+  attribute long? rowSpan;
+  attribute long? setSize;
+  attribute long? level;
+
+  // Position.
+  attribute AccessibleNode? offsetParent;
+  attribute long offsetLeft;
+  attribute long offsetTop;
+  attribute long offsetWidth;
+  attribute long offsetHeight;
+
+  // Scrolling.
+  attribute boolean scrollable;
+  attribute double scrollX;
+  attribute double scrollXMin;
+  attribute double scrollXMax;
+  attribute double scrollY;
+  attribute double scrollYMin;
+  attribute double scrollYMax;
+
+  // Exploring the accessibility tree.
+  readonly attribute AccessibleNode parent;
+  readonly attribute AccessibleNode firstChild;
+  readonly attribute AccessibleNode lastChild;
+  readonly attribute AccessibleNode nextSibling;
+  readonly attribute AccessibleNode previousSibling;
+
+  // Adding, removing, and rearranging the accessibility tree.
+  void appendChild(AccessibleNode child);
+  void insertChild(AccessibleNode child, long index);
+  void removeChild(AccessibleNode child);
+
+  // Events.
+  attribute EventHandler ondefaultaction;
+  attribute EventHandler onfocus;
+  attribute EventHandler onsetvalue;
+  attribute EventHandler oncollapse;
+  attribute EventHandler onexpand;
+  attribute EventHandler onscroll;
+  attribute EventHandler onscrollintoview;
+  attribute EventHandler onselect;
+  attribute EventHandler onaddtoselection;
+  attribute EventHandler onremovefromselection;
+  attribute EventHandler ondelete;
+  attribute EventHandler ondismiss;
+  attribute EventHandler onmedianext;
+  attribute EventHandler onmediapause;
+  attribute EventHandler onmediaprevious;
+  attribute EventHandler onmediastart;
+  attribute EventHandler onmediastop;
+  attribute EventHandler onzoom;
+
+  readonly attribute Node? DOMNode;
+  attribute AccessibleSource? source;
+  void sourceUpdated();
+};</pre>
+      <h2>
+        Deferred
+      </h2>
+      <pre class="idl">
+  attribute DOMString? roleDescription;
+  attribute DOMString? text;  // Returns value if control, otherwise name.
+  attribute DOMString? current;  // Still being implemented
+  attribute boolean offscreen;  // needed because of clipping
+  attribute DOMString? keyboardShortcuts;
+  attribute boolean? modal;
+  attribute boolean? multiline;
+
+  // Use value instead.
+  attribute enum checked;                                    // TODO: enum
+  attribute enum pressed;                                    // TODO: enum
+</pre>
+  </body>
+</html>
