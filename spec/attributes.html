@@ -225,13 +225,15 @@
         name of an <a href="#attribute">accessibility attribute</a>,
         runs the following algorithm:
         <ul>
+          <li>If this attribute is not defined for the AccessibleNode's
+            <dfn>role</dfn>, return <code>undefined</code>.
           <li>If the AccessibleNode's source contains a valid value
             for this attribute, returns that value.
           <li>Otherwise, if this is an AccessibleDOMNode, return the
             computed value of this attribute according to the
             algorithm associated with this attribute.
           <li>Otherwise, return the default value for this
-            attribute, which may be undefined.
+            attribute, which may be <code>undefined</code>.
         </ul>
       </p>
       <p>
@@ -249,27 +251,27 @@
       <p>
         The <dfn>parent</dfn> attribute must return the parent
         AccessibleNode in the accessibility tree, if any,
-        and undefined otherwise.
+        and <code>undefined</code> otherwise.
       </p>
       <p>
         The <dfn>firstChild</dfn> attribute must return the
         AccessibleNode for the first child in the accessibility tree,
-        if any, and undefined otherwise.
+        if any, and <code>undefined</code> otherwise.
       </p>
       <p>
         The <dfn>lastChild</dfn> attribute must return the
         AccessibleNode for the last child in the accessibility tree,
-        if any, and undefined otherwise.
+        if any, and <code>undefined</code> otherwise.
       </p>
       <p>
         The <dfn>nextSibling</dfn> attribute must return the
         AccessibleNode for the next sibling in the accessibility tree,
-        if any, and undefined otherwise.
+        if any, and <code>undefined</code> otherwise.
       </p>
       <p>
         The <dfn>previousSibling</dfn> attribute must return the
         AccessibleNode for the previous sibling in the accessibility tree,
-        if any, and undefined otherwise.
+        if any, and <code>undefined</code> otherwise.
       </p>
       <p>
         The <dfn>appendChild</dfn> method, when called with a valid
@@ -362,7 +364,7 @@
               <code><nobr>aria-activedescendant</nobr></code>, if any,
               otherwise the active option of a
               HTMLSelectElement, if any, otherwise
-              undefined.
+              <code>undefined</code>.
             </td>
           </tr>
           <tr>
@@ -405,14 +407,14 @@
             <td><code>long?</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-colSpan</nobr></code></td>
+            <td>same as <code><nobr>aria-colspan</nobr></code></td>
             <td><code><nobr>aria-colSpan</nobr></code></td>
             <td></td>
           </tr>
           <tr>
             <td><code>controls</code></td>
             <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>undefined</code></td>
+            <td><code>[]</code></td>
             <td>settable</td>
             <td>same as <code><nobr>aria-controls</nobr></code></td>
             <td><code><nobr>aria-controls</nobr></code></td>
@@ -421,9 +423,9 @@
           <tr>
             <td><code>describedBy</code></td>
             <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>undefined</code></td>
+            <td><code>[]</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-describedby</nobr></code></td>
+            <td><em>all roles</em></td>
             <td><code><nobr>aria-describedby</nobr></code></td>
             <td></td>
           </tr>
@@ -474,7 +476,7 @@
           <tr>
             <td><code>hasPopUp</code></td>
             <td><code>boolean</code></td>
-            <td><code>undefined</code></td>
+            <td><code>false</code></td>
             <td>settable</td>
             <td>same as <code><nobr>aria-haspopup</nobr></code></td>
             <td><code><nobr>aria-haspopup</nobr></code></td>
@@ -482,8 +484,8 @@
           </tr>
           <tr>
             <td><code>invalid</code></td>
-            <td><code>enum?</code></td>
-            <td><code>undefined</code></td>
+            <td><code>enum { "grammar", "false", "spelling", "true" }</code></td>
+            <td><code>false</code></td>
             <td>settable</td>
             <td>same as <code><nobr>aria-invalid</nobr></code></td>
             <td><code><nobr>aria-invalid</nobr></code></td>
@@ -507,9 +509,9 @@
           <tr>
             <td><code>labelledBy</code></td>
             <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>undefined</code></td>
+            <td><code>[]</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-labelledby</nobr></code></td>
+            <td><em>all roles</em></td>
             <td><code><nobr>aria-labelledby</nobr></code></td>
             <td></td>
           </tr>
@@ -694,8 +696,8 @@
             <td><code>boolean</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollable</nobr></code></td>
-            <td><code><nobr>aria-scrollable</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -703,8 +705,8 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollx</nobr></code></td>
-            <td><code><nobr>aria-scrollx</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -712,8 +714,8 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollxmin</nobr></code></td>
-            <td><code><nobr>aria-scrollxmin</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -721,8 +723,8 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollxmax</nobr></code></td>
-            <td><code><nobr>aria-scrollxmax</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -730,8 +732,8 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrolly</nobr></code></td>
-            <td><code><nobr>aria-scrolly</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -739,8 +741,8 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollymin</nobr></code></td>
-            <td><code><nobr>aria-scrollymin</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -748,14 +750,14 @@
             <td><code>double</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-scrollymax</nobr></code></td>
-            <td><code><nobr>aria-scrollymax</nobr></code></td>
+            <td></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
             <td><code>sort</code></td>
-            <td><code>enum</code></td>
-            <td><code>undefined</code></td>
+            <td><code>enum { "ascending", "descending", "none", "other" }</code></td>
+            <td><code>"none"</code></td>
             <td>settable</td>
             <td>same as <code><nobr>aria-sort</nobr></code></td>
             <td><code><nobr>aria-sort</nobr></code></td>
@@ -766,8 +768,8 @@
             <td><code>DOMString?</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-value</nobr></code></td>
-            <td><code><nobr>aria-value</nobr></code></td>
+            <td><em>all widget roles</em></td>
+            <td></td>
             <td></td>
           </tr>
           <tr>
@@ -788,32 +790,94 @@
           </tr>
         </tbody>
       </table>
-
-
-
-<!--
+    </section>
+    <section>
       <h2>
-        Deferred
+        Accessible names and descriptions
       </h2>
-      <pre class="idl">
-  attribute AccessibleNode? details;
-  attribute AccessibleNode? errorMessage;
-  attribute AccessibleNode? flowTo;
-  attribute DOMString? roleDescription;
-  attribute DOMString? text;  // Returns value if control, otherwise name.
-  attribute DOMString? current;  // Still being implemented
-  attribute boolean offscreen;  // needed because of clipping
-  attribute DOMString? keyboardShortcuts;
-  attribute boolean? modal;
-  attribute boolean? multiline;
-  attribute boolean? liveAtomic;
-  attribute boolean? liveBusy;
-  attribute DOMString liveStatus;
-  attribute DOMString liveRelevant;
--->
-
-<!--
-  // Use value instead.
-  attribute enum checked;                                    // TODO: enum
-  attribute enum pressed;                                    // TODO: enum
-==>
+      <p>
+        In web accessibility, every node in the accessibility
+        tree has an <dfn>accessible name</dfn> and
+        <dfn>accessible description</dfn>, which are computed
+        using the algorithm described in [[!ACCNAME-AAM-1.1]].
+        The name is primary, the description is secondary.
+      </p>
+      <p>
+        There are many possible sources of the accessible name
+        of an element from its declarative markup. As an example,
+        an HTML INPUT element may get its accessible name from
+        an associated LABEL element, from the <code>title</code>
+        attribute, from the <code>aria-label</code>
+        attribute, from the <code>aria-labelledby</code>
+        attribute, or more. The [[!ACCNAME-AAM-1.1]] algorithm
+        specifies exactly how these combine to form the final
+        accessible name.
+      </p>
+      <p>
+        When using the AccessibleNode interface, it's much simpler.
+        The <code>label</code> attribute contains the accessible
+        name and the <code>description</code> attribute contains
+        the accessible description. In addition, the
+        <code>labelledBy</code> attribute contains references to
+        other accessible nodes that provided the label for a node,
+        and the <code>describedBy</code> attribute contains
+        references to other accessible nodes that provided
+        the description, but those relation attributes are
+        informational only.
+      </p>
+      <p>
+        In particular, setting an AccessibleNode's
+        <code>labelledBy</code> or <code>describedBy</code>
+        attributes will have <em>no effect</em> on its
+        accessible name or description. Set the
+        <code>label</code> and <code>description</code>
+        attributes directly if you want those to change.
+      </p>
+    </section>
+    <section>
+      <h2>
+        Relation attributes
+      </h2>
+      <p>
+        Some accessibility attributes express a relationship between
+        one accessible node and another, just like their ARIA
+        counterparts. Unlike their ARIA counterparts, the nodes
+        referenced by these attributes do not need to have a unique
+        ID. A relationship may be expressed between any two nodes
+        whose <dfn>ancestor Documents</dfn> have the same origin.
+        This it is possible to express a relationship between
+        a node in the main frame and a node in a child frame, or
+        between a node in one element's shadow root and a different
+        node in another element's shadow root, to name two specific
+        examples.
+      </p>
+    </section>
+    <section>
+      <h2>
+        Deferred attributes
+      </h2>
+      <p>
+        The following were considered as possible accessibility
+        attributes but were deferred for a future version of the
+        spec. Please file a bug if you have a compelling use case
+        for one of these.
+      </p>
+      <ul>
+        <li><code>checked</code>
+        <li><code>current</code>
+        <li><code>details</code>
+        <li><code>errorMessage</code>
+        <li><code>flowTo</code>
+        <li><code>keyboardShortcuts</code>
+        <li><code>liveAtomic</code>
+        <li><code>liveBusy</code>
+        <li><code>liveRelevant</code>
+        <li><code>liveStatus</code>
+        <li><code>modal</code>
+        <li><code>multiline</code>
+        <li><code>offscreen</code>
+        <li><code>pressed</code>
+        <li><code>roleDescription</code>
+        <li><code>text</code>
+      </uL>
+    </section>
