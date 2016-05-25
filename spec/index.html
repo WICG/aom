@@ -188,8 +188,11 @@
     </section>
     <section>
       <h2>
-        Accessibility Object Model
+        Introduction
       </h2>
+      <p>
+        <em>This section is non-normative.</em>
+      </p>
       <p>
         This API is called the Accessibility Object Model because it's based
         around the idea that all modern operating systems, including
@@ -220,7 +223,7 @@
         Web browsers have long had support for accessibility APIs,
         allowing all sorts of assistive technology and testing tools
         access to everything in a web page. The HTML standard defined
-        attributes like [[!alt]] that allow the HTML author to provide
+        attributes like <code>alt</code> that allow the HTML author to provide
         an accessible text alternative for an image.
       </p>
       <p>
@@ -292,63 +295,239 @@
           </figcaption>
         </figure>
       </section>
-
-    <section>
-      <h2>
-        Specification
-      </h2>
-      <h3>
-        The Accessibility Tree and Accessible Nodes
-      </h3>
-      <p>
-        An <dfn>Accessibility Tree</dfn> is a semantic representation of an
-        application's user interface enabling it to be observed and
-        controlled by other client software programs, like assistive
-        technology and automation software, via a platform-native
-        <dfn>Accessibility API</dfn>. User agents typically provide
-        support for one or more native accessibility APIs.
-      </p>
-      <p>
-        The Accessibility Tree is made up of <dfn>Accessible Nodes</dfn>.
-        Accessible Nodes have a <em>role</em> and several <a href="#attributes">
-        Accessibility Attributes</a> that describe the node's current
-        state, and other properties.
-      </p>
-      <p>
-        In many cases, the Accessibility Tree exposed by a user agent
-        corresponds closely to a web page's DOM tree, with one
-        Accessible Node for every DOM Node. However, sometimes the trees
-        need to differ - for example, several DOM elements may create a
-        media player seek control, but in the Accessibility Tree that
-        whole collection might be represented by a single Accessible Node
-        with a role of "slider" and other attributes indicating its
-        min, max, and current value.
-      </p>
-      <p>
-        Authors can modify the way a DOM node is converted into the
-        accessibility tree using [[!WAI-ARIA]] attributes. However, this
-        approach is sometimes limited, so this spec provides the author
-        with a richer programmatic interface to complement ARIA.
-      </p>
+      <section>
+        <h3>
+          The Accessibility Tree and Accessible Nodes
+        </h3>
+        <p>
+          An <dfn>Accessibility Tree</dfn> is a semantic representation of an
+          application's user interface enabling it to be observed and
+          controlled by other client software programs, like assistive
+          technology and automation software, via a platform-native
+          <dfn>Accessibility API</dfn>. User agents typically provide
+          support for one or more native accessibility APIs.
+        </p>
+        <p>
+          The Accessibility Tree is made up of <dfn>Accessible Nodes</dfn>.
+          Accessible Nodes have a <em>role</em> and several <a href="#attributes">
+            Accessibility Attributes</a> that describe the node's current
+          state, and other properties.
+        </p>
+        <p>
+          In many cases, the Accessibility Tree exposed by a user agent
+          corresponds closely to a web page's DOM tree, with one
+          Accessible Node for every DOM Node. However, sometimes the trees
+          need to differ - for example, several DOM elements may create a
+          media player seek control, but in the Accessibility Tree that
+          whole collection might be represented by a single Accessible Node
+          with a role of "slider" and other attributes indicating its
+          min, max, and current value.
+        </p>
+        <p>
+          Authors can modify the way a DOM node is converted into the
+          accessibility tree using [[!WAI-ARIA]] attributes. However, this
+          approach is sometimes limited, so this spec provides the author
+          with a richer programmatic interface to complement ARIA.
+        </p>
+      </section>
     </section>
 
     <section>
-      <h3>
-        Extensions to the <code>Node</code> interface
-      </h3>
+      <h2>
+        Tutorial
+      </h2>
       <p>
-        The author can request an <a>accessible node</a> from any [[!DOM]]
-        <code>Node</code> that is rendered as part of a web page.
+        <em>This section is non-normative.</em>
       </p>
-      <pre class="idl">
-        partial interface Node {
-          readonly attribute AccessibleDOMNode? accessibleNode;
-        };
-      </pre>
       <section>
         <h3>
-          <code>accessibleNode</code> attribute
+          Using an AccessibleNode backed by a DOM Node
         </h3>
+        <p>
+          This section applies to accessible nodes that were obtained
+          using the <code>Node.accessibleNode</code> interface.
+          The section below on virtual accessible nodes covers
+          additional cases.
+        </p>
+        <p>
+          Initially, querying a property on an AccessibleNode backed by
+          a node will return the computed value of that property.
+          The following example shows a snippet of HTML for a
+          heading along with the code to obtain the accessible node for it.
+        </p>
+        <pre class="example highlight">
+          &lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
+          &lt;script&gt;
+            var contents = document.getElementById("contents");
+            var axContents = contents.accessibleNode;
+          &lt;/script&gt;</pre>
+        </div>
+        <p>
+          Accessing the properties of the resulting object returns
+          computed accessibility attributes of the DOM element, such as
+          its role, level, and label:
+        </p>
+        <pre class="example highlight">
+          axContents.role;   // returns "heading"
+          axContents.level;  // returns 2
+          axContents.label;  // returns "Contents"
+        </pre>
+        <p>
+          Any of these properties can be modified to any value allowed
+          for the corresponding feature in the [[!WAI-ARIA]] spec:
+        </p>
+        <pre class="example highlight">
+          axContents.role = "region";
+          axContents.label = "Table of contents";
+        </pre>
+        <p>
+          Changing a property immediately affects the accessibility
+          tree and the browser notifies any accessibility clients about
+          the change.
+        </p>
+        <p>
+          Setting the value of a property to <code>undefined</code>
+          will have the effect of reverting any user-modified value
+          and the property will have its computed value instead:
+        </p>
+        <pre class="highlight">
+          axContents.role = "region";
+          axContents.role;  // Returns "region"
+
+          axContents.role = undefined;
+          axContents.role;  // Returns "heading"
+        </pre>
+        <p>
+          Setting the value of a property to an illegal value will
+          have the same effect as setting it to <code>undefined</code>,
+          it will revert any user-modified value. This is useful as
+          a form of feature detection.
+        </p>
+        <pre class="highlight">
+          axContents.role = "butler";
+          axContents.role;  // Returns "heading", because "butler" is not a valid role.
+        </pre>
+        <h3>
+          Optional properties
+        </h3>
+        <p>
+          Some properties of AccessibleNode are optional, they are allowed to be
+          null. For example, <code>rangeValue</code> only applies to elements
+          with certain roles (like "slider" and "progressbar"), while
+          <code>liveRelevant</code> only applies to elements thta are live
+          regions. Other properties of AccessibleNode apply to all elements
+          and are never null, for example <code>focusable</code> must always be
+          true or false.
+        </p>
+        <h3>
+          Relationship properties
+        </h3>
+        <p>
+          Some properties express relationships between one AccessibleNode
+          and one or more others, for example, <code>activeDescendant</code>
+          and <code>labelledBy</code>. The semantics of these relationships
+          are identical to their corresponding ARIA attributes. In ARIA, a
+          relationship can only be expressed with an IDREF, i.e. by passing
+          the ID of another element in the Document. With the
+          AccessibleNode interface, it isn't necessary for the target
+          element to have an ID. Furthermore, it isn't necessary for
+          the the target element to be in the same Document, as long as
+          it is form the same origin. This means it's possible to reference
+          an element in an iframe from the same site, or an element inside
+          shadow DOM.
+        </p>
+        <p>
+          TODO: example
+        </p>
+      </section>
+      <section>
+        <h3>
+          Virtual AccessibleNodes
+        </h3>
+        <p>
+          A virtual AccessibleNode can be created that does not correspond to
+          a DOM node. This is intended to be used to represent an object on the screen
+          that's drawn using some other mechanism, such as an HTML Canvas.
+          The AccessibleNode constructor takes a single argument that can be
+          used to initialize the AccessibleNode and update its properties
+          dynamically.
+        </p>
+        <pre class="highlight">
+          var axVirtualButton = new AccessibleNode(
+              {{ "role": function() { return "button"; }},
+               { "label": function() { return "Enable Audio Descriptions"; } },
+               { "offsetWidth": function() { return 224; }},
+               { "offsetHeight": function() { return 72; }}});
+        </pre>
+        <p>
+          A virtual AccessibleNode isn't part of the document's
+          accessibility tree until it's added as the child of another element,
+          using one of the methods used to add or remove children:
+        </p>
+        <pre class="idl">
+          void appendChild(AccessibleNode child);
+          void insertChild(AccessibleNode child, long index);
+          void removeChild(AccessibleNode child);
+        </pre>
+        <p>
+          For example, this code would add the virtual button we created
+          above as a child of the HTML body element's accessible node:
+        </p>
+        <pre class="highlight">
+          document.body.accessibleNode.appendChild(axVirtualButton);
+        </pre>
+      </section>
+      <section>
+        <h3>
+          Rearranging the Accessibility Tree
+        </h3>
+        <p>
+          The <code>appendChild</code>, <code>insertChild</code>, and
+          <code>removeChild</code> methods can be used to rearrange
+          any elements in the accessibility tree for a document, including
+          those that are backed by DOM Nodes. If the elements in the HTML
+          DOM are not in the proper order for accessibility, these methods
+          can be used to rearrange the accessibility tree so that it's
+          correct semantically.
+        </p>
+        <p>
+          If the argument to <code>appendChild</code> or <code>insertChild</code>
+          was already part of the accessibility tree, it's automatically
+          reparented. It's not necessary to remove it first. Because of this,
+          it's not possible to accidentally create a cycle - if you add B as
+          a child of A, and then try to add A as a child of B, that second
+          step would have the effect of detaching A from its parent and the
+          end result would be that A is a child of B, but both are detached
+          from the document's accessibility tree.
+        </p>
+        <p>
+          The only case where it's illegal to add an AccessibleNode as the
+          child of another is if it's backed by a DOM element that comes from
+          a different Document. That will raise an exception. The
+          accessibility tree can only be rearranged within one Document.
+        </p>
+        <p>
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h2>
+        Interfaces
+      </h2>
+      <section>
+        <h3>
+          Extensions to the <code>Node</code> interface
+        </h3>
+        <p>
+          The author can request an <a>accessible node</a> from any [[!DOM]]
+          <code>Node</code> that is rendered as part of a web page.
+        </p>
+        <pre class="idl">
+          partial interface Node {
+          readonly attribute AccessibleDOMNode? accessibleNode;
+          };
+        </pre>
         <p>
           The <code>accessibleNode</code> attribute returns the <a>accessible
           node</a> associated with this <code>DOM node</code>, or
@@ -356,20 +535,20 @@
           part of a web page.
         </p>
       </section>
-    </section>
-    <section>
-      <h3>
-        AccessibleNode and AccessibleDOMNode interfaces
-      </h3>
-      <p>
-        An AccessibleNode is an interface that represents one node in the
-        user agent's accessibility tree. A subclass, AccessibleDOMNode,
-        can be retrieved directly from a DOM Node, or a new AccessibleNode
-        can be constructed and inserted into the accessibility tree.
-      </p>
-      <pre class="idl">
-        [Constructor(DOMString role)]
-        interface AccessibleNode : EventTarget {
+      <section>
+        <h3>
+          <code>AccessibleNode</code> and <code>AccessibleDOMNode</code> interfaces
+        </h3>
+        <p>
+          An AccessibleNode is an interface that represents one node
+          in the user agent's accessibility tree. A subclass,
+          AccessibleDOMNode, can be retrieved directly from a DOM
+          Node, or a new AccessibleNode can be constructed and
+          inserted into the accessibility tree.
+        </p>
+        <pre class="idl">
+          [Constructor(DOMString role)]
+          interface AccessibleNode : EventTarget {
           attribute DOMString role;
 
           void setAttribute(DOMString attributeName, any value);
@@ -390,135 +569,136 @@
         interface AccessibleDOMNode : AccessibleNode {
           readonly attribute Node node;
         };
-      </pre>
-      <p>
-        The AccessibleNode constructor, when called, returns a new
-        empty AccessibleNode object with its role initialized to
-        the provided value. The AccessibleNode has no associated
-        DOM Node and is not attached to the document's accessibility
-        tree, it must be explicitly added as a child of another
-        AccessibilityNode.
-      </p>
-      <p id="source">
-        Let an AccessibleNode's <dfn>source</dfn> be an internal
-        dictionary containing attributes that the author has set.
-        Attributes in an AccessibleNode's <em>source</em>, when valid,
-        supercede all other rules in the computation of that attribute.
-      </p>
-      <p>
-        The <dfn>role</dfn> attribute, on setting, stores the provided
-        DOMString in the AccessibleNode's <dfn>source</dfn>.
-        On getting, it runs the following algorithm:
-        <ul>
-          <li>If the AccessibleNode's source contains a valid <dfn>role</dfn>
-            according to the [[!WAI-ARIA]] spec, return that role.
-          <li>Otherwise, if this is an AccessibleDOMNode and its associated
-            DOM node has a valid <dfn>role</dfn> attribute according to the
-            [[!WAI-ARIA]] spec, return that role.
-          <li>Otherwise, if this is an AccessibleDOMNode, return the
-            <dfn>computed role</dfn> for this node according to the
-            [[!HTML-AAM-1.0]] spec.
-          <li>Otherwise, return the empty string.
-        </ul>
-      </p>
-      <p>
-        The <dfn>setAttribute</dfn> method, when called with the
-        name of an <a href="#attribute">accessibility attribute</a>,
-        stores the provided value in the AccessibleNode's
-        <a href="#source">source</a>.
-      </p>
-      <p>
-        The <dfn>getAttribute</dfn> method, when called with the
-        name of an <a href="#attribute">accessibility attribute</a>,
-        runs the following algorithm:
-        <ul>
-          <li>If this attribute is not defined for the AccessibleNode's
-            <dfn>role</dfn>, return <code>undefined</code>.
-          <li>If the AccessibleNode's source contains a valid value
-            for this attribute, returns that value.
-          <li>Otherwise, if this is an AccessibleDOMNode, return the
-            computed value of this attribute according to the
-            algorithm associated with this attribute.
-          <li>Otherwise, return the default value for this
-            attribute, which may be <code>undefined</code>.
-        </ul>
-      </p>
-      <p>
-        For each supported <a href="#attribute">accessibility
-        attribute</a>, the following partial interface applies.
-        <pre>
-          partial interface AccessibleNode {
+        </pre>
+        <p>
+          The AccessibleNode constructor, when called, returns a new
+          empty AccessibleNode object with its role initialized to
+          the provided value. The AccessibleNode has no associated
+          DOM Node and is not attached to the document's accessibility
+          tree, it must be explicitly added as a child of another
+          AccessibilityNode.
+        </p>
+        <p id="source">
+          Let an AccessibleNode's <dfn>source</dfn> be an internal
+          dictionary containing attributes that the author has set.
+          Attributes in an AccessibleNode's <em>source</em>, when valid,
+          supercede all other rules in the computation of that attribute.
+        </p>
+        <p>
+          The <dfn>role</dfn> attribute, on setting, stores the provided
+          DOMString in the AccessibleNode's <dfn>source</dfn>.
+          On getting, it runs the following algorithm:
+          <ul>
+            <li>If the AccessibleNode's source contains a valid <dfn>role</dfn>
+              according to the [[!WAI-ARIA]] spec, return that role.
+            <li>Otherwise, if this is an AccessibleDOMNode and its associated
+              DOM node has a valid <dfn>role</dfn> attribute according to the
+              [[!WAI-ARIA]] spec, return that role.
+            <li>Otherwise, if this is an AccessibleDOMNode, return the
+              <dfn>computed role</dfn> for this node according to the
+              [[!HTML-AAM-1.0]] spec.
+            <li>Otherwise, return the empty string.
+          </ul>
+        </p>
+        <p>
+          The <dfn>setAttribute</dfn> method, when called with the
+          name of an <a href="#attribute">accessibility attribute</a>,
+          stores the provided value in the AccessibleNode's
+          <a href="#source">source</a>.
+        </p>
+        <p>
+          The <dfn>getAttribute</dfn> method, when called with the
+          name of an <a href="#attribute">accessibility attribute</a>,
+          runs the following algorithm:
+          <ul>
+            <li>If this attribute is not defined for the AccessibleNode's
+              <dfn>role</dfn>, return <code>undefined</code>.
+            <li>If the AccessibleNode's source contains a valid value
+              for this attribute, returns that value.
+            <li>Otherwise, if this is an AccessibleDOMNode, return the
+              computed value of this attribute according to the
+              algorithm associated with this attribute.
+            <li>Otherwise, return the default value for this
+              attribute, which may be <code>undefined</code>.
+          </ul>
+        </p>
+        <p>
+          For each supported <a href="#attribute">accessibility
+            attribute</a>, the following partial interface applies.
+          <pre>
+            partial interface AccessibleNode {
             attribute <em>typename</em> attributeName;
-          };</pre>
-        Setting the attribute must invoke setAttribute() with the first
-        argument being the attribute name, and the second argument the
-        given value.  Getting the attribute must invoke getAttribute()
-        with the argument being the attribute name, and return the result.
-      </p>
-      <p>
-        The <dfn>parent</dfn> attribute must return the parent
-        AccessibleNode in the accessibility tree, if any,
-        and <code>undefined</code> otherwise.
-      </p>
-      <p>
-        The <dfn>firstChild</dfn> attribute must return the
-        AccessibleNode for the first child in the accessibility tree,
-        if any, and <code>undefined</code> otherwise.
-      </p>
-      <p>
-        The <dfn>lastChild</dfn> attribute must return the
-        AccessibleNode for the last child in the accessibility tree,
-        if any, and <code>undefined</code> otherwise.
-      </p>
-      <p>
-        The <dfn>nextSibling</dfn> attribute must return the
-        AccessibleNode for the next sibling in the accessibility tree,
-        if any, and <code>undefined</code> otherwise.
-      </p>
-      <p>
-        The <dfn>previousSibling</dfn> attribute must return the
-        AccessibleNode for the previous sibling in the accessibility tree,
-        if any, and <code>undefined</code> otherwise.
-      </p>
-      <p>
-        The <dfn>appendChild</dfn> method, when called with a valid
-        AccessibleNode argument, detaches the provided AccessibleNode
-        from its previous parent, if any, and appends it to the end of
-        the list of children in the accessibility tree.
-      </p>
-      <p>
-        The <dfn>insertBefore</dfn> method, when called with a valid
-        AccessibleNode argument <dfn>child</dfn> and a valid existing
-        child of this accessible node <dfn>before</dfn>, detaches the
-        provided AccessibleNode from its previous parent, if any, and
-        inserts it into the list of children of this node immediately
-        before <dfn>before</dfn>.
-      </p>
-      <p>
-        The <dfn>insertAfter</dfn> method, when called with a valid
-        AccessibleNode argument <dfn>child</dfn> and a valid existing
-        child of this accessible node <dfn>after</dfn>, detaches the
-        provided AccessibleNode from its previous parent, if any, and
-        inserts it into the list of children of this node immediately
-        after <dfn>after</dfn>.
-      </p>
-      <p>
-        The <dfn>removeChild</dfn> method, when called with a valid
-        AccessibleNode argument <dfn>child</dfn> corresponding to an
-        existing child of this accessible node, removes that node
-        as one of this node's children. The previous child is now
-        detached and not part of the accessibility tree.
-      </p>
-      <p class="note">
-        Calling appendChild, insertBefore, insertAfter, or removeChild
-        only affects the accessibility tree and never the DOM tree.
-      </p>
+            };</pre>
+          Setting the attribute must invoke setAttribute() with the first
+          argument being the attribute name, and the second argument the
+          given value.  Getting the attribute must invoke getAttribute()
+          with the argument being the attribute name, and return the result.
+        </p>
+        <p>
+          The <dfn>parent</dfn> attribute must return the parent
+          AccessibleNode in the accessibility tree, if any,
+          and <code>undefined</code> otherwise.
+        </p>
+        <p>
+          The <dfn>firstChild</dfn> attribute must return the
+          AccessibleNode for the first child in the accessibility tree,
+          if any, and <code>undefined</code> otherwise.
+        </p>
+        <p>
+          The <dfn>lastChild</dfn> attribute must return the
+          AccessibleNode for the last child in the accessibility tree,
+          if any, and <code>undefined</code> otherwise.
+        </p>
+        <p>
+          The <dfn>nextSibling</dfn> attribute must return the
+          AccessibleNode for the next sibling in the accessibility tree,
+          if any, and <code>undefined</code> otherwise.
+        </p>
+        <p>
+          The <dfn>previousSibling</dfn> attribute must return the
+          AccessibleNode for the previous sibling in the accessibility tree,
+          if any, and <code>undefined</code> otherwise.
+        </p>
+        <p>
+          The <dfn>appendChild</dfn> method, when called with a valid
+          AccessibleNode argument, detaches the provided AccessibleNode
+          from its previous parent, if any, and appends it to the end of
+          the list of children in the accessibility tree.
+        </p>
+        <p>
+          The <dfn>insertBefore</dfn> method, when called with a valid
+          AccessibleNode argument <dfn>child</dfn> and a valid existing
+          child of this accessible node <dfn>before</dfn>, detaches the
+          provided AccessibleNode from its previous parent, if any, and
+          inserts it into the list of children of this node immediately
+          before <dfn>before</dfn>.
+        </p>
+        <p>
+          The <dfn>insertAfter</dfn> method, when called with a valid
+          AccessibleNode argument <dfn>child</dfn> and a valid existing
+          child of this accessible node <dfn>after</dfn>, detaches the
+          provided AccessibleNode from its previous parent, if any, and
+          inserts it into the list of children of this node immediately
+          after <dfn>after</dfn>.
+        </p>
+        <p>
+          The <dfn>removeChild</dfn> method, when called with a valid
+          AccessibleNode argument <dfn>child</dfn> corresponding to an
+          existing child of this accessible node, removes that node
+          as one of this node's children. The previous child is now
+          detached and not part of the accessibility tree.
+        </p>
+        <p class="note">
+          Calling appendChild, insertBefore, insertAfter, or removeChild
+          only affects the accessibility tree and never the DOM tree.
+        </p>
+      </section>
     </section>
 
     <section>
-      <h3>
+      <h2>
         Accessibility attributes
-      </h3>
+      </h2>
       <p>
         An <dfn>Accessibility Attribute</dfn> is an abstract concept that is not
         exposed as an object in the DOM. An Accessibility Attribute has
@@ -997,884 +1177,256 @@
           </tr>
         </tbody>
       </table>
-    </section>
-    <section>
-      <h3>
-        Accessible names and descriptions
-      </h3>
-      <p>
-        In web accessibility, every node in the accessibility
-        tree has an <dfn>accessible name</dfn> and
-        <dfn>accessible description</dfn>, which are computed
-        using the algorithm described in [[!ACCNAME-AAM-1.1]].
-        The name is primary, the description is secondary.
-      </p>
-      <p>
-        There are many possible sources of the accessible name
-        of an element from its declarative markup. As an example,
-        an HTML INPUT element may get its accessible name from
-        an associated LABEL element, from the <code>title</code>
-        attribute, from the <code>aria-label</code>
-        attribute, from the <code>aria-labelledby</code>
-        attribute, or more. The [[!ACCNAME-AAM-1.1]] algorithm
-        specifies exactly how these combine to form the final
-        accessible name.
-      </p>
-      <p>
-        When using the AccessibleNode interface, it's much simpler.
-        The <code>label</code> attribute contains the accessible
-        name and the <code>description</code> attribute contains
-        the accessible description. In addition, the
-        <code>labelledBy</code> attribute contains references to
-        other accessible nodes that provided the label for a node,
-        and the <code>describedBy</code> attribute contains
-        references to other accessible nodes that provided
-        the description, but those relation attributes are
-        informational only.
-      </p>
-      <p>
-        In particular, setting an AccessibleNode's
-        <code>labelledBy</code> or <code>describedBy</code>
-        attributes will have <em>no effect</em> on its
-        accessible name or description. Set the
-        <code>label</code> and <code>description</code>
-        attributes directly if you want those to change.
-      </p>
-    </section>
-    <section>
-      <h3>
-        Relation attributes
-      </h3>
-      <p>
-        Some accessibility attributes express a relationship between
-        one accessible node and another, just like their ARIA
-        counterparts. Unlike their ARIA counterparts, the nodes
-        referenced by these attributes do not need to have a unique
-        ID. A relationship may be expressed between any two nodes
-        whose <dfn>ancestor Documents</dfn> have the same origin.
-        This it is possible to express a relationship between
-        a node in the main frame and a node in a child frame, or
-        between a node in one element's shadow root and a different
-        node in another element's shadow root, to name two specific
-        examples.
-      </p>
-    </section>
-    <section>
-      <h3>
-        Attributes deferred for a future version
-      </h3>
-      <p>
-        The following were considered as possible accessibility
-        attributes but were deferred for a future version of the
-        spec. Please file a bug if you have a compelling use case
-        for one of these.
-      </p>
-      <ul>
-        <li><code>checked</code>
-        <li><code>current</code>
-        <li><code>details</code>
-        <li><code>errorMessage</code>
-        <li><code>flowTo</code>
-        <li><code>keyboardShortcuts</code>
-        <li><code>liveAtomic</code>
-        <li><code>liveBusy</code>
-        <li><code>liveRelevant</code>
-        <li><code>liveStatus</code>
-        <li><code>modal</code>
-        <li><code>multiline</code>
-        <li><code>offscreen</code>
-        <li><code>pressed</code>
-        <li><code>roleDescription</code>
-        <li><code>text</code>
-      </uL>
-    </section>
-    <section>
-      <h3>
-        Accessibility input events
-      </h3>
-      <p>
-        All AccessibilityNodes are EventTargets, so authors
-        can register event listeners on them. AccessibilityNodes
-        receive special <dfn>accessibility input events</dfn>
-        that represent explicit intents to control the user agent
-        via an accessibility API
-      </p>
-      <p>
-        Accessibility input events are needed for two reasons.
-        First, because it's possible to create AccessibleNodes
-        that don't correspond to a DOM node and authors need to
-        be able to listen to events on these nodes. Second,
-        because there are many types of specific user intents
-        that can be communicated to the user agent via accessibility
-        APIs that don't correspond to existing keyboard and mouse
-        events - for example some assistive technology has
-        keystrokes or gestures to increment a slider, or dismiss
-        a pop-up.
-      </p>
-      <pre class="idl">
-        interface AccessibleInputEvent : Event {
-        };
-        interface AccessibleSetValueEvent : AccessibleInputEvent {
-          DOMString value;
-        };
-      </pre>
-      <table>
-        <caption>
-          Accessibility event table
-        </caption>
-        <thead>
-          <tr>
-            <th>event name</th>
-            <th>type</th>
-            <th>valid roles</th>
-            <th>fallback behavior</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>"accessibleclick"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td><em>all roles</em></td>
-            <td>Fire <code>"click"</code> event on DOM node</td>
-          </tr>
-          <tr>
-            <td><code>"accessiblesetvalue"</code></td>
-            <td><code>AccessibleSetValueEvent</code></td>
-            <td>
-              <code>"scrollbar"</code>,
-              <code>"slider"</code>
-            </td>
-            <td>Change value of INPUT or TEXTAREA element</td>
-          </tr>
-          <tr>
-            <td><code>"accessibleincrement"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td>
-              <code>"scrollbar"</code>,
-              <code>"slider"</code>
-            </td>
-            <td>
-              Change value of INPUT type="range",
-              otherwise fire <code>"keypress"</code> with a
-              RightArrow key code
-            </td>
-          </tr>
-          <tr>
-            <td><code>"accessibledecrement"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td>
-              <code>"scrollbar"</code>,
-              <code>"slider"</code>
-            </td>
-            <td>
-              Change value of INPUT type="range",
-              otherwise fire <code>"keypress"</code> with a
-              LeftArrow key code
-            </td>
-          </tr>
-          <tr>
-            <td><code>"accessibleselect"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td>
-              <code>"cell"</code>,
-              <code>"option"</code>
-            </td>
-            <td>
-              Change selectedIndex of SELECT
-              otherwise fire <code>"click"</code> event
-            </td>
-          </tr>
-          <tr>
-            <td><code>"accessiblescrollintoview"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td><em>all roles</em></td>
-            <td>scroll DOM node into view</td>
-          </tr>
-          <tr>
-            <td><code>"accessibledismiss"</code></td>
-            <td><code>AccessibleInputEvent</code></td>
-            <td><em>all roles</em></td>
-            <td>fire <code>"keypress"</code> with a
-              Escape key code</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>
-        Accessibility input events go through capture and bubble
-        phases, just like DOM events. The only difference is that
-        the capture and bubble phases happen entirely in the
-        accessibility tree. If the event is not canceled
-        (by calling <code>preventDefault()</code> after completely
-        going through the capture and bubble phases in the accessibility
-        tree, the event executes its <dfn>fallback behavior</dfn>,
-        as defined in the table above.
-      </p>
-      <p>
-        When an event's fallback behavior involves firing a DOM
-        event, the event's target will be the associated DOM node
-        of the target AccessibleNode, or the associated DOM node
-        of the nearest ancestor of the target AccessibleNode that
-        has one. Fallback DOM events will go through capture and
-        bubble phases just like any other DOM events.
-      </p>
-      <p>
-        As an example, suppose an accessible click event is received
-        on a button. Here's the sequence of what will occur:
-        <ol>
-          <li>Capturing event listeners are called, starting with the
-            root of the accessibility tree, and continuing along the
-            ancestor chain until reaching the target AccessibleNode in
-            the accessibility tree.
-          <li>If none of the capturing event listeners stop
-            propagation, normal (non-capturing) event listeners on the
-            target AccessibleNode are called, and if
-            <code>stopPropagation()</code> is not called, the event
-            bubbles up to all event listeners on ancestors of the
-            target.
-          <li>After capture and bubble phases in the accessibility tree,
-            if <code>preventDefault()</code> was not called, the
-            event's <dfn>fallback behavior</dfn> is triggered. In this
-            case it fires a DOM <code>"click"</code> event on the
-            targer AccessibleNode's associated DOM node, going through
-            capture and bubble phases in the DOM tree.
-        </ol>
-      </p>
-    </section>
-
-
       <section>
         <h3>
-          Correspondance with [[!WAI-ARIA]]
+          Accessible names and descriptions
         </h3>
         <p>
-          Wherever possible, this spec does not define new semantics, but
-          instead defers to the existing [[!WAI-ARIA]] spec. The majority of
-          ARIA attributes have an <code>AccessibleNode</code> property with
-          identical semantics and usage. The following table matches ARIA
-          attributes with their corresponding <code>AccessibleNode</code>
-          property and notes relevant differences.
-        </p>
-
-        <table>
-          <caption>
-            [[!WAI-ARIA]] to AccessibleNode mapping table.
-          </caption>
-          <thead>
-            <tr>
-              <th style="min-width:200px;">ARIA attribute</th>
-              <th>AccessibleNode property</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>aria-activedescendant</td>
-              <td>activeDescendant</td>
-              <td>
-                The AccessibleNode property takes an AccessibleNode
-                as its value, rather than an ID. This allows the author
-                to reference any other accessible node within the same
-                [[!origin]], rather than only elements within the same
-                <i>tree scope</i>.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-atomic</td>
-              <td>liveAtomic</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-autocomplete</td>
-              <td>autocomplete</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-busy</td>
-              <td>liveBusy</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-checked</td>
-              <td>checked</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-colcount</td>
-              <td>colCount</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-colindex</td>
-              <td>colIndex</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-colspan</td>
-              <td>colSpan</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-controls</td>
-              <td>controls</td>
-              <td>
-                The AccessibleNode property takes a sequence of
-                AccessibleNodes as its value, rather than IDREFs.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-current</td>
-              <td>current</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-describedby</td>
-              <td>describedby</td>
-              <td>
-                The AccessibleNode property takes a sequence of
-                AccessibleNodes as its value, rather than IDREFs.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-details</td>
-              <td>details</td>
-              <td>
-                The AccessibleNode property takes an AccessibleNode
-                as its value, rather than an IDREF.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-disabled</td>
-              <td>disabled</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-dropeffect</td>
-              <td><em>None</em></td>
-              <td>
-                Not mapped because the ARIA attribute is deprecated.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-errormessage</td>
-              <td>errormessage</td>
-              <td>
-                The AccessibleNode property takes an AccessibleNode
-                as its value, rather than an IDREF.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-expanded</td>
-              <td>expanded</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-flowto</td>
-              <td>flowto</td>
-              <td>
-                The AccessibleNode property takes an AccessibleNode
-                as its value, rather than an IDREF.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-grabbed</td>
-              <td><em>None</em></td>
-              <td>
-                Not mapped because the ARIA attribute is deprecated.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-haspopup</td>
-              <td>haspopup</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-hidden</td>
-              <td>hidden</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-invalid</td>
-              <td>invalid</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-kbdshortcuts</td>
-              <td>keyboardShortcuts</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-label</td>
-              <td>label</td>
-              <td>
-                Note that in ARIA, aria-labelledby takes precedence over
-                aria-label.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-labelledby</td>
-              <td>labelledBy</td>
-              <td>
-                Unlike in ARIA, an AccessibleNode's label is not
-                computed when setting the labelledBy property, it
-                simply expresses the relationship. To set the accessible
-                label, set the <code>label</code> property directly.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-level</td>
-              <td>level</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-live</td>
-              <td>liveStatus</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-modal</td>
-              <td>modal</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-multiline</td>
-              <td>multiline</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-multiselectable</td>
-              <td>multiselectable</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-orientation</td>
-              <td>orientation</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-owns</td>
-              <td><em>None</em></td>
-              <td>
-                Instead of using aria-owns, use methods like
-                <code>appendChild</code> and <code>removeChild</code>
-                to rearrange the accessibility tree directly as needed.
-              </td>
-            </tr>
-            <tr>
-              <td>aria-placeholder</td>
-              <td>placeholder</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-posinset</td>
-              <td>posInSet</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-pressed</td>
-              <td>pressed</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-readonly</td>
-              <td>readOnly</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-relevant</td>
-              <td>liveRelevant</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-required</td>
-              <td>required</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-roledescription</td>
-              <td>roleDescription</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-rowcount</td>
-              <td>rowCount</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-rowindex</td>
-              <td>rowIndex</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-rowspan</td>
-              <td>rowSpan</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-selected</td>
-              <td>selected</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-setsize</td>
-              <td>setSize</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-sort</td>
-              <td>sort</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-valuemax</td>
-              <td>rangeMax</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-valuemin</td>
-              <td>rangeMin</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-valuenow</td>
-              <td>rangeValue</td>
-              <td>
-              </td>
-            </tr>
-            <tr>
-              <td>aria-valuetext</td>
-              <td><em>None</em></td>
-              <td>
-                Not mapped; set <code>value</code> directly to set the
-                string value of a control and set <code>rangeValue</code>
-                for its numeric value.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-      </section>
-
-      <section>
-        <h3>
-          Properties that don't correspond with [[!WAI-ARIA]]
-        </h3>
-        <p>
-          There are a few AccessibleNode properties that provide
-          semantic information about an accessible node but don't correspond
-          directly to [[!WAI-ARIA]] attributes, because this information is
-          available from host languages (like HTML) in some other way.
+          In web accessibility, every node in the accessibility
+          tree has an <dfn>accessible name</dfn> and
+          <dfn>accessible description</dfn>, which are computed
+          using the algorithm described in [[!ACCNAME-AAM-1.1]].
+          The name is primary, the description is secondary.
         </p>
         <p>
-          AccessibleNode also has additional properties that don't
-          correspond to ARIA, but these have to do with the tree structure
-          or the usage of the AccessibleNode API and not the semantics
-          of a particular AccessibleNode, so they're described separately
-          below.
-        </p>
-
-        <table
-          <caption>
-            AccessibleNode properties that don't correspond with [[!WAI-ARIA]]
-          </caption>
-          <thead>
-            <tr>
-              <th>AccessibleNode property</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>focusable</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>offscreen</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>offsetParent</td>
-              <td>
-                The parent or ancestor of this accessible node that should be
-                used to anchor the relative position of this element expressed
-                by <code>offsetLeft</code> and <code>offsetTop</code>.
-              </td>
-            </tr>
-            <tr>
-              <td>
-                offsetLeft<br>
-                offsetTop<br>
-                offsetWidth<br>
-                offsetHeight
-              </td>
-              <td>
-                The position of this accessible node (relative to the position of its
-                <code>offsetParent</code>, and its width and height, all in CSS pixels.
-              </td>
-            </tr>
-            <tr>
-              <td>scrollable</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>
-                scrollX<br>
-                scrollXMin<br>
-                scrollXMax<br>
-                scrollY<br>
-                scrollYMin<br>
-                scrollYMax<br>
-              </td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>
-          Using an AccessibleNode backed by a DOM Node
-        </h2>
-        <p>
-          This section applies to accessible nodes that were obtained
-          using the <code>Node.accessibleNode</code> interface.
-          The section below on virtual accessible nodes covers
-          additional cases.
+          There are many possible sources of the accessible name
+          of an element from its declarative markup. As an example,
+          an HTML INPUT element may get its accessible name from
+          an associated LABEL element, from the <code>title</code>
+          attribute, from the <code>aria-label</code>
+          attribute, from the <code>aria-labelledby</code>
+          attribute, or more. The [[!ACCNAME-AAM-1.1]] algorithm
+          specifies exactly how these combine to form the final
+          accessible name.
         </p>
         <p>
-          Initially, querying a property on an AccessibleNode backed by
-          a node will return the computed value of that property. For example,
-          suppose our HTML document contains the following element:
-        </p>
-        <pre class="highlight">
-          &lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
-        </pre>
-        <p>
-          We can obtain the accessible node for this heading like this:
-        </p>
-        <pre class="highlight">
-          var contents = document.getElementById("contents");
-          var axContents = contents.accessibleNode;
-        </pre>
-        <p>
-          Accessing the properties of the resulting object returns
-          computed accessibility attributes of the DOM element, such as
-          its role, level, and label:
-        </p>
-        <pre class="highlight">
-          axContents.role;   // returns "heading"
-          axContents.level;  // returns 2
-          axContents.label;  // returns "Contents"
-        </pre>
-        <p>
-          Any of these properties can be modified to any value allowed
-          for the corresponding feature in the [[!WAI-ARIA]] spec:
-        </p>
-        <pre class="highlight">
-          axContents.role = "region";
-          axContents.label = "Table of contents";
-        </pre>
-        <p>
-          Changing a property immediately affects the accessibility
-          tree and the browser notifies any accessibility clients about
-          the change.
+          When using the AccessibleNode interface, it's much simpler.
+          The <code>label</code> attribute contains the accessible
+          name and the <code>description</code> attribute contains
+          the accessible description. In addition, the
+          <code>labelledBy</code> attribute contains references to
+          other accessible nodes that provided the label for a node,
+          and the <code>describedBy</code> attribute contains
+          references to other accessible nodes that provided
+          the description, but those relation attributes are
+          informational only.
         </p>
         <p>
-          Setting the value of a property to <code>undefined</code>
-          will have the effect of reverting any user-modified value
-          and the property will have its computed value instead:
-        </p>
-        <pre class="highlight">
-          axContents.role = "region";
-          axContents.role;  // Returns "region"
-
-          axContents.role = undefined;
-          axContents.role;  // Returns "heading"
-        </pre>
-        <p>
-          Setting the value of a property to an illegal value will
-          have the same effect as setting it to <code>undefined</code>,
-          it will revert any user-modified value. This is useful as
-          a form of feature detection.
-        </p>
-        <pre class="highlight">
-          axContents.role = "butler";
-          axContents.role;  // Returns "heading", because "butler" is not a valid role.
-        </pre>
-        <h3>
-          Optional properties
-        </h3>
-        <p>
-          Some properties of AccessibleNode are optional, they are allowed to be
-          null. For example, <code>rangeValue</code> only applies to elements
-          with certain roles (like "slider" and "progressbar"), while
-          <code>liveRelevant</code> only applies to elements thta are live
-          regions. Other properties of AccessibleNode apply to all elements
-          and are never null, for example <code>focusable</code> must always be
-          true or false.
-        </p>
-        <h3>
-          Relationship properties
-        </h3>
-        <p>
-          Some properties express relationships between one AccessibleNode
-          and one or more others, for example, <code>activeDescendant</code>
-          and <code>labelledBy</code>. The semantics of these relationships
-          are identical to their corresponding ARIA attributes. In ARIA, a
-          relationship can only be expressed with an IDREF, i.e. by passing
-          the ID of another element in the Document. With the
-          AccessibleNode interface, it isn't necessary for the target
-          element to have an ID. Furthermore, it isn't necessary for
-          the the target element to be in the same Document, as long as
-          it is form the same origin. This means it's possible to reference
-          an element in an iframe from the same site, or an element inside
-          shadow DOM.
-        </p>
-        <p>
-          TODO: example
+          In particular, setting an AccessibleNode's
+          <code>labelledBy</code> or <code>describedBy</code>
+          attributes will have <em>no effect</em> on its
+          accessible name or description. Set the
+          <code>label</code> and <code>description</code>
+          attributes directly if you want those to change.
         </p>
       </section>
       <section>
-        <h2>
-          Virtual AccessibleNodes
-        </h2>
+        <h3>
+          Relation attributes
+        </h3>
         <p>
-          A virtual AccessibleNode can be created that does not correspond to
-          a DOM node. This is intended to be used to represent an object on the screen
-          that's drawn using some other mechanism, such as an HTML Canvas.
-          The AccessibleNode constructor takes a single argument that can be
-          used to initialize the AccessibleNode and update its properties
-          dynamically.
+          Some accessibility attributes express a relationship between
+          one accessible node and another, just like their ARIA
+          counterparts. Unlike their ARIA counterparts, the nodes
+          referenced by these attributes do not need to have a unique
+          ID. A relationship may be expressed between any two nodes
+          whose <dfn>ancestor Documents</dfn> have the same origin.
+          This it is possible to express a relationship between
+          a node in the main frame and a node in a child frame, or
+          between a node in one element's shadow root and a different
+          node in another element's shadow root, to name two specific
+          examples.
         </p>
-        <pre class="highlight">
-          var axVirtualButton = new AccessibleNode(
-              {{ "role": function() { return "button"; }},
-               { "label": function() { return "Enable Audio Descriptions"; } },
-               { "offsetWidth": function() { return 224; }},
-               { "offsetHeight": function() { return 72; }}});
-        </pre>
+      </section>
+      <section>
+        <h3>
+          Attributes deferred for a future version
+        </h3>
         <p>
-          A virtual AccessibleNode isn't part of the document's
-          accessibility tree until it's added as the child of another element,
-          using one of the methods used to add or remove children:
+          The following were considered as possible accessibility
+          attributes but were deferred for a future version of the
+          spec. Please file a bug if you have a compelling use case
+          for one of these.
+        </p>
+        <ul>
+          <li><code>checked</code>
+          <li><code>current</code>
+          <li><code>details</code>
+          <li><code>errorMessage</code>
+          <li><code>flowTo</code>
+          <li><code>keyboardShortcuts</code>
+          <li><code>liveAtomic</code>
+          <li><code>liveBusy</code>
+          <li><code>liveRelevant</code>
+          <li><code>liveStatus</code>
+          <li><code>modal</code>
+          <li><code>multiline</code>
+          <li><code>offscreen</code>
+          <li><code>pressed</code>
+          <li><code>roleDescription</code>
+          <li><code>text</code>
+        </uL>
+      </section>
+      <section>
+        <h3>
+          Accessibility input events
+        </h3>
+        <p>
+          All AccessibilityNodes are EventTargets, so authors
+          can register event listeners on them. AccessibilityNodes
+          receive special <dfn>accessibility input events</dfn>
+          that represent explicit intents to control the user agent
+          via an accessibility API
+        </p>
+        <p>
+          Accessibility input events are needed for two reasons.
+          First, because it's possible to create AccessibleNodes
+          that don't correspond to a DOM node and authors need to
+          be able to listen to events on these nodes. Second,
+          because there are many types of specific user intents
+          that can be communicated to the user agent via accessibility
+          APIs that don't correspond to existing keyboard and mouse
+          events - for example some assistive technology has
+          keystrokes or gestures to increment a slider, or dismiss
+          a pop-up.
         </p>
         <pre class="idl">
-          void appendChild(AccessibleNode child);
-          void insertChild(AccessibleNode child, long index);
-          void removeChild(AccessibleNode child);
+          interface AccessibleInputEvent : Event {
+          };
+          interface AccessibleSetValueEvent : AccessibleInputEvent {
+          DOMString value;
+          };
         </pre>
+        <table>
+          <caption>
+            Accessibility event table
+          </caption>
+          <thead>
+            <tr>
+              <th>event name</th>
+              <th>type</th>
+              <th>valid roles</th>
+              <th>fallback behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>"accessibleclick"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>Fire <code>"click"</code> event on DOM node</td>
+            </tr>
+            <tr>
+              <td><code>"accessiblesetvalue"</code></td>
+              <td><code>AccessibleSetValueEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>Change value of INPUT or TEXTAREA element</td>
+            </tr>
+            <tr>
+              <td><code>"accessibleincrement"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>
+                Change value of INPUT type="range",
+                otherwise fire <code>"keypress"</code> with a
+                RightArrow key code
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessibledecrement"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>
+                Change value of INPUT type="range",
+                otherwise fire <code>"keypress"</code> with a
+                LeftArrow key code
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessibleselect"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"cell"</code>,
+                <code>"option"</code>
+              </td>
+              <td>
+                Change selectedIndex of SELECT
+                otherwise fire <code>"click"</code> event
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessiblescrollintoview"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>scroll DOM node into view</td>
+            </tr>
+            <tr>
+              <td><code>"accessibledismiss"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>fire <code>"keypress"</code> with a
+                Escape key code</td>
+            </tr>
+          </tbody>
+        </table>
         <p>
-          For example, this code would add the virtual button we created
-          above as a child of the HTML body element's accessible node:
+          Accessibility input events go through capture and bubble
+          phases, just like DOM events. The only difference is that
+          the capture and bubble phases happen entirely in the
+          accessibility tree. If the event is not canceled
+          (by calling <code>preventDefault()</code> after completely
+          going through the capture and bubble phases in the accessibility
+          tree, the event executes its <dfn>fallback behavior</dfn>,
+          as defined in the table above.
         </p>
-        <pre class="highlight">
-          document.body.accessibleNode.appendChild(axVirtualButton);
-        </pre>
+        <p>
+          When an event's fallback behavior involves firing a DOM
+          event, the event's target will be the associated DOM node
+          of the target AccessibleNode, or the associated DOM node
+          of the nearest ancestor of the target AccessibleNode that
+          has one. Fallback DOM events will go through capture and
+          bubble phases just like any other DOM events.
+        </p>
+        <p>
+          As an example, suppose an accessible click event is received
+          on a button. Here's the sequence of what will occur:
+          <ol>
+            <li>Capturing event listeners are called, starting with the
+              root of the accessibility tree, and continuing along the
+              ancestor chain until reaching the target AccessibleNode in
+              the accessibility tree.
+            <li>If none of the capturing event listeners stop
+              propagation, normal (non-capturing) event listeners on the
+              target AccessibleNode are called, and if
+              <code>stopPropagation()</code> is not called, the event
+              bubbles up to all event listeners on ancestors of the
+              target.
+            <li>After capture and bubble phases in the accessibility tree,
+              if <code>preventDefault()</code> was not called, the
+              event's <dfn>fallback behavior</dfn> is triggered. In this
+              case it fires a DOM <code>"click"</code> event on the
+              targer AccessibleNode's associated DOM node, going through
+              capture and bubble phases in the DOM tree.
+          </ol>
+        </p>
       </section>
-      <section>
-        <h2>
-          Rearranging the Accessibility Tree
-        </h2>
-        <p>
-          The <code>appendChild</code>, <code>insertChild</code>, and
-          <code>removeChild</code> methods can be used to rearrange
-          any elements in the accessibility tree for a document, including
-          those that are backed by DOM Nodes. If the elements in the HTML
-          DOM are not in the proper order for accessibility, these methods
-          can be used to rearrange the accessibility tree so that it's
-          correct semantically.
-        </p>
-        <p>
-          If the argument to <code>appendChild</code> or <code>insertChild</code>
-          was already part of the accessibility tree, it's automatically
-          reparented. It's not necessary to remove it first. Because of this,
-          it's not possible to accidentally create a cycle - if you add B as
-          a child of A, and then try to add A as a child of B, that second
-          step would have the effect of detaching A from its parent and the
-          end result would be that A is a child of B, but both are detached
-          from the document's accessibility tree.
-        </p>
-        <p>
-          The only case where it's illegal to add an AccessibleNode as the
-          child of another is if it's backed by a DOM element that comes from
-          a different Document. That will raise an exception. The
-          accessibility tree can only be rearranged within one Document.
-        </p>
-        <p>
-        </p>
-      </section>
-      <section>
-      <h2>
-        Dependencies
-      </h2>
-      <p>
-        The following definitions are in the [[!HTML]] specification:
-      </p>
-      <ul>
-        <li>
-          <a href=
-          "http://www.w3.org/TR/html5/dom.html#interactive-content"><dfn>interactive
-          content</dfn></a>
-        </li>
-      </ul>
     </section>
     <section class='appendix'>
       <h2>
         Acknowledgements
       </h2>
       <p>
-        Many thanks to Robin Berjon for making our lives so much easier with
-        his cool tool.
-
-              {
-                  name:       "Marcos Caceres"
-              ,   url:        "http://mozilla.org/"
-              ,   mailto:     "mcaceres@mozilla.com"
-              ,   company:    "Mozilla"
-              ,   companyURL: "http://mozilla.org/"
-              },
-              {
-                  name:       "Nan Wang"
-              ,   url:        "http://apple.com"
-              ,   mailto:     "n_wang@apple.com"
-              ,   company:    "Apple"
-              ,   companyURL: "http://apple.com/"
-              },
-
+        Many thanks for valuable feedback, advice, and tools from:
+        Robin Berjon, Marcos Caceres, Nan Wang, Ian Hickson, and Domenic Denicola.
       </p>
     </section>
   </body>
