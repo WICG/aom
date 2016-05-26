@@ -341,14 +341,8 @@
       </p>
       <section>
         <h3>
-          Using an AccessibleNode backed by a DOM Node
+          Getting an AccessibleNode from a DOM Node
         </h3>
-        <p>
-          This section applies to accessible nodes that were obtained
-          using the <code>Node.accessibleNode</code> interface.
-          The section below on virtual accessible nodes covers
-          additional cases.
-        </p>
         <p>
           Initially, querying a property on an AccessibleNode backed by
           a node will return the computed value of that property.
@@ -372,9 +366,16 @@
           axContents.level;  // returns 2
           axContents.label;  // returns "Contents"
         </pre>
+      </section>
+      <section>
+        <h3>
+          Modifying accessibility attributes
+        </h3>
         <p>
-          Any of these properties can be modified to any value allowed
-          for the corresponding feature in the [[!WAI-ARIA]] spec:
+          Most properties on an AccessibleNode can be modified. If you're
+          familiar with [[!WAI-ARIA]] attributes, you'll recognize most of
+          the properties and their legal values. Let's take the example
+          above and change the role and label.
         </p>
         <pre class="example highlight">
           axContents.role = "region";
@@ -383,14 +384,17 @@
         <p>
           Changing a property immediately affects the accessibility
           tree and the browser notifies any accessibility clients about
-          the change.
+          the change. On an AccessibleNode, instead of several attributes
+          that affect the computed name, a single property,
+          <code>label</code>, determines its accessible name and it
+          overrides any accessible text from the DOM.
         </p>
         <p>
           Setting the value of a property to <code>undefined</code>
           will have the effect of reverting any user-modified value
           and the property will have its computed value instead:
         </p>
-        <pre class="highlight">
+        <pre class="example highlight">
           axContents.role = "region";
           axContents.role;  // Returns "region"
 
@@ -403,7 +407,7 @@
           it will revert any user-modified value. This is useful as
           a form of feature detection.
         </p>
-        <pre class="highlight">
+        <pre class="example highlight">
           axContents.role = "butler";
           axContents.role;  // Returns "heading", because "butler" is not a valid role.
         </pre>
@@ -419,6 +423,8 @@
           and are never null, for example <code>focusable</code> must always be
           true or false.
         </p>
+      </section>
+      <section>
         <h3>
           Relationship properties
         </h3>
@@ -434,30 +440,79 @@
           the the target element to be in the same Document, as long as
           it is form the same origin. This means it's possible to reference
           an element in an iframe from the same site, or an element inside
-          shadow DOM.
+          shadow DOM. In the example below, a listbox sets its activeDescendant
+          without putting an ID on any of the options.
         </p>
-        <p>
-          TODO: example
-        </p>
+        <pre class="example highlight">
+          &lt;div role="listbox"&gt;
+            &lt;div role="option"&gt;Kirk&lt;/div&gt;
+            &lt;div class="selected" role="option"&gt;Picard&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;script&gt;
+            var listbox = document.querySelector("[role='listbox']");
+            var axListbox = listbox.accessibleNode;
+            var selectedOption = listbox.querySelector(".selected");
+            axListbox.activeDescendant = selectedOption.accessibleNode;
+          &lt;/script&gt;</pre>
+        </div>
       </section>
       <section>
         <h3>
-          Virtual AccessibleNodes
+          Exploring the accessibility tree
+        </h3>
+        <p>
+          From any AccessibleNode, you can explore the rest of the
+          accessibility tree in much the same way you explore the
+          DOM tree, with properties ilke <code>firstChild</code>,
+          <code>nextSibling</code>, and <code>parent</code>, as in
+          this example.
+        </p>
+        <pre>
+          &lt;ol id="list1"&gt;
+            &lt;li&gt;The Original Series&lt;/li&gt;
+            &lt;li&gt;The Next Generation&lt;/li&gt;
+            &lt;li&gt;Deep Space Nine&lt;/li&gt;
+            &lt;li&gt;Voyager&lt;/li&gt;
+            &lt;li&gt;Enterprise&lt;/li&gt;
+          &lt;/ol&gt;
+          &lt;script&gt;
+            var axList = document.getElementById("list1").accessibleElement;
+            var axItem1 = axList.firstChild;
+            var axItem2 = axItem1.nextSibling;
+          &lt;/script&gt;</pre>
+        </pre>
+      </section>
+      <section>
+        <h3>
+          Rearranging the accessibility tree
+        </h3>
+        <p>
+          The Accessibility Object Model lets you arbitrarily rearrange
+          nodes in the accessibility tree without affecting the DOM tree.
+          For example, you can remove the first list item from the example
+          above and put it at the end of the list instead:
+        </p>
+        <pre>
+          axList.removeChild(axItem1);
+          axList.appendChild(axItem1);
+        </pre>
+      </section>
+      <section>
+        <h3>
+          Creating new "virtual" accessible nodes
         </h3>
         <p>
           A virtual AccessibleNode can be created that does not correspond to
           a DOM node. This is intended to be used to represent an object on the screen
           that's drawn using some other mechanism, such as an HTML Canvas.
-          The AccessibleNode constructor takes a single argument that can be
-          used to initialize the AccessibleNode and update its properties
-          dynamically.
+          The AccessibleNode constructor takes a single argument that
+          initializes the new object's role.
         </p>
-        <pre class="highlight">
-          var axVirtualButton = new AccessibleNode(
-              {{ "role": function() { return "button"; }},
-               { "label": function() { return "Enable Audio Descriptions"; } },
-               { "offsetWidth": function() { return 224; }},
-               { "offsetHeight": function() { return 72; }}});
+        <pre class="highlight example">
+          var axVirtualButton = new AccessibleNode("button");
+          axVirtualButton.label = "Enable Audio Descriptions";
+          axVirtualButton.offsetWidth = 224;
+          axVirtualButton.offsetHeight = 72;
         </pre>
         <p>
           A virtual AccessibleNode isn't part of the document's
@@ -466,28 +521,25 @@
         </p>
         <pre class="idl">
           void appendChild(AccessibleNode child);
-          void insertChild(AccessibleNode child, long index);
+          void insertBefore(AccessibleNode child, AccessibleNode before);
+          void insertAfter(AccessibleNode child, AccessibleNode after);
           void removeChild(AccessibleNode child);
         </pre>
         <p>
           For example, this code would add the virtual button we created
           above as a child of the HTML body element's accessible node:
         </p>
-        <pre class="highlight">
+        <pre class="highlight example">
           document.body.accessibleNode.appendChild(axVirtualButton);
         </pre>
-      </section>
-      <section>
-        <h3>
-          Rearranging the Accessibility Tree
-        </h3>
         <p>
-          The <code>appendChild</code>, <code>insertChild</code>, and
-          <code>removeChild</code> methods can be used to rearrange
-          any elements in the accessibility tree for a document, including
-          those that are backed by DOM Nodes. If the elements in the HTML
-          DOM are not in the proper order for accessibility, these methods
-          can be used to rearrange the accessibility tree so that it's
+          The <code>appendChild</code>, <code>insertBefore</code>,
+          <code>insertAfter</code>, and <code>removeChild</code>
+          methods can be used to rearrange any elements in the
+          accessibility tree for a document, including those that are
+          backed by DOM Nodes. If the elements in the HTML DOM are not
+          in the proper order for accessibility, these methods can be
+          used to rearrange the accessibility tree so that it's
           correct semantically.
         </p>
         <p>
@@ -506,7 +558,40 @@
           a different Document. That will raise an exception. The
           accessibility tree can only be rearranged within one Document.
         </p>
+      </section>
+      <section>
+        <h3>
+          Accessibility input events
+        </h3>
         <p>
+          AccessibleNodes are EventTargets and you can register event
+          listeners for special accessibility input events that come
+          from assistive technology. This is critical when building a
+          virtual accessible node in order to make it interactive at
+          all, but it can also be helpful for DOM-backed accessible
+          nodes because there are some accessible input events that
+          can be generated by assistive technology and have a clear
+          semantic intent, like <em>increment</em> or
+          <em>dismiss</em>, and can't be detected by other means.
+        </p>
+        <p>
+          This example adds a virtual button to the pgae and registers
+          a click listener on it.
+        </p>
+        <pre class="highlight example">
+          var axVirtualButton = new AccessibleNode("button");
+          axVirtualButton.label = "Enable Audio Descriptions";
+          axVirtualButton.offsetWidth = 224;
+          axVirtualButton.offsetHeight = 72;
+          axVirtualButton.addEventListener("accessibleclick", function(event) {
+            alert("clicked!");
+          }, false);
+          document.body.accessibleNode.appendChild(axVirtualButton);
+        </pre>
+        <p>
+          Virtual accessible nodes can be focusable, but they'll never be
+          part of the tab order. It's up to the author to track focus
+          in virtual accessible nodes.
         </p>
       </section>
     </section>
@@ -858,6 +943,19 @@
             <td>
               Returns true if an AccessibleDOMNode's associated
               DOM node is focusable.
+            </td>
+          </tr>
+          <tr>
+            <td><code>focused</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>readonly</td>
+            <td><em>all roles</em></td>
+            <td></td>
+            <td>
+              Returns true if an AccessibleNode is currently
+              focused. Note that it's possible for this to not
+              correspond to the DOM Node with input focus.
             </td>
           </tr>
           <tr>
