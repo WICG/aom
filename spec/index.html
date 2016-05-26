@@ -247,7 +247,7 @@
           A web page or web app is made up of a tree of accessible nodes.
           Typically each DOM node gets a corresponding accessible node,
           but this API allows the author to create additional accessible
-          elements and create relationships between accessible nodes
+          elements and create relation between accessible nodes
           that aren't present in the DOM.
           Each <a>accessible node</a> is described by
           accessible properties like <a>role</a>, <a>name</a>, <a>relations</a>
@@ -411,6 +411,8 @@
           axContents.role = "butler";
           axContents.role;  // Returns "heading", because "butler" is not a valid role.
         </pre>
+      </section>
+      <section>
         <h3>
           Optional properties
         </h3>
@@ -426,7 +428,7 @@
       </section>
       <section>
         <h3>
-          Relationship properties
+          Relation properties
         </h3>
         <p>
           Some properties express relationships between one AccessibleNode
@@ -492,7 +494,7 @@
           For example, you can remove the first list item from the example
           above and put it at the end of the list instead:
         </p>
-        <pre>
+        <pre class="example highlight">
           axList.removeChild(axItem1);
           axList.appendChild(axItem1);
         </pre>
@@ -610,7 +612,7 @@
         </p>
         <pre class="idl">
           partial interface Node {
-          readonly attribute AccessibleDOMNode? accessibleNode;
+            readonly attribute AccessibleDOMNode? accessibleNode;
           };
         </pre>
         <p>
@@ -649,6 +651,8 @@
           void insertBefore(AccessibleNode child, AccessibleNode before);
           void insertAfter(AccessibleNode child, AccessibleNode after);
           void removeChild(AccessibleNode child);
+
+          void focus();
         };
 
         interface AccessibleDOMNode : AccessibleNode {
@@ -710,9 +714,9 @@
         <p>
           For each supported <a href="#attribute">accessibility
             attribute</a>, the following partial interface applies.
-          <pre>
+          <pre class="idl">
             partial interface AccessibleNode {
-            attribute <em>typename</em> attributeName;
+              attribute <em>typename</em> attributeName;
             };</pre>
           Setting the attribute must invoke setAttribute() with the first
           argument being the attribute name, and the second argument the
@@ -777,6 +781,13 @@
           Calling appendChild, insertBefore, insertAfter, or removeChild
           only affects the accessibility tree and never the DOM tree.
         </p>
+        <p>
+          The <dfn>focus</dfn> method, when called, changes the node
+          that is reported as the focused node within the accessibility
+          tree, without changing input focus in the DOM. This focused
+          state will persist until DOM input focus changes, then
+          that DOM node's AccessibleNode will become focused.
+        </p>
       </section>
     </section>
 
@@ -803,7 +814,7 @@
         <dd>The corresponding ARIA attributes, if any</dd>
         <dt>computed value algorithm</dt>
         <dd>The algorithm used to compute the value of this attribute,
-          when not explicitly set on an AccessibleNode./dd>
+          when not explicitly set on an AccessibleNode.</dd>
       </dl>
       <p>
         AccessibleNodes support the following accessibility attributes:
@@ -1100,8 +1111,8 @@
             <td><code>double?</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-rangevalue</nobr></code></td>
-            <td><code><nobr>aria-rangevalue</nobr></code></td>
+            <td>same as <code><nobr>aria-valuenow</nobr></code></td>
+            <td><code><nobr>aria-valuenow</nobr></code></td>
             <td></td>
           </tr>
           <tr>
@@ -1109,8 +1120,8 @@
             <td><code>double?</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-rangemin</nobr></code></td>
-            <td><code><nobr>aria-rangemin</nobr></code></td>
+            <td>same as <code><nobr>aria-valuemin</nobr></code></td>
+            <td><code><nobr>aria-valuemin</nobr></code></td>
             <td></td>
           </tr>
           <tr>
@@ -1118,8 +1129,8 @@
             <td><code>double?</code></td>
             <td><code>undefined</code></td>
             <td>settable</td>
-            <td>same as <code><nobr>aria-rangemax</nobr></code></td>
-            <td><code><nobr>aria-rangemax</nobr></code></td>
+            <td>same as <code><nobr>aria-valuemax</nobr></code></td>
+            <td><code><nobr>aria-valuemax</nobr></code></td>
             <td></td>
           </tr>
           <tr>
@@ -1392,7 +1403,7 @@
           interface AccessibleInputEvent : Event {
           };
           interface AccessibleSetValueEvent : AccessibleInputEvent {
-          DOMString value;
+            DOMString value;
           };
         </pre>
         <table>
@@ -1413,6 +1424,12 @@
               <td><code>AccessibleInputEvent</code></td>
               <td><em>all roles</em></td>
               <td>Fire <code>"click"</code> event on DOM node</td>
+            </tr>
+            <tr>
+              <td><code>"accessiblefocus"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>Focus the associated DOM element</td>
             </tr>
             <tr>
               <td><code>"accessiblesetvalue"</code></td>
@@ -1481,7 +1498,7 @@
           phases, just like DOM events. The only difference is that
           the capture and bubble phases happen entirely in the
           accessibility tree. If the event is not canceled
-          (by calling <code>preventDefault()</code> after completely
+          (by calling <code>preventDefault()</code>) after completely
           going through the capture and bubble phases in the accessibility
           tree, the event executes its <dfn>fallback behavior</dfn>,
           as defined in the table above.
@@ -1517,6 +1534,28 @@
           </ol>
         </p>
       </section>
+    </section>
+    <section>
+      <h2>Implementation Phases</h2>
+      <p>
+
+      </p>
+      <section>
+        <h2></h2>
+        <p>
+        </p>
+      </section>
+      <section>
+        <h2></h2>
+        <p>
+        </p>
+      </section>
+      <section>
+        <h2></h2>
+        <p>
+        </p>
+      </section>
+
     </section>
     <section class='appendix'>
       <h2>
