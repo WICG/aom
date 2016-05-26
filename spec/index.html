@@ -634,8 +634,8 @@
           inserted into the accessibility tree.
         </p>
         <pre class="idl">
-          [Constructor(DOMString role)]
-          interface AccessibleNode : EventTarget {
+        [Constructor(DOMString role)]
+        interface AccessibleNode : EventTarget {
           attribute DOMString role;
 
           void setAttribute(DOMString attributeName, any value);
@@ -653,6 +653,7 @@
           void removeChild(AccessibleNode child);
 
           void focus();
+          void announce(DOMString message);
         };
 
         interface AccessibleDOMNode : AccessibleNode {
@@ -787,6 +788,17 @@
           tree, without changing input focus in the DOM. This focused
           state will persist until DOM input focus changes, then
           that DOM node's AccessibleNode will become focused.
+        </p>
+        <p>
+          The <dfn>announce</dfn> method, when called, sends an
+          announcement message to assistive technology. A screen reader
+          may speak the given message to the user, for example.
+          If a string is passed as the argument, that string is used as
+          the announcement message, otherwise the accessible name of the
+          target node is used as the message text. Authors are
+          encouraged to call this method on the most appropriate
+          node on the screen because some assistive technology might
+          visually highlight the node making the announcement.
         </p>
       </section>
     </section>
@@ -1538,24 +1550,98 @@
     <section>
       <h2>Implementation Phases</h2>
       <p>
-
+        This spec is designed to be implemented in phases in order to
+        accelerate the development process while providing ample
+        opportunities for getting feedback from web authors and users
+        while the spec is still under development.
       </p>
       <section>
-        <h2></h2>
-        <p>
-        </p>
-      </section>
-      <section>
-        <h2></h2>
-        <p>
-        </p>
-      </section>
-      <section>
-        <h2></h2>
-        <p>
-        </p>
-      </section>
+        <h3>Introspection</h3>
+        <pre class="idl">
+          partial interface Node {
+            readonly attribute AccessibleDOMNode? accessibleNode;
+          };
 
+          interface AccessibleNode {
+            readonly attribute DOMString role;
+
+            any getAttribute(DOMString attributeName);
+
+            readonly attribute AccessibleNode parent;
+            readonly attribute AccessibleNode firstChild;
+            readonly attribute AccessibleNode lastChild;
+            readonly attribute AccessibleNode nextSibling;
+            readonly attribute AccessibleNode previousSibling;
+          };
+
+          interface AccessibleDOMNode : AccessibleNode {
+            readonly attribute Node node;
+          };
+        </pre>
+        <p>
+          This phase contains all of the functionality necessary
+          to examine the accessibility attributes of any DOM node.
+        </p>
+      </section>
+      <section>
+        <h3>Exploration</h3>
+        <pre class="idl">
+          interface AccessibleNode {
+            readonly attribute AccessibleNode parent;
+            readonly attribute AccessibleNode firstChild;
+            readonly attribute AccessibleNode lastChild;
+            readonly attribute AccessibleNode nextSibling;
+            readonly attribute AccessibleNode previousSibling;
+          };
+        </pre>
+        <p>
+          This phase adds the ability to expore the accessibility
+          tree, including accessible nodes without associated DOM nodes,
+          like nodes for generated CSS content.
+        </p>
+      </section>
+      <section>
+        <h3>Modification</h3>
+        <pre class="idl">
+          interface AccessibleNode {
+            void setAttribute(DOMString attributeName, any value);
+          };
+        </pre>
+        <p>
+          This phase adds the ability to modify accessibility attributes.
+        </p>
+      </section>
+      <section>
+        <h3>Rearranging</h3>
+        <pre class="idl">
+          [Constructor(DOMString role)]
+          interface AccessibleNode {
+            void appendChild(AccessibleNode child);
+            void insertBefore(AccessibleNode child, AccessibleNode before);
+            void insertAfter(AccessibleNode child, AccessibleNode after);
+            void removeChild(AccessibleNode child);
+          };
+        </pre>
+        <p>
+          This phase adds the ability to construct an AccessibleNode and
+          rearrange AccessibleNodes within the accessibility tree.
+        </p>
+      </section>
+      <section>
+        <h3>Events and announcements</h3>
+        <pre class="idl">
+          [Constructor(DOMString role)]
+          interface AccessibleNode : EventTarget {
+            void focus();
+            void announce(DOMString message);
+          };
+        </pre>
+        <p>
+          The final phase adds support for all of the accessible
+          input events and the ability to focus or post an
+          announcement on an AccessibleNode.
+        </p>
+      </section>
     </section>
     <section class='appendix'>
       <h2>
