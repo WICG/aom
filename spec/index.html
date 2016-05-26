@@ -139,10 +139,10 @@
       <p>
         The web platform has a long history of features for developers
         to use to make their web content more accessible to users with
-        disabilities, from the alt attribute on images to all of
-        WAI-ARIA. A key component of these solutions is that user
-        agents provide an alternate way to interact with a web app
-        using native accessibility APIs specific to each
+        disabilities, from the <code>alt</code> attribute on images to
+        all of [[!WAI-ARIA]]. A key component of these solutions is
+        that user agents provide an alternate way to interact with a
+        web app using native accessibility APIs specific to each
         platform. These APIs are used by a variety of assistive
         technologies, including but not limited to screen readers and
         magnifiers for visually impaired users, and switch access
@@ -157,17 +157,26 @@
         challenges happens when a web app uses scripting, and not
         declarative markup, for a significant portion of its user
         interface - for example building a portion of the interface
-        using the HTML canvas element (both 2D and WebGL). Authors are
-        forced to create fake invisible DOM elements that represent
-        accessible objects on the screen, a hack that's cumbersome,
-        limited, and ultimately bad for the platform.
+        using the HTML <code>canvas</code> element (both
+        [[!2DCONTEXT]] and
+        [[WEBGL]]). Authors are forced to create fake invisible DOM
+        elements that represent accessible objects on the screen, a
+        hack that's cumbersome, limited, and ultimately bad for the
+        platform.
+      </p>
+      <p>
+        Authors also face challenges when using the [[!SHADOW-DOM]],
+        because it isn't possible to use ARIA relations like
+        <code>aria-activeDescendant</code> or <code>aria-labelledby</code>
+        when the target element is inside the shadow DOM of another
+        element.
       </p>
       <p>
         The solution is to make it possible for an author to make an
         app accessible using scripting, where desirable, rather than
         the only option being accessible features of HTML markup. In a
         simple use case, the author is able to set an
-        accessibility property of an HTML element via JavaScript
+        accessibility attribute of an HTML element via JavaScript
         without affecting that element's HTML attributes. In a more
         complicated use case, the author is able to create new
         virtual accessible objects on the page that don't correspond
@@ -223,8 +232,8 @@
         Web browsers have long had support for accessibility APIs,
         allowing all sorts of assistive technology and testing tools
         access to everything in a web page. The HTML standard defined
-        attributes like <code>alt</code> that allow the HTML author to provide
-        an accessible text alternative for an image.
+        attributes such as <code>alt</code> that allow the HTML author
+        to provide an accessible text alternative for an image.
       </p>
       <p>
         As the web became used more for applications and not just documents,
@@ -241,93 +250,44 @@
       </p>
       <section class="informative">
         <h3>
-          Understanding the terms
-        </h3>
-        <p>
-          A web page or web app is made up of a tree of accessible nodes.
-          Typically each DOM node gets a corresponding accessible node,
-          but this API allows the author to create additional accessible
-          elements and create relation between accessible nodes
-          that aren't present in the DOM.
-          Each <a>accessible node</a> is described by
-          accessible properties like <a>role</a>, <a>name</a>, <a>relations</a>
-          etc.
-        </p>
-        <figure>
-          <img src="images/props.png" alt="accessible properties diagram">
-          <figcaption>
-            Accessible properties.
-          </figcaption>
-        </figure>
-        <p>
-          <a>accessible nodes</a> can be related to each other
-          in a number of ways.
-        </p>
-        <figure>
-          <img src="images/rels.png" alt="accessible relations diagram">
-          <figcaption>
-            Relations. A color of arrows connecting accessible node
-            represent own relation type.
-          </figcaption>
-        </figure>
-        <p>
-          All <a>accessible nodes</a> are organized into an
-          accessibility tree, with strict parent-child relationships.
-        </p>
-        <figure>
-          <img src="images/tree.png" alt="accessibility tree">
-          <figcaption>
-            Accessibility tree.
-          </figcaption>
-        </figure>
-        <p>
-          The browser exposes semantics of the content to the accessibility
-          client (like assistive technology or automation software) via
-          platform APIs like ATK, IAccessible2, UIA, or NSAccessibility.
-          The client communicates back to the content by the browser
-          via platform APIs.
-        </p>
-        <figure>
-          <img src="images/overview.png" alt="overview diagram">
-          <figcaption>
-            Overview of the communication between the content and the
-            <a>assistive technology</a>.
-          </figcaption>
-        </figure>
-      </section>
-      <section>
-        <h3>
-          The Accessibility Tree and Accessible Nodes
+          Terms
         </h3>
         <p>
           An <dfn>Accessibility Tree</dfn> is a semantic representation of an
           application's user interface enabling it to be observed and
-          controlled by other client software programs, like assistive
-          technology and automation software, via a platform-native
+          controlled by other client software programs, like <dfn>assistive
+          technology</dfn> and automation software, via a platform-native
           <dfn>Accessibility API</dfn>. User agents typically provide
           support for one or more native accessibility APIs.
         </p>
         <p>
-          The Accessibility Tree is made up of <dfn>Accessible Nodes</dfn>.
-          Accessible Nodes have a <em>role</em> and several <a href="#attributes">
-            Accessibility Attributes</a> that describe the node's current
-          state, and other properties.
+          The Accessibility Tree is made up of
+          <a href="#accessiblenode"><dfn>Accessible Nodes</dfn></a>.
+          Accessible Nodes have a <dfn>role</dfn> and several <a href="#attributes">
+          <dfn>Accessibility Attributes</dfn></a> that describe the node's
+          characteristics and its current state.
         </p>
         <p>
-          In many cases, the Accessibility Tree exposed by a user agent
-          corresponds closely to a web page's DOM tree, with one
-          Accessible Node for every DOM Node. However, sometimes the trees
-          need to differ - for example, several DOM elements may create a
-          media player seek control, but in the Accessibility Tree that
-          whole collection might be represented by a single Accessible Node
-          with a role of "slider" and other attributes indicating its
-          min, max, and current value.
+          In many cases, the Accessibility Tree exposed by a user
+          agent corresponds closely to a web page's DOM tree, with one
+          Accessible Node for every DOM Node. However, sometimes the
+          trees need to differ - for example, several DOM elements may
+          create a media player seek control, but in the Accessibility
+          Tree that whole collection might be represented by a single
+          Accessible Node with a role of <code>"slider"</code> and
+          other attributes indicating its min, max, and current value.
         </p>
         <p>
-          Authors can modify the way a DOM node is converted into the
-          accessibility tree using [[!WAI-ARIA]] attributes. However, this
-          approach is sometimes limited, so this spec provides the author
-          with a richer programmatic interface to complement ARIA.
+          When assistive technology users control an application via its
+          accessibility API, they generate <dfn>accessibility input events</dfn>.
+          Accessiblity input events often imply specific user intents that
+          can't be easily captured by apps in a universal, cross-platform
+          way. For example, there is a specific accessibility input event
+          to increment a slider. On a desktop platform this might be the
+          equivalent of the right-arrow key, but while several mobile
+          screen readers provide a touch-screen gesture to increment a slider,
+          it isn't standard across platforms and there's no straightforward
+          way for an author to detect it.
         </p>
       </section>
     </section>
@@ -344,10 +304,11 @@
           Getting an AccessibleNode from a DOM Node
         </h3>
         <p>
-          Initially, querying a property on an AccessibleNode backed by
-          a node will return the computed value of that property.
-          The following example shows a snippet of HTML for a
-          heading along with the code to obtain the accessible node for it.
+          In the Accessibility Object Model, every DOM node on a page
+          has an associated AccessibleNode that can be retrieved using the
+          <code>accessibleNode</code> property. The following example shows a
+          snippet of HTML for a heading along with the code to obtain
+          the accessible node for it.
         </p>
         <pre class="example highlight">
           &lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
@@ -363,7 +324,7 @@
         </p>
         <pre class="example highlight">
           axContents.role;   // returns "heading"
-          axContents.level;  // returns 2
+          axContents.level;  // returns 2 since it's a H2 element
           axContents.label;  // returns "Contents"
         </pre>
       </section>
@@ -419,9 +380,8 @@
         <p>
           Some properties of AccessibleNode are optional, they are allowed to be
           null. For example, <code>rangeValue</code> only applies to elements
-          with certain roles (like "slider" and "progressbar"), while
-          <code>liveRelevant</code> only applies to elements thta are live
-          regions. Other properties of AccessibleNode apply to all elements
+          with certain roles (like "slider" and "progressbar").
+          Other properties of AccessibleNode apply to all elements
           and are never null, for example <code>focusable</code> must always be
           true or false.
         </p>
@@ -434,7 +394,7 @@
           Some properties express relationships between one AccessibleNode
           and one or more others, for example, <code>activeDescendant</code>
           and <code>labelledBy</code>. The semantics of these relationships
-          are identical to their corresponding ARIA attributes. In ARIA, a
+          are basically the same as their corresponding ARIA attributes. In ARIA, a
           relationship can only be expressed with an IDREF, i.e. by passing
           the ID of another element in the Document. With the
           AccessibleNode interface, it isn't necessary for the target
@@ -469,7 +429,7 @@
           <code>nextSibling</code>, and <code>parent</code>, as in
           this example.
         </p>
-        <pre>
+        <pre class="example highlight">
           &lt;ol id="list1"&gt;
             &lt;li&gt;The Original Series&lt;/li&gt;
             &lt;li&gt;The Next Generation&lt;/li&gt;
@@ -622,7 +582,7 @@
           part of a web page.
         </p>
       </section>
-      <section>
+      <section id="accessiblenode">
         <h3>
           <code>AccessibleNode</code> and <code>AccessibleDOMNode</code> interfaces
         </h3>
@@ -803,7 +763,7 @@
       </section>
     </section>
 
-    <section>
+    <section id="attributes">
       <h2>
         Accessibility attributes
       </h2>
@@ -930,9 +890,7 @@
             <td><code>""</code></td>
             <td>settable</td>
             <td><em>all roles</em></td>
-            <td>
-              <code><nobr>aria-describedby</nobr></code>
-            </td>
+            <td></td>
             <td>
               The accessible description computation algorithm
               as defined in [[!ACCNAME-AAM-1.1]].
@@ -1200,69 +1158,6 @@
             <td></td>
           </tr>
           <tr>
-            <td><code>scrollable</code></td>
-            <td><code>boolean</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollX</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollXMin</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollXMax</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollY</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollYMin</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>scrollYMax</code></td>
-            <td><code>double</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
             <td><code>sort</code></td>
             <td><code>enum { "ascending", "descending", "none", "other" }</code></td>
             <td><code>"none"</code></td>
@@ -1361,32 +1256,21 @@
       </section>
       <section>
         <h3>
-          Attributes deferred for a future version
+          Position attributes
         </h3>
         <p>
-          The following were considered as possible accessibility
-          attributes but were deferred for a future version of the
-          spec. Please file a bug if you have a compelling use case
-          for one of these.
+          The position of an AccessibleNode is determined by the
+          <code>offsetLeft</code>,
+          <code>offsetTop</code>,
+          <code>offsetWidth</code>, and <code>offsetHeight</code>
+          attributes, which all give coordinates in CSS pixels
+          relative to the
+          <code>offsetParent</code>. A node's <code>offsetParent</code>
+          will be its parent in the accessibility tree by default,
+          but authors can override this in order to absolutely-position
+          an element, or position it relative to any other element
+          on the page.
         </p>
-        <ul>
-          <li><code>checked</code>
-          <li><code>current</code>
-          <li><code>details</code>
-          <li><code>errorMessage</code>
-          <li><code>flowTo</code>
-          <li><code>keyboardShortcuts</code>
-          <li><code>liveAtomic</code>
-          <li><code>liveBusy</code>
-          <li><code>liveRelevant</code>
-          <li><code>liveStatus</code>
-          <li><code>modal</code>
-          <li><code>multiline</code>
-          <li><code>offscreen</code>
-          <li><code>pressed</code>
-          <li><code>roleDescription</code>
-          <li><code>text</code>
-        </uL>
       </section>
       <section>
         <h3>
@@ -1550,6 +1434,9 @@
     <section>
       <h2>Implementation Phases</h2>
       <p>
+        <em>This section is non-normative.</em>
+      </p>
+      <p>
         This spec is designed to be implemented in phases in order to
         accelerate the development process while providing ample
         opportunities for getting feedback from web authors and users
@@ -1641,6 +1528,62 @@
           input events and the ability to focus or post an
           announcement on an AccessibleNode.
         </p>
+      </section>
+      <section>
+        <h3>
+          Future work
+        </h3>
+        <p>
+          The following were considered as possible accessibility
+          attributes but were deferred for a future version of the
+          spec. Please file a bug if you have a compelling use case
+          for one of these.
+        </p>
+        <ul>
+          <li><code>checked</code>
+          <li><code>current</code>
+          <li><code>details</code>
+          <li><code>errorMessage</code>
+          <li><code>flowTo</code>
+          <li><code>keyboardShortcuts</code>
+          <li><code>liveAtomic</code>
+          <li><code>liveBusy</code>
+          <li><code>liveRelevant</code>
+          <li><code>liveStatus</code>
+          <li><code>modal</code>
+          <li><code>multiline</code>
+          <li><code>offscreen</code>
+          <li><code>pressed</code>
+          <li><code>roleDescription</code>
+          <li><code>scrollable</code>
+          <li><code>scrollX</code>
+          <li><code>scrollXMin</code>
+          <li><code>scrollXMax</code>
+          <li><code>scrollY</code>
+          <li><code>scrollYMin</code>
+          <li><code>scrollYMax</code>
+          <li><code>text</code>
+        </uL>
+        <p>
+          The following were considered as possible accessibility
+          input events but were deferred for a future version of the
+          spec. Please file a bug if you have a compelling use case
+          for one of these.
+        </p>
+        <ul>
+          <li><code>"addtoselection"</code>
+          <li><code>"collapse"</code>
+          <li><code>"delete"</code>
+          <li><code>"expand"</code>
+          <li><code>"medianext"</code>
+          <li><code>"mediapause"</code>
+          <li><code>"mediaprevious"</code>
+          <li><code>"mediastart"</code>
+          <li><code>"mediastop"</code>
+          <li><code>"removefromselection"</code>
+          <li><code>"scroll"</code>
+          <li><code>"zoom"</code>
+        </ul>
       </section>
     </section>
     <section class='appendix'>
