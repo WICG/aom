@@ -136,119 +136,57 @@
   </head>
   <body>
     <section id='abstract'>
-      <p>
-        The web platform has a long history of features for developers
-        to use to make their web content more accessible to users with
-        disabilities, from the <code>alt</code> attribute on images to
-        all of [[!WAI-ARIA]]. A key component of these solutions is
-        that user agents provide an alternate way to interact with a
-        web app using native accessibility APIs specific to each
-        platform. These APIs are used by a variety of assistive
-        technologies, including but not limited to screen readers and
-        magnifiers for visually impaired users, and switch access
-        software and voice control software for motor-impaired
-        users. Accessibility APIs are also often used for automation
-        and automated testing.
-      </p>
-      <p>
-        Increasingly, apps that take full advantage of some new web
-        platform features are finding it difficult or impossible to
-        make their apps accessible. In particular, one of the biggest
-        challenges happens when a web app uses scripting, and not
-        declarative markup, for a significant portion of its user
-        interface - for example building a portion of the interface
-        using the HTML <code>canvas</code> element (both
-        [[!2DCONTEXT]] and
-        [[WEBGL]]). Authors are forced to create fake invisible DOM
-        elements that represent accessible objects on the screen, a
-        hack that's cumbersome, limited, and ultimately bad for the
-        platform.
-      </p>
-      <p>
-        Authors also face challenges when using the [[!SHADOW-DOM]],
-        because it isn't possible to use ARIA relations like
-        <code>aria-activeDescendant</code> or <code>aria-labelledby</code>
-        when the target element is inside the shadow DOM of another
-        element.
-      </p>
-      <p>
-        The solution is to make it possible for an author to make an
-        app accessible using scripting, where desirable, rather than
-        the only option being accessible features of HTML markup. In a
-        simple use case, the author is able to set an
-        accessibility attribute of an HTML element via JavaScript
-        without affecting that element's HTML attributes. In a more
-        complicated use case, the author is able to create new
-        virtual accessible objects on the page that don't correspond
-        to an HTML element at all, such as controls in a Canvas-based
-        app.
-      </p>
-      <p>
-        This spec is narrowly focused on the goal of creating a
-        scripting API for web accessibility. It's intended to
-        complement existing web accessibility APIs such as
-        [[!WAI-ARIA]], not replace them. In particular, this spec
-        attempts to avoid proposing new roles, states, and properties
-        an accessible object can have except where necessary;
-        otherwise it just defines a mechanism by which an accessible
-        object with those same roles, states and properties can be
-        defined without necessarily being tied to the HTML DOM.
-      </p>
+      <p>The Web Platform has a long history of features that developers can use to make their web content accessible to users with disabilities, from the <code>alt</code> attribute on images to the entirety of [[!WAI-ARIA]]. Accessibility is used by a variety of assistive technologies, including screen readers and magnifiers for visually impaired users, and switch access software and speech-controlled software for motor-impaired users. Accessibility is also often used for automation, testing, and more.</p>
+      <p>However, the timelines of accessibility standardization and implementation often lag behind those of mainstream features of the Web Platform, sometimes by a number of years. Despite recommendations for best practices, accessibility-conscious web developers often find themselves retrofitting dubiously created sites that would require a full rewrite to make accessible. Increasingly, web developers taking full advantage of new web platform features, or those retrofitting the work of others, are finding it difficult or impossible to make their web apps accessible.</p>
+      <p>In particular, one of the biggest challenges happens when a web app uses custom event handling and scripting, not declarative markup, for a significant portion of its user interface — for example, building a portion of the interface using the HTML <code>canvas</code> element (both [[!2DCONTEXT]] and [[WEBGL]]). Authors are often forced to create fake, invisible DOM elements that represent the accessible equivalent of onscreen UI. These hacks are cumbersome, limited, and ultimately bad for the platform. Authors also face challenges when crossing document boundaries (e.g. [[!SHADOW-DOM]]), because it isn't possible to use IDREF relationships like <code>aria-activedescendant</code> or <code>aria-labelledby</code> when the target element is outside the current document.</p>
+      <p>The intention of this specification is to allow authors to make a web apps accessible using scripting, rather than requiring the only option being accessibility features of HTML markup. In the simplest use case, the author is able to programmatically modify the accessible representation of an existing DOM element. In a more complicated use case, the author is able to create new virtual accessible objects on the page that don't correspond to an HTML element at all, such as controls in a canvas-based app.</p>
     </section>
-    <section>
-      <h2>
-        Introduction
-      </h2>
-      <p>
-        <em>This section is non-normative.</em>
-      </p>
-      <p>
-        This API is called the Accessibility Object Model because it's based
-        around the idea that all modern operating systems, including
-        both desktop and mobile operating systems, have native APIs that
-        allow an application to be explored and controlled via a high-level
-        semantic interface for the purposes of accessibility or automation.
-        A key component of these interfaces across all platforms is that
-        they represent each application's user interface as a tree of
-        accessible objects.
-      </p>
-      <p>
-        The canonical example of a client of accessibility APIs is a
-        <i>screen reader</i> used by blind users to access a computer or
-        mobile device using synthesized speech or braille. Other examples
-        include magnifiers, voice control software, and switch access software,
-        plus testing and automation tools. All of these accessibility
-        clients can do three things:
-        <ol>
-          <li>Explore the tree of accessible objects representing the
-            current state of the application's user interface,
-          <li>Listen for notifications from the application when the
-            user interface has changed, and
-          <li>Control the interface by commanding it to set focus,
-            activate a control, enter text, and more.
-        </ol>
-      </p>
-      <p>
-        Web browsers have long had support for accessibility APIs,
-        allowing all sorts of assistive technology and testing tools
-        access to everything in a web page. The HTML standard defined
-        attributes such as <code>alt</code> that allow the HTML author
-        to provide an accessible text alternative for an image.
-      </p>
-      <p>
-        As the web became used more for applications and not just documents,
-        the [[!WAI-ARIA]] standard was created to allow web authors to
-        fill in missing semantics in the accessibility tree.
-      </p>
-      <p>
-        A fundamental assumption of [[!WAI-ARIA]], though, is that there's
-        essentially a one-to-one correspondence between a DOM element
-        and an accessible node. While there are ways to hide
-        presentational DOM elements from the accessibility tree, there are
-        no ways to create accessible nodes that don't correspond to
-        DOM elements. This is one of the gaps this spec aims to address.
-      </p>
-      <section class="informative">
+    <section id="scope" class="informative">
+      <h2>Document Scope</h2>
+      <p>The Accessibility Object Model spec is narrowly focused on the goal of creating a scripting API for web accessibility. It's intended to complement existing web accessibility APIs such as [WAI-ARIA], not replace them. In particular, this spec attempts to avoid proposing new roles, states, and properties an of accessible objects except where necessary.</p>
+      <p>This spec primarily defines the following:</p>
+      <ul>
+        <li>A mechanism by which an accessible object with a role, states, and properties can be manipulated without necessarily being tied to the HTML DOM</li>
+        <li>A mechanism for allowing input events from assistive technology, particularly those that are not possible to implement with ARIA, such as <code>increment</code> and <code>decrement</code> events on custom sliders</li>
+        <li>Potentially, a mechanism for web authors to send additional information to the accessibility layer, such as notifications or other announcements that may be spoken by a screen reader.</li>
+      </ul>
+    </section>
+    <section id="inclusion" class="informative">
+      <h2>Criteria for Inclusion</h2>
+      <p>The first version of this specification is not intended to be complete. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
+      <p>In order for features to be considered within scope for 1.0, the following criteria must be met:</p>
+      <ul>
+        <li>The feature addresses a critical accessibility need that is either impossible to solve, or one whose solution is so tedious to implement that even accessibility-conscious developers avoid remediation. [Note: Some non-critical features may be included if they are side effects of, or trivial to implement because of, work included to support another critical feature.]</li>
+        <li>The feature addresses the accessibility of a very commonly used technique or technology. Examples of the problematic usage should exist on major web applications or many other web sites.</li>
+        <li>The feature has been considered for privacy impact. [Note: It is possible the spec will mandate that privacy considerations must be addressed before partial implementations ship in browsers.]</li>
+        <li>The feature is considered critical for the 1.0 release by at least two of the Accessibility Object Model [AOM] editors, representing two browser manufacturers.</li>
+      </ul>
+      <p>External contributors wishing to submit new features or ideas for consideration should include the following as a new GitHub Issue:</p>
+      <ul>
+        <li>Title and explanation of the problem</li>
+        <li>Existing possibilities for remediation (if they exist)</li>
+        <li>Demonstrable pain points caused by the lack of this feature, or by the currently available technique to address the problem this feature would solve.</li>
+        <li>Optional, but desired: Complete or partial test cases, code examples, or browser user agent patches demonstrating implementability.</li>
+      </ul>
+    </section>
+    <section id="exclusion" class="informative">
+      <h2>Criteria for Exclusion or Objection</h2>
+      <p>Specification objections such as the following will be considered.</p>
+      <ul>
+        <li>Syntactical or other violations of Web API trends.</li>
+        <li>Inability of a feature to be implemented in a particular browser, user agent, or assistive technology.</li>
+        <li>Privacy violations or fingerprinting issues (e.g. inadvertent exposure of user details)</li>
+        <li>Objections to any feature that would "Break The Web" or otherwise result in irreconcilable incompatibility with existing web APIs.</li>
+      </ul>
+      <p>Specification objections that disregard the following core beliefs will not be entertained.</p>
+      <ul>
+        <li>All native features and custom user interfaces should be possible to make accessible to all users.</li>
+        <li>All web specification authors should consider and account for the accessibility of new features, ideally prior to publishing the feature.</li>
+        <li>Where possible, web authors should follow best practices, use natively accessible features first, and not resort to custom user interface elements or custom input handling.</li>
+        <li>Finally, because there are times when best practices are ignored, or inaccessible features are used, web authors should have the ability to programmatically augment and override the accessibility of existing mainstream user interfaces.</li>
+      </ul>
+    </section>
+    <section class="informative">
         <h3>
           Terms
         </h3>
