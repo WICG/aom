@@ -1273,10 +1273,11 @@
           on the page.
         </p>
       </section>
-      <section>
-        <h3>
+    </section>
+    <section>
+        <h2>
           Accessibility input events
-        </h3>
+        </h2>
         <p>
           All AccessibilityNodes are EventTargets, so authors
           can register event listeners on them. AccessibilityNodes
@@ -1299,8 +1300,9 @@
         <pre class="idl">
           interface AccessibleInputEvent : Event {
           };
+
           interface AccessibleSetValueEvent : AccessibleInputEvent {
-            DOMString value;
+            attribute DOMString value;
           };
         </pre>
         <table>
@@ -1430,7 +1432,6 @@
               capture and bubble phases in the DOM tree.
           </ol>
         </p>
-      </section>
     </section>
     <section class="informative">
       <h2>Implementation Phases</h2>
