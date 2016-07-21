@@ -335,7 +335,7 @@
           AccessibleNode interface, it isn't necessary for the target
           element to have an ID. Furthermore, it isn't necessary for
           the the target element to be in the same Document, as long as
-          it is form the same origin. This means it's possible to reference
+          it is from the same origin. This means it's possible to reference
           an element in an iframe from the same site, or an element inside
           shadow DOM. In the example below, a listbox sets its activeDescendant
           without putting an ID on any of the options.
@@ -359,10 +359,8 @@
         </h3>
         <p>
           From any AccessibleNode, you can explore the rest of the
-          accessibility tree in much the same way you explore the
-          DOM tree, with properties ilke <code>firstChild</code>,
-          <code>nextSibling</code>, and <code>parent</code>, as in
-          this example.
+          accessibility tree using the <code>children</code>
+          and <code>parent</code> properties, as in this example.
         </p>
         <pre class="example highlight">
           &lt;ol id="list1"&gt;
@@ -374,8 +372,9 @@
           &lt;/ol&gt;
           &lt;script&gt;
             var axList = document.getElementById("list1").accessibleElement;
-            var axItem1 = axList.firstChild;
-            var axItem2 = axItem1.nextSibling;
+            var axItem1 = axList.children[0];
+            var axItem2 = axList.children[1];
+            axItem1.parent == axList;  // returns true;
           &lt;/script&gt;</pre>
         </pre>
       </section>
@@ -390,8 +389,8 @@
           above and put it at the end of the list instead:
         </p>
         <pre class="example highlight">
-          axList.removeChild(axItem1);
-          axList.appendChild(axItem1);
+          axList.children.remove(0);
+          axList.append(axItem1);
         </pre>
       </section>
       <section>
@@ -413,41 +412,33 @@
         </pre>
         <p>
           A virtual AccessibleNode isn't part of the document's
-          accessibility tree until it's added as the child of another element,
-          using one of the methods used to add or remove children:
-        </p>
-        <pre class="idl">
-          void appendChild(AccessibleNode child);
-          void insertBefore(AccessibleNode child, AccessibleNode before);
-          void insertAfter(AccessibleNode child, AccessibleNode after);
-          void removeChild(AccessibleNode child);
-        </pre>
-        <p>
+          accessibility tree until it's added as the child of another element.
           For example, this code would add the virtual button we created
           above as a child of the HTML body element's accessible node:
         </p>
         <pre class="highlight example">
-          document.body.accessibleNode.appendChild(axVirtualButton);
+          document.body.accessibleNode.children.append(axVirtualButton);
         </pre>
         <p>
-          The <code>appendChild</code>, <code>insertBefore</code>,
-          <code>insertAfter</code>, and <code>removeChild</code>
-          methods can be used to rearrange any elements in the
+          Modifying the <code>children</code> or <code>parent</code>
+          attributes an be used to rearrange any elements in the
           accessibility tree for a document, including those that are
           backed by DOM Nodes. If the elements in the HTML DOM are not
-          in the proper order for accessibility, these methods can be
+          in the proper order for accessibility, this can be
           used to rearrange the accessibility tree so that it's
           correct semantically.
         </p>
         <p>
-          If the argument to <code>appendChild</code> or <code>insertChild</code>
-          was already part of the accessibility tree, it's automatically
-          reparented. It's not necessary to remove it first. Because of this,
-          it's not possible to accidentally create a cycle - if you add B as
-          a child of A, and then try to add A as a child of B, that second
-          step would have the effect of detaching A from its parent and the
-          end result would be that A is a child of B, but both are detached
-          from the document's accessibility tree.
+          When making a change to the accessibility tree, the node
+          being moved is automatically detached from its previous
+          location if it was already in the accessibility tree. It's
+          not necessary to remove it first. Because of this, it's not
+          possible to accidentally create a cycle - if you add B as a
+          child of A, and then try to add A as a child of B, that
+          second step would have the effect of detaching A from its
+          parent and the end result would be that A is a child of B,
+          but both are detached from the document's accessibility
+          tree.
         </p>
         <p>
           The only case where it's illegal to add an AccessibleNode as the
@@ -536,16 +527,8 @@
           void setAttribute(DOMString attributeName, any value);
           any getAttribute(DOMString attributeName);
 
-          readonly attribute AccessibleNode parent;
-          readonly attribute AccessibleNode firstChild;
-          readonly attribute AccessibleNode lastChild;
-          readonly attribute AccessibleNode nextSibling;
-          readonly attribute AccessibleNode previousSibling;
-
-          void appendChild(AccessibleNode child);
-          void insertBefore(AccessibleNode child, AccessibleNode before);
-          void insertAfter(AccessibleNode child, AccessibleNode after);
-          void removeChild(AccessibleNode child);
+          void setRelation(DOMString relationName, any relatives);
+          any getRelation(DOMString relationName);
 
           void focus();
           void announce(DOMString message);
@@ -620,64 +603,72 @@
           with the argument being the attribute name, and return the result.
         </p>
         <p>
-          The <dfn>parent</dfn> attribute must return the parent
-          AccessibleNode in the accessibility tree, if any,
-          and <code>undefined</code> otherwise.
+          The <dfn>setRelation</dfn> method, when called with the
+          name of an <a href="#relations">relationship attribute</a>,
+          stores the provided value in the AccessibleNode's
+          <a href="#source">source</a>.
         </p>
         <p>
-          The <dfn>firstChild</dfn> attribute must return the
-          AccessibleNode for the first child in the accessibility tree,
-          if any, and <code>undefined</code> otherwise.
+          If the type of the relation attribute
+          is <code>AccessibleNode</code>, then only an
+          <code>AccessibleNode</code> will be valid, and setting it
+          to any other value will have the same effect as clearing that
+          relationship attribute in the source.
         </p>
         <p>
-          The <dfn>lastChild</dfn> attribute must return the
-          AccessibleNode for the last child in the accessibility tree,
-          if any, and <code>undefined</code> otherwise.
+          If the type of the relation attribute
+          is <code>AccessibleNodeList</code>, then either an
+          <code>AccessibleNode</code>, a
+          <code>AccessibleNodeList</code>, or any sequence or iterable
+          of <code>AccessibleNodes</code> will be valid and converted
+          to an <code>AccessibleNodeList</code> automatically, and
+          setting it to any other value will have the same effect as
+          clearing that relationship attribute in the source.
         </p>
         <p>
-          The <dfn>nextSibling</dfn> attribute must return the
-          AccessibleNode for the next sibling in the accessibility tree,
-          if any, and <code>undefined</code> otherwise.
+          Most relationship attributes have a reciprocal relationship
+          attribute that expresses the inverse relationship. For example,
+          the inverse of <code>children</code> is <code>parent</code>,
+          and the inverse of <code>labelledBy</code> is <code>labelFor</code>.
+          When a relationship attribute is set, the target's corresponding
+          reciprocal relationship attribute is set automatically.
         </p>
         <p>
-          The <dfn>previousSibling</dfn> attribute must return the
-          AccessibleNode for the previous sibling in the accessibility tree,
-          if any, and <code>undefined</code> otherwise.
+          Setting a relationship attribute often implies clearing a
+          previously existing relationship. This also happend automatically
+          when a relationship attribute is set.
         </p>
         <p>
-          The <dfn>appendChild</dfn> method, when called with a valid
-          AccessibleNode argument, detaches the provided AccessibleNode
-          from its previous parent, if any, and appends it to the end of
-          the list of children in the accessibility tree.
+          The <dfn>getRelation</dfn> method, when called with the
+          name of an <a href="#relations">relationship attribute</a>,
+          runs the following algorithm:
+          <ul>
+            <li>If the AccessibleNode's source contains a valid value
+              for this attribute, returns that value.
+            <li>Otherwise, if this is an AccessibleDOMNode, return the
+              computed value of this attribute according to the
+              algorithm associated with this attribute.
+            <li>Otherwise, if the relationship attribute's type is
+              <code>AccessibleNode</code>, return null, but if the
+              type is <code>AccessibleNodeList</code>, return a
+              reference to the empty <code>AccessibleNodeList</code>
+              from its source, which can be modified dynamically by the
+              caller.
+          </ul>
         </p>
         <p>
-          The <dfn>insertBefore</dfn> method, when called with a valid
-          AccessibleNode argument <dfn>child</dfn> and a valid existing
-          child of this accessible node <dfn>before</dfn>, detaches the
-          provided AccessibleNode from its previous parent, if any, and
-          inserts it into the list of children of this node immediately
-          before <dfn>before</dfn>.
+          For each supported <a href="#relations">relationship
+          attribute</a>, the following partial interface applies.
+          <pre class="idl">
+            partial interface AccessibleNode {
+              attribute <em>typename</em> relationName;
+            };</pre>
+          Setting the attribute must invoke setRelation() with the first
+          argument being the attribute name, and the second argument the
+          given value.  Getting the attribute must invoke getRelation()
+          with the argument being the attribute name, and return the result.
         </p>
-        <p>
-          The <dfn>insertAfter</dfn> method, when called with a valid
-          AccessibleNode argument <dfn>child</dfn> and a valid existing
-          child of this accessible node <dfn>after</dfn>, detaches the
-          provided AccessibleNode from its previous parent, if any, and
-          inserts it into the list of children of this node immediately
-          after <dfn>after</dfn>.
-        </p>
-        <p>
-          The <dfn>removeChild</dfn> method, when called with a valid
-          AccessibleNode argument <dfn>child</dfn> corresponding to an
-          existing child of this accessible node, removes that node
-          as one of this node's children. The previous child is now
-          detached and not part of the accessibility tree.
-        </p>
-        <p class="note">
-          Calling appendChild, insertBefore, insertAfter, or removeChild
-          only affects the accessibility tree and never the DOM tree.
-        </p>
-        <p>
+x        <p>
           The <dfn>focus</dfn> method, when called, changes the node
           that is reported as the focused node within the accessibility
           tree, without changing input focus in the DOM. This focused
@@ -695,6 +686,35 @@
           node on the screen because some assistive technology might
           visually highlight the node making the announcement.
         </p>
+      </section>
+      <section>
+        <h3>
+          <code>AccessibleNodeList</code> interface
+        </h3>
+        <p>
+          Relationship attributes allow expressing
+          a relationship between one AccessibleNode and an ordered
+          list of other nodes. This list can be expressed using an
+          <dfn>AccessibleNodeList</dfn>.
+        </p>
+
+        <pre class="idl">
+        interface AccessibleNodeList {
+          readonly attribute unsigned long length;
+
+          void clear();
+          getter AccessibleNode? getNode(unsigned long index);
+          AccessibleNode insertBefore(AccessibleNode newNode, unsigned long index);
+          AccessibleNode replace(AccessibleNode newNode, unsigned long index);
+          AccessibleNode remove(unsigned long index);
+          AccessibleNode remove(AccessibleNode node);
+          AccessibleNode append(AccessibleNode newNode);
+          setter void (unsigned long index, AccessibleNode newNode);
+
+          iterable&lt;AccessibleNode&gt;;
+        };
+        </pre>
+
       </section>
     </section>
 
@@ -718,7 +738,7 @@
         <dt>supported roles</dt>
         <dd>A list of roles on which this attribute is allowed to be set</dd>
         <dt>related ARIA attribute</dt>
-        <dd>The corresponding ARIA attributes, if any</dd>
+        <dd>The corresponding ARIA attribute, if any</dd>
         <dt>computed value algorithm</dt>
         <dd>The algorithm used to compute the value of this attribute,
           when not explicitly set on an AccessibleNode.</dd>
@@ -742,21 +762,6 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><code>activeDescendant</code></td>
-            <td><code>AccessibleNode?</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td>same as <code><nobr>aria-activedescendant</nobr></code></td>
-            <td><code><nobr>aria-activedescendant</nobr></code></td>
-            <td>
-              The element referenced by
-              <code><nobr>aria-activedescendant</nobr></code>, if any,
-              otherwise the active option of a
-              HTMLSelectElement, if any, otherwise
-              <code>undefined</code>.
-            </td>
-          </tr>
           <tr>
             <td><code>autocomplete</code></td>
             <td><code>enum { "both", "inline", "list", "none" }</code></td>
@@ -799,24 +804,6 @@
             <td>settable</td>
             <td>same as <code><nobr>aria-colspan</nobr></code></td>
             <td><code><nobr>aria-colSpan</nobr></code></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>controls</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>[]</code></td>
-            <td>settable</td>
-            <td>same as <code><nobr>aria-controls</nobr></code></td>
-            <td><code><nobr>aria-controls</nobr></code></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><code>describedBy</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>[]</code></td>
-            <td>settable</td>
-            <td><em>all roles</em></td>
-            <td><code><nobr>aria-describedby</nobr></code></td>
             <td></td>
           </tr>
           <tr>
@@ -908,15 +895,6 @@
             </td>
           </tr>
           <tr>
-            <td><code>labelledBy</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>[]</code></td>
-            <td>settable</td>
-            <td><em>all roles</em></td>
-            <td><code><nobr>aria-labelledby</nobr></code></td>
-            <td></td>
-          </tr>
-          <tr>
             <td><code>level</code></td>
             <td><code>long?</code></td>
             <td><code>undefined</code></td>
@@ -938,15 +916,6 @@
               or for an HTML <code>select</code> element with
               the <code>multi</code> attribute set.
             </td>
-          </tr>
-          <tr>
-            <td><code>offsetParent</code></td>
-            <td><code>AccessibleNode?</code></td>
-            <td><code>undefined</code></td>
-            <td>settable</td>
-            <td><em>all roles</em></td>
-            <td></td>
-            <td></td>
           </tr>
           <tr>
             <td><code>offsetLeft</code></td>
@@ -1171,23 +1140,120 @@
           attributes directly if you want those to change.
         </p>
       </section>
-      <section>
-        <h3>
-          Relation attributes
-        </h3>
+      <section id="relations">
+        <h2>
+          Relationship attributes
+        </h2>
         <p>
-          Some accessibility attributes express a relationship between
-          one accessible node and another, just like their ARIA
-          counterparts. Unlike their ARIA counterparts, the nodes
-          referenced by these attributes do not need to have a unique
-          ID. A relationship may be expressed between any two nodes
-          whose <dfn>ancestor Documents</dfn> have the same origin.
-          This it is possible to express a relationship between
-          a node in the main frame and a node in a child frame, or
-          between a node in one element's shadow root and a different
-          node in another element's shadow root, to name two specific
-          examples.
+          In addition to attributes that express information about
+          just one accessible node, an accessible node can also have
+          <dfn>relationship attributes</dfn> that express
+          relationships with other accessible nodes in the
+          accessibility tree. Unlike their ARIA counterparts, the
+          nodes referenced by relationship attributes do not need to
+          have a unique ID. A relationship may be expressed between
+          any two nodes whose <dfn>ancestor Documents</dfn> have the
+          same origin.  This it is possible to express a relationship
+          between a node in the main frame and a node in a child
+          frame, or between a node in one element's shadow root and a
+          different node in another element's shadow root, to name two
+          specific examples.
         </p>
+        <p>
+          An <dfn>Accessibility Relationship Attribute</dfn> is an
+          abstract concept that is not exposed as an object in the
+          DOM. An Accessibility Attribute has the following associated
+          properties:
+        </p>
+        <dl>
+          <dt>name</dt>
+          <dd>The name of the relationship.</dd>
+          <dt>type</dt>
+          <dd>Whether the value of the relationship attribute is a single
+            <code>AccessibleNode</code> or an <code>AccessibleNodeList</code>.
+          <dt>reciprocal</dt>
+          <dd>Relationship attributes that is the inverse of this one..</dd>
+          <dt>related ARIA attribute</dt>
+          <dd>The corresponding ARIA attributes, if any</dd>
+        </dl>
+        <p>
+          AccessibleNodes support the following accessibility relationship attributes:
+        </p>
+        <table>
+          <caption>
+            Relationship attribute table
+          </caption>
+          <thead>
+            <tr>
+              <th>attribute name</th>
+              <th>type</th>
+              <th>reciprocals</th>
+              <th>related ARIA attributes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>activeDescendant</code></td>
+              <td><code>AccessibleNode</code></td>
+              <td><em>None</em></td>
+              <td><code><nobr>aria-activedescendant</nobr></code></td>
+            </tr>
+            <tr>
+              <td><code>children</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>parent</code></td>
+              <td><code>aria-owns</code></td>
+            </tr>
+            <tr>
+              <td><code>controlledBy</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>controllerFor</code></td>
+              <td><em>None</em></td>
+            </tr>
+            <tr>
+              <td><code>controllerFor</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>controlledBy</code></td>
+              <td><code>aria-controls</code></td>
+            </tr>
+            <tr>
+              <td><code>describedBy</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>descriptionFor</code></td>
+              <td><code>aria-describedBy</code></td>
+            </tr>
+            <tr>
+              <td><code>descriptionFor</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>describedBy</code></td>
+              <td><em>None</em></td>
+            </tr>
+            <tr>
+              <td><code>labeledBy</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>labelFor</code></td>
+              <td><code>aria-labelledby</code></td>
+            </tr>
+            <tr>
+              <td><code>labelFor</code></td>
+              <td><code>AccessibleNodeList</code></td>
+              <td><code>labeledBy</code></td>
+              <td><em>None</em></td>
+            </tr>
+            <tr>
+              <td><code>offsetParent</code></td>
+              <td><code>AccessibleNode</code></td>
+              <td><em>None</em></td>
+              <td><em>None</em></td>
+            </tr>
+            <tr>
+              <td><code>parent</code></td>
+              <td><code>AccessibleNode</code></td>
+              <td><code>children</code></td>
+              <td><em>None</em></td>
+            </tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h3>
@@ -1385,12 +1451,6 @@
             readonly attribute DOMString role;
 
             any getAttribute(DOMString attributeName);
-
-            readonly attribute AccessibleNode parent;
-            readonly attribute AccessibleNode firstChild;
-            readonly attribute AccessibleNode lastChild;
-            readonly attribute AccessibleNode nextSibling;
-            readonly attribute AccessibleNode previousSibling;
           };
 
           interface AccessibleDOMNode : AccessibleNode {
@@ -1405,18 +1465,21 @@
       <section>
         <h3>Exploration</h3>
         <pre class="idl">
-          interface AccessibleNode {
-            readonly attribute AccessibleNode parent;
-            readonly attribute AccessibleNode firstChild;
-            readonly attribute AccessibleNode lastChild;
-            readonly attribute AccessibleNode nextSibling;
-            readonly attribute AccessibleNode previousSibling;
+          partial interface AccessibleNode {
+            any getRelation(DOMString relationName);
+          };
+
+          interface AccessibleNodeList {
+            readonly attribute unsigned long length;
+            getter AccessibleNode? getNode(unsigned long index);
           };
         </pre>
         <p>
           This phase adds the ability to expore the accessibility
           tree, including accessible nodes without associated DOM nodes,
-          like nodes for generated CSS content.
+          like nodes for generated CSS content. It also allows
+          exploring other types of relationships like labelledBy
+          and labelFor.
         </p>
       </section>
       <section>
@@ -1435,15 +1498,13 @@
         <pre class="idl">
           [Constructor(DOMString role)]
           interface AccessibleNode {
-            void appendChild(AccessibleNode child);
-            void insertBefore(AccessibleNode child, AccessibleNode before);
-            void insertAfter(AccessibleNode child, AccessibleNode after);
-            void removeChild(AccessibleNode child);
+            void setRelation(DOMString relationName, any relatives);
           };
         </pre>
         <p>
-          This phase adds the ability to construct an AccessibleNode and
-          rearrange AccessibleNodes within the accessibility tree.
+          This phase adds the ability to construct an AccessibleNode,
+          rearrange AccessibleNodes within the accessibility tree,
+          and set other relationship attributes.
         </p>
       </section>
       <section>
