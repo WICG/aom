@@ -189,9 +189,9 @@
         </ul>
       </section>
       <section>
-        <h3>Terms</h3>
+        <h2>Model</h2>
         <p>
-          An <dfn>Accessibility Tree</dfn> is a semantic representation of an
+          An <dfn>accessibility tree</dfn> is a semantic representation of an
           application's user interface enabling it to be observed and
           controlled by other client software programs, like <dfn>assistive
           technology</dfn> and automation software, via a platform-native
@@ -199,28 +199,37 @@
           support for one or more native accessibility APIs.
         </p>
         <p>
-          The Accessibility Tree is made up of
-          <a href="#accessiblenode"><dfn>Accessible Nodes</dfn></a>.
-          Accessible Nodes have a <dfn>role</dfn> and several <a href="#attributes">
-          <dfn>Accessibility Attributes</dfn></a> that describe the node's
+          The <a>accessibility tree</a> is made up of
+          <dfn>accessible nodes</dfn>:
+          Accessible nodes have a <dfn data-lt="accessibility roles">role</dfn> and several
+          <dfn>accessibility attributes</dfn> that describe the node's
           characteristics and its current state.
         </p>
         <p>
-          In many cases, the Accessibility Tree exposed by a user
+          In the <a>API</a>, the <a>accessible nodes</a> are represented by
+          instances of <a>AccessibleNode</a>, which expose WebIDL attributes that reflect
+          <a>accessibility roles</a> and/or states.
+        </p>
+        <p>
+          In many cases, the <a>accessibility tree</a> exposed by a user
           agent corresponds closely to a web page's DOM tree, with one
           Accessible Node for every DOM Node. However, sometimes the
-          trees need to differ - for example, several DOM elements may
-          create a media player seek control, but in the Accessibility
-          Tree that whole collection might be represented by a single
-          Accessible Node with a role of <code>"slider"</code> and
+          trees need to differ.
+        </p>
+        <p class="example">For example, several DOM elements can
+          constitute a media player seek control, but in the <a>accessibility
+          tree</a> that whole collection might be represented by a single
+          <a>accessible node</a> with a <a>role</a> of <code>"slider"</code> and
           other attributes indicating its min, max, and current value.
         </p>
         <p>
-          When assistive technology users control an application via its
+          When <a>assistive technology</a> users control an application via its
           accessibility API, they generate <dfn>accessibility input events</dfn>.
           Accessiblity input events often imply specific user intents that
           can't be easily captured by apps in a universal, cross-platform
-          way. For example, there is a specific accessibility input event
+          way.
+        </p>
+        <p class="example">For example, there is a specific accessibility input event
           to increment a slider. On a desktop platform this might be the
           equivalent of the right-arrow key, but while several mobile
           screen readers provide a touch-screen gesture to increment a slider,
