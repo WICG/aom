@@ -1,3 +1,19 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Background: assistive technology and the accessibility tree](#background-assistive-technology-and-the-accessibility-tree)
+- [Accessibility on the web platform today](#accessibility-on-the-web-platform-today)
+- [Use cases](#use-cases)
+  - [Use DOM node references instead of IDREFs](#use-dom-node-references-instead-of-idrefs)
+    - [Example code](#example-code)
+  - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
+    - [Example code](#example-code-1)
+- [Introducing the Accessibility Object Model](#introducing-the-accessibility-object-model)
+  - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Background: assistive technology and the accessibility tree
 
 Assistive technology, in this context, refers to a third party application
