@@ -191,7 +191,7 @@ Accessing an element's accessible node allows you to determine its
 role. This example shows how you could figure out the role assigned to
 an HTML INPUT element with a type of "range":
 
-```
+```html
 <input id="myinput" type="range" value="5" min="1" max="10">
 <script>
   var input = document.querySelector("#myinput");
