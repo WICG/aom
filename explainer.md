@@ -114,7 +114,7 @@ var shadowRoot = combobox.createShadowRoot();
 var input = document.createElement('input');
 shadowRoot.appendChild(input);
 
-var option1 = combobox.querySelectorAll('x-option')[0];
+var option1 = combobox.querySelector('x-option');
 var axInput = input.accessibleNode;
 var axOption1 = option1.accessibleNode;
 axInput.activeDescendant = axOption1;
