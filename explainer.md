@@ -8,7 +8,7 @@ with an auditory output (speech and tones)
 and a keyboard and/or gesture-based input mechanism,
 completely separate from any audio output or keyboard or gesture input handled by the app.
 
-Many assistive technologies interact with a web page via accessibility APIs, such as 
+Many assistive technologies interact with a web page via accessibility APIs, such as
 [UIAutomation](https://msdn.microsoft.com/en-us/library/windows/desktop/ee684009.aspx)
 on Windows, or
 [NSAccessibility](https://developer.apple.com/library/mac/documentation/AppKit/Reference/NSAccessibility_Protocol_Reference/)
@@ -27,6 +27,44 @@ These keypresses would never be passed to the application,
 but would be interpreted by the screen reader,
 which would then call the `accessibilityPerformPress()` function on the element via the API.
 This is then routed back to the DOM as a `click` event by the browser.
+
+## Accessibility on the web platform today
+
+The web has rich support for making applications accessible, but only via a *declarative* API.
+
+Talk about options for making something accessible: either limit yourself to native elements
+that are already accessible, or use ARIA to make custom elements behave the same. However,
+there's essentially a one-to-one correspondence between the DOM and the accessibility tree
+presented to assistive technology.
+
+This is different than the situation on virtuall all native platforms. When writing a native
+app for a desktop or mobile operating system, there are *low-level* accessibliity APIs that
+make it possible to customize exactly how the application interfaces with assistive technology.
+
+Note that native platforms often have *high-level* accessibility APIs, too - just like the
+web platform provides. Changing the accessible text label for an image is often just a
+single line of code and doesn't require subclassing. However, when the high-level APIs are
+insufficient, the low-level APIs give the developer total control over optimizing the
+accessible experience.
+
+Since the web is missing this low-level API, it leads to significant gaps:
+
+* Web apps that push the boundaries of what's possible on the web struggle to make them
+  accessible because the APIs aren't yet sufficient.
+* New web platform features aren't fully accessible or don't interact well with existing
+  accessibility APIs, forcing developers to choose between using new standard or
+  remaining accessible.
+
+A low-level API would bridge that gap, allowing authors to bypass artificial limitations
+or bugs in the platform and provide a custom accessible experience where necessary.
+
+Note that we don't expect or encourage the average web developer to want or need
+a low-level accessibility API for most things. Most of the time, declarative markup
+works great. However, the impact should not be underestimated. A small number of
+developers maintain the JavaScript frameworks and widget libraries that power the
+vast majority of web apps, and accessibility is a key goal of most of these frameworks
+and libraries. A low-level API would allow them to work around bugs and limitations
+and provide a clean high-level interface for developers that "just works".
 
 ## Use cases
 
@@ -115,3 +153,5 @@ axRoot.children.append(axCancelButton);
 
 
 ```
+
+## Introducing the Accessibility Object Model
