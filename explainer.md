@@ -6,9 +6,7 @@
 - [Accessibility on the web platform today](#accessibility-on-the-web-platform-today)
 - [Use cases](#use-cases)
   - [Use DOM node references instead of IDREFs](#use-dom-node-references-instead-of-idrefs)
-    - [Example code](#example-code)
   - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
-    - [Example code](#example-code-1)
 - [Introducing the Accessibility Object Model](#introducing-the-accessibility-object-model)
   - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
 
