@@ -192,11 +192,25 @@ role. This example shows how you could figure out the role assigned to
 an HTML INPUT element with a type of "range":
 
 ```html
-<input id="myinput" type="range" value="5" min="1" max="10">
+<label>
+  Rating:
+  <input id="myinput" type="range" value="5" min="1" max="10">
+</label>
 <script>
   var input = document.querySelector("#myinput");
   var axInput = input.accessibleNode;
   axInput.role;  // returns "slider"
 </script>
 
+```
+
+Most ARIA attributes have a corresponding property on an accessible node.
+In this particular case, we can access the min, max, and current value of
+the slider and its text label, among other things.
+
+```js
+axInput.rangeValue;  // returns 5.0
+axInput.rangeMin;    // returns 1.0
+axInput.rangeMax;    // returns 10.0
+axInput.label;       // returns "Rating:"
 ```
