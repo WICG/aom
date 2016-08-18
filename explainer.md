@@ -228,3 +228,31 @@ axInput.rangeMin;    // returns 1.0
 axInput.rangeMax;    // returns 10.0
 axInput.label;       // returns "Rating:"
 ```
+
+The full list of properties of an AccessibleNode will be discussed below.
+
+The AOM can be used as a form of feature detection and validation, in
+particular when using ARIA attributes. For example, we can set an
+element's role and see what role is returned in the AOM.
+
+```js
+var element = document.createElement("article");
+element.accessibleNode.role;  // returns "article" because that's a valid ARIA role
+
+element.setAttribute("role", "toolbar");
+element.accessibleNode.role;  // returns "toolbar" because that's a valid ARIA role
+
+element.setAttribute("role", "feed");  // new ARIA 1.1 role
+element.accessibleNode.role;  // returns "feed" if supported by the user agent
+
+element.setAttribute("role", "butler");
+element.accessibleNode.role;  // returns "article" because "butler" is not a valid role
+```
+
+
+
+
+In addition to examining the properties of an individual node, you can
+explore an accessible node's relationships with other nodes in the tree.
+Just like nodes in the DOM, every accessible node has a parent (unless
+it's the root of the tree), and it can have any number of children.
