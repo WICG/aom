@@ -3,12 +3,16 @@
 **Table of Contents**
 
 - [Background: assistive technology and the accessibility tree](#background-assistive-technology-and-the-accessibility-tree)
-- [Accessibility on the web platform today](#accessibility-on-the-web-platform-today)
+  - [Accessibility node properties](#accessibility-node-properties)
+- [Existing accessibility APIs](#existing-accessibility-apis)
+  - [Native platform accessibility APIs](#native-platform-accessibility-apis)
+  - [Gaps in the web platform's accessibility story](#gaps-in-the-web-platforms-accessibility-story)
+  - [Audience for the proposed API](#audience-for-the-proposed-api)
+- [The Accessibility Object Model](#the-accessibility-object-model)
+  - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
 - [Use cases](#use-cases)
   - [Use DOM node references instead of IDREFs](#use-dom-node-references-instead-of-idrefs)
   - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
-- [Introducing the Accessibility Object Model](#introducing-the-accessibility-object-model)
-  - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -30,10 +34,13 @@ on OS X.
 These APIs allow an application to expose a tree of objects representing the application's interface,
 typically with the root node representing the application window,
 with various levels of grouping node descendants down to individual interactive elements.
+This is referred to as the **accessibility tree**.
 
 An assistive technology user interacts with the application almost exclusively via this API,
 as the assistive technology uses it both to create the alternative interface,
 and to route user interaction events triggered by the user's commands to the assistive technology.
+
+![Flow from application UI to accessibility tree to assistive technology to user](images/a11y-tree.jpg)
 
 For example, a [VoiceOver](https://www.apple.com/voiceover/info/guide/) user might press the key combination
 "Control Option Spacebar" to indicate that they wish to click the element which the screen reader is currently visiting.
@@ -42,43 +49,146 @@ but would be interpreted by the screen reader,
 which would then call the `accessibilityPerformPress()` function on the element via the API.
 This is then routed back to the DOM as a `click` event by the browser.
 
-## Accessibility on the web platform today
+### Accessibility node properties
 
-The web has rich support for making applications accessible, but only via a *declarative* API.
+Each node in the accessibility tree may be referred to as an **accessibility node**.
+An accessibility node always has a **role**, indicating its semantic purpose.
+This may be a grouping role,
+indicating that this node merely exists to contain and group other nodes,
+or it may be an interactive role,
+such as `"button"`.
 
-Talk about options for making something accessible: either limit yourself to native elements
-that are already accessible, or use ARIA to make custom elements behave the same. However,
-there's essentially a one-to-one correspondence between the DOM and the accessibility tree
-presented to assistive technology.
+![Accessibility nodes in an accessibility tree, showing roles, names, states and properties](images/a11y-node.jpg)
 
-This is different than the situation on virtuall all native platforms. When writing a native
-app for a desktop or mobile operating system, there are *low-level* accessibliity APIs that
-make it possible to customize exactly how the application interfaces with assistive technology.
+The user, via assistive technology, may explore the accessibility tree at various levels.
+They may interact with grouping nodes,
+such as a landmark element which helps a user navigate sections of the page,
+or they may interact with interactive nodes,
+such as a button.
+In both of these cases,
+the node will usually need to have a **label** (often referred to as a **name**)
+to indicate the node's purpose in context.
+For example, a button may have a label of "Ok" or "Menu".
 
-Note that native platforms often have *high-level* accessibility APIs, too - just like the
-web platform provides. Changing the accessible text label for an image is often just a
-single line of code and doesn't require subclassing. However, when the high-level APIs are
-insufficient, the low-level APIs give the developer total control over optimizing the
-accessible experience.
+Accessibility nodes may also have other properties,
+such as the current **value** (e.g. `"10"` for a range, or `"Jane"` for a text input),
+or **state** information (e.g. `"checked"` for a checkbox, or `"focused"`).
 
-Since the web is missing this low-level API, it leads to significant gaps:
+Interactive accessibility nodes may also have certain **actions** which may be performed on them.
+For example, a button may expose a `"press"` action.
 
-* Web apps that push the boundaries of what's possible on the web struggle to make them
-  accessible because the APIs aren't yet sufficient.
-* New web platform features aren't fully accessible or don't interact well with existing
-  accessibility APIs, forcing developers to choose between using new standard or
-  remaining accessible.
+These properties and actions are referred to as the *semantics* of a node.
 
-A low-level API would bridge that gap, allowing authors to bypass artificial limitations
-or bugs in the platform and provide a custom accessible experience where necessary.
+## Existing accessibility APIs
 
-Note that we don't expect or encourage the average web developer to want or need
-a low-level accessibility API for most things. Most of the time, declarative markup
-works great. However, the impact should not be underestimated. A small number of
-developers maintain the JavaScript frameworks and widget libraries that power the
-vast majority of web apps, and accessibility is a key goal of most of these frameworks
-and libraries. A low-level API would allow them to work around bugs and limitations
-and provide a clean high-level interface for developers that "just works".
+The web has rich support for making applications accessible,
+but only via a *declarative* API.
+
+Native HTML elements are implicitly mapped to accessibility APIs.
+A `<button>` element will automatically be mapped to an accessibility node with a role of `"button"`,
+a label based on the inner text of the button,
+and with the appropriate actions available.
+
+Alternatively, [ARIA](https://www.w3.org/TR/wai-aria-1.1/)
+allows developers to annotate elements with attributes to override the default semantics.
+
+However, in either case there's essentially a one-to-one correspondence
+between the DOM and the accessibility tree presented to assistive technology,
+and there is minimal fine-grained control over the semantics of the corresponding accessibility node.
+
+### Native platform accessibility APIs
+
+This is different than the situation on virtually all native platforms.
+Platform accessibility APIs typically also make it straightforward to achieve the most common tasks,
+such as adding an accessible text label for an image,
+but, where necessary, have the power to give the developer total control over optimizing the accessible experience.
+
+For example, an Android application developer may use the standard Android components,
+which will expose the correct semantics and bounding boxes for touch exploration,
+and have simple hooks for setting the accessible name.
+However, if they are creating a fully-customised user interface,
+the framework gives them the ability to create a
+[virtual view hierarchy](https://developer.android.com/guide/topics/ui/accessibility/apps.html#virtual-hierarchy),
+effectively exposing a sub-tree of accessibility nodes for a single, complex view.
+
+### Gaps in the web platform's accessibility story
+
+Since the web is missing this type of low-level API, it leads to significant gaps:
+
+* Web apps that push the boundaries of what's possible on the web struggle to make them accessible
+  because the APIs aren't yet sufficient.
+* New web platform features aren't fully accessible or don't interact well with existing accessibility APIs,
+  forcing developers to choose between using new standard or remaining accessible.
+
+A low-level API would bridge that gap,
+allowing authors to bypass artificial limitations or bugs in the platform
+and provide a custom accessible experience where necessary.
+
+### Audience for the proposed API
+
+We don't expect or encourage the average web developer
+to want or need a low-level accessibility API for most things.
+Declarative HTML should be sufficient for most web page authors.
+
+This API is aimed at the relatively small number of developers who create and maintain
+the JavaScript frameworks and widget libraries that power the vast majority of web apps.
+Accessibility is a key goal of most of these frameworks and libraries,
+as they need to be usable in as broad a variety of contexts as possible.
+A low-level API would allow them to work around bugs and limitations
+and provide a clean high-level interface that "just works" for the developers who use their components.
+
+## The Accessibility Object Model
+
+This spec proposes the *Accessibility Object Model*,
+a new API that makes it possible to:
+
+1. explore the accessibility tree automatically generated by the browser from the DOM,
+2. modify the accessibility tree to change what's exposed to assistive technology, and
+3. directly respond to messages from assistive technology.
+
+In the following sections we'll explore each of these major categories of functionality
+and how we propose the accessibility API would work.
+
+### Exploring the accessibility tree
+
+The most basic thing that's possible using the proposed Accessibility Object Model
+is exploring and querying the existing accessibility tree.
+
+With the AOM, every DOM node has a property **`accessibleNode`**
+that accesses that element's corresponding object in the accessibility tree,
+if it has one.
+Most DOM nodes will have an accessible node, with a few exceptions -
+an element might not have an accessible node if it's not currently attached to a visible Document,
+or if it's not currently displayed, for example.
+
+Accessing an element's accessible node allows you to determine its role.
+This example shows how you could figure out the role assigned to an HTML INPUT element with a type of "range":
+
+```html
+<label>
+  Rating:
+  <input id="myinput" type="range" value="5" min="1" max="10">
+</label>
+<script>
+  var input = document.querySelector("#myinput");
+  var axInput = input.accessibleNode;
+  axInput.role;  // returns "slider"
+</script>
+
+```
+
+Most ARIA attributes have a corresponding property on an accessible node.
+In this particular case, we can access
+the min, max, and current value of the slider
+and its text label, among other things.
+
+```js
+axInput.rangeValue;  // returns 5.0
+axInput.rangeMin;    // returns 1.0
+axInput.rangeMax;    // returns 10.0
+axInput.label;       // returns "Rating:"
+```
+
 
 ## Use cases
 
@@ -164,69 +274,6 @@ axCancelButton.offsetTop = 40;
 
 axRoot.children.append(axCancelButton);
 
-
-
-```
-
-## Introducing the Accessibility Object Model
-
-This spec proposes the *Accessibility Object Model*, a new API that makes it
-possible to (1) explore the accessibility tree automatically generated by
-the browser from the DOM, (2) modify the accessibility tree to change what's
-exposed to assistive technology, and (3) directly respond to messages from
-assistive technology.
-
-In the following sections we'll explore each of these major categories of
-functionality and how we propose the accessibility API would work.
-
-### Exploring the accessibility tree
-
-The most basic thing that's possible using the proposed Accessibility
-Object Model is exploring and querying the existing accessibility tree.
-Most user agents create the accessibility tree lazily or on-demand, only
-when an assistive technology client is running. However, conceptually
-the accessibility tree is always there, and the fact that it's only
-generated lazily is an implementation detail.
-
-The accessibility tree is created from the DOM, based on both the
-elements and their style. As the DOM is mutated, the accessibility tree
-changes with it, sending notifications to assistive technology clients.
-However, without the AOM there's no way for a web author to directly
-observe the accessibility tree.
-
-With the AOM, every DOM node has a property **accessibleNode** that
-accesses that element's corresponding object in the accessibility tree,
-if it has one. Most DOM nodes will have an accessible node, with a few
-exceptions - an element might not have an accessible node if it's
-not currently attached to a visible Document, or if it's not currently
-displayed, for example.
-
-Accessing an element's accessible node allows you to determine its
-role. This example shows how you could figure out the role assigned to
-an HTML INPUT element with a type of "range":
-
-```html
-<label>
-  Rating:
-  <input id="myinput" type="range" value="5" min="1" max="10">
-</label>
-<script>
-  var input = document.querySelector("#myinput");
-  var axInput = input.accessibleNode;
-  axInput.role;  // returns "slider"
-</script>
-
-```
-
-Most ARIA attributes have a corresponding property on an accessible node.
-In this particular case, we can access the min, max, and current value of
-the slider and its text label, among other things.
-
-```js
-axInput.rangeValue;  // returns 5.0
-axInput.rangeMin;    // returns 1.0
-axInput.rangeMax;    // returns 10.0
-axInput.label;       // returns "Rating:"
 ```
 
 The full list of properties of an AccessibleNode will be discussed below.
