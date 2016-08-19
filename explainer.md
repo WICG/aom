@@ -85,20 +85,24 @@ The web has rich support for making applications accessible,
 but only via a *declarative* API.
 
 Native HTML elements are implicitly mapped to accessibility APIs.
-A `<button>` element will automatically be mapped to an accessibility node with a role of `"button"`,
-a label based on the inner text of the button,
-and with the appropriate actions available.
+For example, an  `<img>` element will automatically be mapped
+to an accessibility node with a role of `"image"`
+and a label based on the `alt` attribute (if present).
+
+![<img> node translated into an image on the page and an accessibility node](images/img-node.jpg)
 
 Alternatively, [ARIA](https://www.w3.org/TR/wai-aria-1.1/)
-allows developers to annotate elements with attributes to override the default semantics.
+allows developers to annotate elements with attributes to override
+the default role and semantic properties of an element -
+but not to expose any accessible actions.
 
-However, in either case there's essentially a one-to-one correspondence
-between the DOM and the accessibility tree presented to assistive technology,
+![<div role=checkbox aria-checked=true> translated into a visual presentation and a DOM node](images/aria-checkbox.jpg)
+
+In either case there's a one-to-one correspondence between a DOM node and a node in the accessibility tree,
 and there is minimal fine-grained control over the semantics of the corresponding accessibility node.
 
 ### Native platform accessibility APIs
 
-This is different than the situation on virtually all native platforms.
 Platform accessibility APIs typically also make it straightforward to achieve the most common tasks,
 such as adding an accessible text label for an image,
 but, where necessary, have the power to give the developer total control over optimizing the accessible experience.
@@ -106,6 +110,7 @@ but, where necessary, have the power to give the developer total control over op
 For example, an Android application developer may use the standard Android components,
 which will expose the correct semantics and bounding boxes for touch exploration,
 and have simple hooks for setting the accessible name.
+
 However, if they are creating a fully-customised user interface,
 the framework gives them the ability to create a
 [virtual view hierarchy](https://developer.android.com/guide/topics/ui/accessibility/apps.html#virtual-hierarchy),
@@ -113,14 +118,59 @@ effectively exposing a sub-tree of accessibility nodes for a single, complex vie
 
 ### Gaps in the web platform's accessibility story
 
-Since the web is missing this type of low-level API, it leads to significant gaps:
+Since the web is missing this type of low-level API, it leads to significant gaps.
+Web apps that push the boundaries of what's possible on the web struggle to make them accessible
+because the APIs aren't yet sufficient.
+New web platform features aren't fully accessible
+or don't interact well with existing accessibility APIs,
+forcing developers to choose between using new standard or remaining accessible.
 
-* Web apps that push the boundaries of what's possible on the web struggle to make them accessible
-  because the APIs aren't yet sufficient.
-* New web platform features aren't fully accessible or don't interact well with existing accessibility APIs,
-  forcing developers to choose between using new standard or remaining accessible.
+* A library author creating a custom element is forced to "sprout" ARIA attributes
+to express semantics which are implicit for native elements.
 
-A low-level API would bridge that gap,
+```html
+<!-- Page author uses the custom element as they would a native element -->
+<custom-slider min="0" max="5" value="3"></custom-slider>
+
+<!-- Custom element is forced to "sprout" extra attributes to express semantics -->
+<custom-slider min="0" max="5" value="3" role="slider"
+               tabindex="0" aria-valuemin="0" aria-valuemax="5"
+               aria-valuenow="3" aria-valuetext="3"></custom-slider>
+```
+
+* Moreover, there is no way to connect custom HTML elements to accessible actions.
+For example, the custom slider above with a role of `slider`
+prompts a suggestion on VoiceOver for iOS
+to perform swipe gestures to increment or decrement,
+but there is no way to handle that gesture via the DOM API.
+
+* Many ARIA relationship properties depend on IDREFs,
+meaning that elements participating in these relationship must have globally unique IDs.
+This is ugly, costly and fiddly to achieve,
+particularly in the context of framework or library code.
+
+* A custom element which uses shadow DOM
+and which needs to express semantic relationships such as
+["active descendant"](https://www.w3.org/TR/wai-aria-1.1/#aria-activedescendant)
+may be unable to do so, as `aria-activedescendant` relies on IDREF values,
+which are scoped to a single document fragment.
+
+```html
+<x-combobox>
+  #shadow-root
+  |  <!-- this doesn't work! -->
+  |  <input aria-activedescendant="opt1"></input>
+  <x-optionlist>
+    <x-option id="opt1">Option 1</x-option>
+    <x-option id="opt2">Option 2</x-option>
+    <x-option id='opt3'>Option 3</x-option>
+ </x-optionlist>
+</x-combobox>
+
+```
+
+
+A low-level API would bridge these gap,
 allowing authors to bypass artificial limitations or bugs in the platform
 and provide a custom accessible experience where necessary.
 
