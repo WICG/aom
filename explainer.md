@@ -49,6 +49,18 @@ but would be interpreted by the screen reader,
 which would then call the `accessibilityPerformPress()` function on the element via the API.
 This is then routed back to the DOM as a `click` event by the browser.
 
+In addition to screen readers, there's a variety of other types of assistive
+technology that uses the same accessibility APIs, including *magnifiers*
+for users with low vision, and both *switch access* and *voice control* software
+for users with a motor impairment.
+
+Accessibility APIs are also popular for testing and automation.
+They provide a way to examine an application's state and manipulate its UI
+from out-of-process, in a robust and comprehensive way. While assistive
+technology for users with disabilities is typically the primary motivator for
+accessibility APIs, it's important to understand that these APIs are quite general
+and have many other uses.
+
 ### Accessibility node properties
 
 Each node in the accessibility tree may be referred to as an **accessibility node**.
