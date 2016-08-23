@@ -224,7 +224,6 @@ This example shows how you could figure out the role assigned to an HTML INPUT e
   var axInput = input.accessibleNode;
   axInput.role;  // returns "slider"
 </script>
-
 ```
 
 Most ARIA attributes have a corresponding property on an accessible node.
@@ -267,12 +266,60 @@ corresponding "paragraph" ARIA role. Options include returning an internal
 non-standardized role like "x-paragraph" that may differ by user agent,
 or extending the list of roles supported by the AOM to include many non-ARIA roles.
 
-
-
 In addition to examining the properties of an individual node, you can
 explore an accessible node's relationships with other nodes in the tree.
 Just like nodes in the DOM, every accessible node has a parent (unless
 it's the root of the tree), and it can have any number of children.
+
+```html
+<ol id="list1">
+  <li>The Original Series</li>
+  <li>The Next Generation</li>
+  <li>Deep Space Nine</li>
+  <li>Voyager</li>
+  <li>Enterprise</li>
+</ol>
+<script>
+  var axList = document.getElementById("list1").accessibleElement;
+  var axItem1 = axList.children[0];
+  var axItem2 = axList.children[1];
+  axItem1.parent == axList;  // returns true;
+</script>
+```
+
+In addition to **`parent`** and **`children`**, accessible nodes
+have relationships like **`activeDescendant`**, which expresses a
+relationship between a container element (like a listbox) and its
+active child, or **`labelFor`**, which expresses a relationship
+between a label and the control that it labels.
+
+### Modifying the accessibility tree
+
+So far we've just seen ways the AOM makes it possible to introspect
+and explore the accessibility tree via JavaScript. This is definitely
+interesting for use cases such as testing and feature detection,
+but it doesn't really add any significant capabilities to the web
+platform. The next major category of functionality the AOM enables is
+modifying the accessibility tree, and that's where it starts to address
+major developer pain points and bridge many gaps in the current platform.
+
+Nearly all properties on an accessible node can be written, not just read.
+For example, we could take the slider as in the example above and give it
+a role of "scrollbar" instead, and change its accessible label.
+
+```html
+<label>
+  Rating:
+  <input id="myinput" type="range" value="5" min="1" max="10">
+</label>
+<script>
+  var input = document.querySelector("#myinput");
+  var axInput = input.accessibleNode;
+  axInput.role = "scrollbar";
+  axInput.label = "User rating";
+</script>
+```
+
 
 
 ## Use cases
