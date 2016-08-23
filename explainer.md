@@ -320,7 +320,19 @@ a role of "scrollbar" instead, and change its accessible label.
 </script>
 ```
 
+Setting a property of an accessible node immediately has an
+effect on the accessibility tree. For example, if any assistive
+technology was currently examining the user agent, it would
+quickly receive a notification that an attribute of an object
+within the web page had changed, and upon retrieving that object
+it'd get the new value of those properties.
 
+Just as with ARIA, changing properties of accessible nodes has no
+effect on the look or feel of the webpage in any other way. Only
+clients of that platform's accessibility API are affected.
+
+(Next: talk about the model for the internal state, more feature
+detection, etc.)
 
 ## Use cases
 
