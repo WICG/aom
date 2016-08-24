@@ -259,6 +259,11 @@ axInput.label;       // returns "Rating:"
 ```
 
 The full list of properties of an AccessibleNode will be discussed below.
+The important thing to keep in mind is that the AOM doesn't add any
+new vocabulary or semantics; all of the properties are concepts that
+already exist in ARIA or other parts of existing web specifications.
+The only thing that's new is providing a functional, as opposed to a
+declarative, interface.
 
 The AOM can be used as a form of feature detection and validation, in
 particular when using ARIA attributes. For example, we can set an
@@ -351,8 +356,38 @@ Just as with ARIA, changing properties of accessible nodes has no
 effect on the look or feel of the webpage in any other way. Only
 clients of that platform's accessibility API are affected.
 
-(Next: talk about the model for the internal state, more feature
-detection, etc.)
+One very important design decision in the AOM is what should happen
+when trying to set the value of an accessible property to
+something illegal (such as a role name that doesn't exist).
+Possible options include:
+
+* Doing no error checking, all values would be allowed for accessibility
+  properties, but some would just have no effect.
+* Raising an exception immediately upon trying to set an accessibility
+  property to an illegal value
+* Ignoring attemps to set an accessibility property to an illegal value.
+
+However, one important consideration is that whether or not a value is
+legal or not often depends on the context.
+
+For example, the **`checked`** property is only defined on
+accessible nodes with certain roles like **`checkbox`** and **`radio`**.
+Therefore it's illegal to try to set **`checked`** on an object with a
+role where it isn't defined, like **`heading`**. However, it seems like
+it would be unfortunate if setting `checked=true` and then setting
+`role="checkbox"` would fail, while doing it in the other order would
+succeed.
+
+So instead, we propose the following rule:
+
+**When setting the value of an accessible property, that value is
+preserved in the accessible node's internal state. At the time the
+accessible property is accessed, the user-provided value in the
+accessible node takes precendence but is ignored if it's illegal.**
+
+TODO: Examples
+
+TODO: Side benefit: feature detection
 
 ## Use cases
 
