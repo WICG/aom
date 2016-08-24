@@ -87,7 +87,8 @@ such as the current **value** (e.g. `"10"` for a range, or `"Jane"` for a text i
 or **state** information (e.g. `"checked"` for a checkbox, or `"focused"`).
 
 Interactive accessibility nodes may also have certain **actions** which may be performed on them.
-For example, a button may expose a `"press"` action.
+For example, a button may expose a `"press"` action, and a slider may expose
+`"increment"` and `"decrement"` actions.
 
 These properties and actions are referred to as the *semantics* of a node.
 
