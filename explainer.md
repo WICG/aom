@@ -200,6 +200,13 @@ as they need to be usable in as broad a variety of contexts as possible.
 A low-level API would allow them to work around bugs and limitations
 and provide a clean high-level interface that "just works" for the developers who use their components.
 
+This API is also aimed at developers of large flagship web apps that
+push the boundaries of the web platform. These apps tend to have large
+development teams who look for unique opportunities to improve performance
+using low-level APIs like Canvas. These development teams have the
+resources to make accessibility a priority too, but existing APIs make it
+very cumbersome.
+
 ## The Accessibility Object Model
 
 This spec proposes the *Accessibility Object Model*,
