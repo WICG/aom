@@ -382,8 +382,66 @@ So instead, we propose the following rule:
 
 **When setting the value of an accessible property, that value is
 preserved in the accessible node's internal state. At the time the
-accessible property is accessed, the user-provided value in the
-accessible node takes precendence but is ignored if it's illegal.**
+accessible property is accessed, illegal values are ignored.**
+
+First let's see an example of how that applies in practice when
+trying to set a role.
+
+```js
+var heading = document.createElement("h1");
+var axHeading = heading.accessibleNode;
+axHeading.role;  // returns "heading"
+
+axHeading.role = "button";
+axHeading.role;  // returns "button" because that's a legal role
+
+axHeading.role = "captain";
+axHeading.role;  // returns "heading" because "captain" is not legal.
+```
+
+If ARIA attributes are used, the same behavior applies, in that
+accessing the **`role`** property returns the *computed* property
+value, which is taken from the accessible node first, from the
+ARIA attribute second, and from the HTML element's native semantics
+third.
+
+```js
+var textbox = document.createElement("input");
+var axTextbox = textbox.accessibleNode;
+axTextbox.role;  // returns "textbox"
+
+textbox.setAttribute("role", "combobox");
+axTextbox.role;  // returns "combobox"
+
+textbox.setAttribute("role", "victim");
+axTextbox.role;  // returns "textbox" because "victim" is not legal.
+
+textbox.setAttribute("role", "combobox");
+axTextbox.role = "searchbox";
+axTextbox.role;  // returns "searchbox" because the AOM overrides ARIA.
+```
+
+Note that one design decision we made here is that properties set on
+an accessible node are not reflected in the HTML element, for example:
+
+```js
+var link = document.createElement("a");
+var axLink = link.accessibleNode;
+axLink.role = "button";
+link.getAttribute("role");  // returns "link", because the AOM role is not reflected
+```
+
+There are several reasons we feel this is the right solution.
+
+* Most importantly, some attributes of accessible nodes can't always
+  be reflected - in particular relationship attributes.
+  In the AOM you can use **`labeledBy`** to establish a relationship
+  between one node and any other node that provides its label,
+  whereas in ARIA the `aria-labelledby` attribute is limited to
+  elements it can reference by unique ID.
+
+
+
 
 TODO: Examples
 
