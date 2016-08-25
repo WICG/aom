@@ -431,7 +431,7 @@ axLink.role = "button";
 link.getAttribute("role");  // returns "link", because the AOM role is not reflected
 ```
 
-There are several reasons we feel this is the right solution.
+There are a couple of reasons we feel this is the right solution.
 
 * Most importantly, some attributes of accessible nodes can't always
   be reflected - in particular relationship attributes.
@@ -439,13 +439,82 @@ There are several reasons we feel this is the right solution.
   between one node and any other node that provides its label,
   whereas in ARIA the `aria-labelledby` attribute is limited to
   elements it can reference by unique ID.
+* Also, adding lots of ARIA attributes to the DOM can be a performance issue,
+  especially for interactive web apps with thousands of elements.
+  Using the AOM has the potential to be a more lightweight way to make
+  apps accessible.
 
+A side benefit of this approach is that feature detection is especially easy.
+To determine if the browser supports a certain role, just set any accessible
+node's role to that string and see if it's returned back when accessing it.
+While not an explicit goal, it does seem useful.
 
+#### Rearranging the tree
 
+In addition to changing properties of a single accessible node, you can
+also make changes to the relationships between multiple accessible nodes,
+including the parent/child relationships that form the tree structure.
 
-TODO: Examples
+When modifying a relationship property, the change is reflected in the
+accessibility tree synchronously. If a node is attached as the new child
+or parent of another node, it's automatically detached from its previous
+child or parent first. That makes cycles impossible, because trying to
+conncet nodes in a way that would form a cycle would just break some
+other link in the cycle first.
 
-TODO: Side benefit: feature detection
+Here are some examples:
+
+```js
+axNode1.children.append(axNode2);
+```
+
+This statement makes axNode2 the last child of axNode1.
+If axNode2 was previously somewhere else in the accessibility
+tree, it's first detached from its previous parent before being
+added here. If axNode2 was previously already a child of
+axNode1, but not the last child, this would make it the last
+child.
+
+```js
+axNode2.parent = axNode1;
+```
+
+This statement has the same effect in most cases: if axNode2
+was not previously a child of axNode1, it gets detached from
+its previous parent, if any, and attached as the last child of
+axNode1.
+
+However, unlike the statement above, if axNode2 was already a
+child of axNode1, this wouldn't rearrange it.
+If axNode2 was previously somewhere else in the accessibility
+tree, it's first detached from its previous parent before being
+added here.
+
+Trying to set the parent or child to an illegal value throws an
+exception.
+
+Trying to reparent the root of the accessibility tree for a frame
+throws an exception. The root of the tree can be modified in most
+other ways but it can't be entirely removed.
+
+Note that changing the accessibility tree happens completely
+independently of the DOM tree.
+
+**Open question:**
+What should happen if the DOM tree changes and it affects
+accessible nodes that have already been rearranged in the
+accessibility tree?
+
+#### Virtual accessibility nodes
+
+So far we've looked into how to modify existing accessible nodes
+corresponding to DOM nodes, and even rearrange them in the
+accessibility tree.
+
+The AOM also makes it possible to create new *virtual* accessible
+nodes that don't correspond to DOM elements. This makes it possible
+to represent objects on the screen that don't correspond to DOM
+elements but semantically represent real objects.
 
 ## Use cases
 
