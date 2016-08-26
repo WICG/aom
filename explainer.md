@@ -1,3 +1,14 @@
+# Accessibility Object Model
+
+**Editors:**
+
+* Alice Boxhall, Google, aboxhall@google.com
+* Bogdan Brinza, Microsoft, bbrinza@microsoft.com
+* James Craig, Apple, jcraig@apple.com
+* Dominic Mazzoni, Google, dmazzoni@google.com
+* Cynthia Shelley, Microsoft, cyns@microsoft.com
+* Alexander Surkov, Mozilla, surkov.alexander@gmail.com
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -606,3 +617,51 @@ axCancelButton.offsetTop = 40;
 axRoot.children.append(axCancelButton);
 
 ```
+
+## Next Steps
+
+The Accessibility Object Model development is led by a team of editors
+that represent all of the major browser vendors. The spec still needs
+a lot of work, but we have already achieved broad consensus on the overall
+approach and scope, and we intend to ship preliminary implementation
+(behind a flag) in multiple browsers before the end of 2016.
+
+An early draft of the spec is available here:
+
+http://a11y-api.github.io/a11y-api/spec/
+
+The spec has several rough edges. Please refer to this explainer to understand
+the motivation, reasoning, and design tradeoffs. The spec will continue to
+evolve as we clarify the ideas and work out corner cases.
+
+Issues can be filed on GitHub:
+
+https://github.com/a11y-api/a11y-api/issues
+
+### Incubation
+
+We intend to continue development of this spec as part of the
+[Web Platform Incubator Community Group (WICG)](https://www.w3.org/community/wicg/).
+Over time it may move into its own community group.
+
+Our intent is for this group's work to be almost entirely orthogonal to the
+current work of the [Web Accessibility Initiative](https://www.w3.org/WAI/)
+groups such as [ARIA](https://www.w3.org/TR/wai-aria/). While ARIA defines
+structural markup and semantics for accessibility properties on the web,
+often requiring coordination with assistive technology vendors and native platform
+APIs, the AOM simply provides a parallel JavaScript API that provides
+more low-level control for developers and fills in gaps in the web platform,
+but without introducing any new semantics.
+
+## Additional thanks
+
+Many thanks for valuable feedback, advice, and tools from:
+
+* Alex Russell
+* David Bolter
+* Domenic Denicola
+* Ian Hickson
+* Joanmarie Diggs
+* Marcos Caceres
+* Nan Wang
+* Robin Berjon
