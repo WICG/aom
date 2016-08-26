@@ -10,9 +10,14 @@
   - [Audience for the proposed API](#audience-for-the-proposed-api)
 - [The Accessibility Object Model](#the-accessibility-object-model)
   - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
+  - [Modifying the accessibility tree](#modifying-the-accessibility-tree)
+    - [Rearranging the tree](#rearranging-the-tree)
+    - [Virtual accessibility nodes](#virtual-accessibility-nodes)
 - [Use cases](#use-cases)
   - [Use DOM node references instead of IDREFs](#use-dom-node-references-instead-of-idrefs)
+    - [Example code](#example-code)
   - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
+    - [Example code](#example-code-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
