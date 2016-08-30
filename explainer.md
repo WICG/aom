@@ -132,7 +132,14 @@ and there is minimal fine-grained control over the semantics of the correspondin
 
 ### Native platform accessibility APIs
 
-Platform accessibility APIs typically also make it straightforward to achieve the most common tasks,
+When building a native app, developers have the option of using native platform
+accessibility APIs, such as
+[UIAutomation](https://msdn.microsoft.com/en-us/library/windows/desktop/ee684009.aspx)
+on Windows, or
+[NSAccessibility](https://developer.apple.com/library/mac/documentation/AppKit/Reference/NSAccessibility_Protocol_Reference/)
+on OS X, as mentioned above.
+
+These platform accessibility APIs also make it straightforward to achieve the most common tasks,
 such as adding an accessible text label for an image,
 but, where necessary, have the power to give the developer total control over optimizing the accessible experience.
 
@@ -262,7 +269,13 @@ This example shows how you could figure out the role assigned to an HTML INPUT e
 </script>
 ```
 
-Most ARIA attributes have a corresponding property on an accessible node.
+The set of roles returned `AccessibleNode.role` is exactly the set of
+ARIA roles. The Accessibility Object Model doesn't define any new semantics,
+it just provides programmatic access to the role computation that was
+previously not exposed to developers.
+
+For nearly every ARIA attributes, there is a corresponding property on an `AccessibleNode` object
+with the same semantics. (The few exceptions will be discussed below.)
 In this particular case, we can access
 the min, max, and current value of the slider
 and its text label, among other things.
@@ -274,8 +287,7 @@ axInput.rangeMax;    // returns 10.0
 axInput.label;       // returns "Rating:"
 ```
 
-The full list of properties of an AccessibleNode will be discussed below.
-The important thing to keep in mind is that the AOM doesn't add any
+To reiterate, the important thing to keep in mind is that the AOM doesn't add any
 new vocabulary or semantics; all of the properties are concepts that
 already exist in ARIA or other parts of existing web specifications.
 The only thing that's new is providing a functional, as opposed to a
