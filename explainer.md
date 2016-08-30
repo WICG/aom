@@ -395,8 +395,8 @@ Possible options include:
   property to an illegal value
 * Ignoring attemps to set an accessibility property to an illegal value.
 
-However, one important consideration is that whether or not a value is
-legal or not often depends on the context.
+However, one important consideration is that in current web accessibility
+specs, whether or not a value is legal or not often depends on the context.
 
 For example, the **`checked`** property is only defined on
 accessible nodes with certain roles like **`checkbox`** and **`radio`**.
