@@ -258,7 +258,7 @@ a new JavaScript API that makes it possible to:
 2. modify the accessibility tree to change what's exposed to assistive technology, and
 3. directly respond to messages from assistive technology.
 
-![DOM tree, accessibility tree, JS and AOM](DOM-a11y-tree-AOM.jpg)
+![DOM tree, accessibility tree, JS and AOM](images/DOM-a11y-tree-AOM.jpg)
 
 In the following sections we'll explore each of these major categories of functionality
 and how we propose the accessibility API would work.
