@@ -13,11 +13,13 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [Introduction](#introduction)
 - [Background: assistive technology and the accessibility tree](#background-assistive-technology-and-the-accessibility-tree)
   - [Accessibility node properties](#accessibility-node-properties)
-- [Existing accessibility APIs](#existing-accessibility-apis)
-  - [Native platform accessibility APIs](#native-platform-accessibility-apis)
-  - [Gaps in the web platform's accessibility story](#gaps-in-the-web-platforms-accessibility-story)
+- [DOM tree, accessibility tree and platform accessibility APIs](#dom-tree-accessibility-tree-and-platform-accessibility-apis)
+  - [Mapping native HTML to the accessibility tree](#mapping-native-html-to-the-accessibility-tree)
+  - [ARIA](#aria)
+- [Gaps in the web platform's accessibility story](#gaps-in-the-web-platforms-accessibility-story)
   - [Audience for the proposed API](#audience-for-the-proposed-api)
 - [The Accessibility Object Model](#the-accessibility-object-model)
   - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
@@ -29,6 +31,9 @@
     - [Example code](#example-code)
   - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
     - [Example code](#example-code-1)
+- [Next Steps](#next-steps)
+  - [Incubation](#incubation)
+- [Additional thanks](#additional-thanks)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -462,8 +467,8 @@ axTextbox.role;  // returns "textbox"
 textbox.setAttribute("role", "combobox");
 axTextbox.role;  // returns "combobox"
 
-textbox.setAttribute("role", "victim");
-axTextbox.role;  // returns "textbox" because "victim" is not legal.
+textbox.setAttribute("role", "Portia");
+axTextbox.role;  // returns "textbox" because "Portia" is not legal.
 
 textbox.setAttribute("role", "combobox");
 axTextbox.role = "searchbox";
