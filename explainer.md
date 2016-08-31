@@ -280,6 +280,11 @@ Most DOM nodes will have an accessible node, with a few exceptions -
 an element might not have an accessible node if it's not currently attached to a visible Document,
 or if it's not currently displayed, for example.
 
+:question: **Open question:**
+Should `accessibleNode` be asynchronous? That way we could defer creating the
+accessibility tree, or we could ensure that layout is clean at the time you access
+the accessibility tree.
+
 Accessing an element's accessible node allows you to determine its role.
 This example shows how you could figure out the role assigned to an HTML INPUT element with a type of "range":
 
@@ -371,6 +376,14 @@ have relationships like **`activeDescendant`**, which expresses a
 relationship between a container element (like a listbox) and its
 active child, or **`labelFor`**, which expresses a relationship
 between a label and the control that it labels.
+
+Note on synchronous updates: Accessing a property of an accessible node
+should not trigger style resolution or layout. Properties should reflect
+the last time they were computed, and when a new layout happens the
+accessibility tree should reflect the changes at that time.
+
+It may make sense to have something similar to a mutation observer
+for the accessibility tree if developers need to watch for such changes.
 
 ### Modifying the accessibility tree
 
@@ -554,8 +567,8 @@ other ways but it can't be entirely removed.
 Note that changing the accessibility tree happens completely
 independently of the DOM tree.
 
-**Open question:**
-What should happen if the DOM tree changes and it affects
+:question: **Open question:**
+What should happen if the DOM tree or layout tree changes and it affects
 accessible nodes that have already been rearranged in the
 accessibility tree?
 
@@ -569,6 +582,34 @@ The AOM also makes it possible to create new *virtual* accessible
 nodes that don't correspond to DOM elements. This makes it possible
 to represent objects on the screen that don't correspond to DOM
 elements but semantically represent real objects.
+
+The AccessibleNode constructor takes a single argument that initializes the new object's role.
+
+```js
+var axVirtualButton = new AccessibleNode("button");
+axVirtualButton.label = "Enable Audio Descriptions";
+axVirtualButton.offsetWidth = 224;
+axVirtualButton.offsetHeight = 72;
+```
+
+A virtual AccessibleNode isn't part of the document's accessibility
+tree until it's added as the child of another element. For example,
+this code would add the virtual button we created above as a child of
+the HTML body element's accessible node:
+
+```js
+document.body.accessibleNode.children.append(axVirtualButton);
+```
+
+### Supported accessibility properties and relations
+
+The following tables list all of the accessibility properties and
+relations supported by the accessibility object model. Note that most
+of these correspond directly to an ARIA attribute; please refer to
+[the ARIA spec](https://www.w3.org/TR/wai-aria-1.1/) for details about
+the semantics of these.
+
+
 
 ## Use cases
 
