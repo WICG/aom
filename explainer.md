@@ -609,7 +609,40 @@ of these correspond directly to an ARIA attribute; please refer to
 [the ARIA spec](https://www.w3.org/TR/wai-aria-1.1/) for details about
 the semantics of these.
 
-
+| attribute name | type | default value | settable | supported roles | related ARIA attributes | computed value algorithm |
+| -------------- | ---- | ------------- | -------- | --------------- | ----------------------- | ------------------------ |
+| `autocomplete` | `enum { "both", "inline", "list", "none" }` | `"none"` | settable | same as `aria-autocomplete` | `aria-autocomplete` | |
+| `colCount` | `long?` | `undefined` | settable | same as `aria-colcount` | `aria-colcount` | if any, otherwise the number of columns in a HTMLTableElement. |
+| `colIndex` | `long?` | `undefined` | settable | same as `aria-colindex` | `aria-colindex` | if any, otherwise the index of the current column for any element with a cell role. |
+| `colSpan` | `long?` | `undefined` | settable | same as `aria-colspan` | `aria-colSpan` | |
+| `description` | `DOMString` | `""` | settable | <em>all roles</em> |  | as defined in [[!ACCNAME-AAM-1.1]]. |
+| `disabled` | `boolean?` | `undefined` | settable | same as `aria-disabled` | `aria-disabled` |
+| `expanded` | `boolean?` | `undefined` | settable | same as `aria-expanded` | `aria-expanded` |
+| `focusable` | `boolean` | `false` | settable | <em>all roles</em> |  | DOM node is focusable. |
+| `focused` | `boolean` | `false` | readonly | <em>all roles</em> |  | focused. Note that it's possible for this to not correspond to the DOM Node with input focus.
+| `hasPopUp` | `boolean` | `false` | settable | same as `aria-haspopup` | `aria-haspopup` |
+| `invalid` | `enum { "grammar", "false", "spelling", "true" }` | `false` | settable | same as `aria-invalid` | `aria-invalid` |
+| `label` | `DOMString` | `""` | settable | <em>all roles</em> | `aria-label`, `aria-labelledby` | as defined in [[!ACCNAME-AAM-1.1]]. |
+| `level` | `long?` | `undefined` | settable | same as `aria-level` | `aria-level` |
+| `multiselectable` | `boolean` | `false` | settable | same as `aria-multiselectable` | `aria-multiselectable` | `aria-multiselectable` is set to true, or for an HTML `select` element with the `multi` attribute set. |
+| `offsetLeft` | `long` | `undefined` | settable | <em>all roles</em> |  |
+| `offsetWidth` | `long` | `undefined` | settable |  |  |
+| `orientation` | `enum { "horizontal", "vertical" } | undefined` | `undefined` | settable | same as `aria-orientation` | `aria-orientation` |
+| `placeholder` | `DOMString?` | `undefined` | settable | same as `aria-placeholder` | `aria-placeholder` |
+| `posInSet` | `long?` | `undefined` | settable | same as `aria-posinset` | `aria-posinset` |
+| `rangeValue` | `double?` | `undefined` | settable | same as `aria-valuenow` | `aria-valuenow` |
+| `rangeMin` | `double?` | `undefined` | settable | same as `aria-valuemin` | `aria-valuemin` |
+| `rangeMax` | `double?` | `undefined` | settable | same as `aria-valuemax` | `aria-valuemax` |
+| `readonly` | `boolean?` | `undefined` | settable | same as `aria-readonly` | `aria-readonly` |
+| `required` | `boolean?` | `undefined` | settable | same as `aria-required` | `aria-required` |
+| `roleDescription` | `DOMString` | `undefined` | settable | same as `aria-roledescription` | `aria-roledescription` |
+| `rowCount` | `long?` | `undefined` | settable | same as `aria-rowcount` | `aria-rowcount` |
+| `rowIndex` | `long?` | `undefined` | settable | same as `aria-rowindex` | `aria-rowindex` |
+| `rowSpan` | `long?` | `undefined` | settable | same as `aria-rowspan` | `aria-rowspan` |
+| `setSize` | `long?` | `undefined` | settable | same as `aria-setsize` | `aria-setsize` |
+| `sort` | `enum { "ascending", "descending", "none", "other" }` | `"none"` | settable | same as `aria-sort` | `aria-sort` |
+| `value` | `DOMString?` | `undefined` | settable | <em>all widget roles</em> |  |
+| `visible` | `boolean` | `true` | readonly | <em>all roles</em> | `aria-hidden` | the accessibility tree because the DOM node is not visible or not displayed, or because the DOM node has the `aria-hidden` attribute set. |
 
 ## Use cases
 
