@@ -73,7 +73,8 @@ Both the alternative interface's *output*
 updating a [braille display](https://en.wikipedia.org/wiki/Refreshable_braille_display),
 moving a [screen magnifier's](https://en.wikipedia.org/wiki/Screen_magnifier) focus)
 and *input*
-(e.g. keyboard shortcuts, gestures, braille routing keys, [switch devices](https://en.wikipedia.org/wiki/Switch_access), voice input)
+(e.g. keyboard shortcuts, gestures, braille routing keys,
+[switch devices](https://en.wikipedia.org/wiki/Switch_access), voice input)
 are completely the responsibility of the assistive technology,
 and are abstracted away from the application.
 
@@ -634,12 +635,19 @@ This has analogs in platform accessibility APIs:
 * ['accessibilityAddChild'](https://developer.apple.com/library/mac/documentation/AppKit/Reference/NSAccessibilityElement_Class/index.html#//apple_ref/occ/instm/NSAccessibilityElement/accessibilityAddChildElement:)
   in Apple's NSAccessibility framework
 
+### Handling actions from accessibility APIs
+
+`<TODO>`
 
 ## Use cases
 
 ### Express role and properties for a web component programmatically
 
+`<TODO>`
+
 ### Implement accessible actions
+
+`<TODO>`
 
 ### Use DOM node references instead of IDREFs
 Some HTML and ARIA features require reference to another element by IDREF,
@@ -774,6 +782,12 @@ Many thanks for valuable feedback, advice, and tools from:
 * Nan Wang
 * Robin Berjon
 
+
+## Appendix: `accessibleNode` naming
+
+`<TODO>`
+
+
 ## Appendix: Supported accessibility properties and relations
 
 The following tables list all of the accessibility properties and relations
@@ -818,4 +832,3 @@ for details about the semantics of each of these.
 | `value` | `DOMString?` | `undefined` | settable | <em>all widget roles</em> |  |
 | `visible` | `boolean` | `true` | readonly | <em>all roles</em> | `aria-hidden` | the accessibility tree because the DOM node is not visible or not displayed, or because the DOM node has the `aria-hidden` attribute set. |
 
-## Appendix: `accessibleNode` naming
