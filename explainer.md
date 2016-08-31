@@ -24,16 +24,16 @@
 - [The Accessibility Object Model](#the-accessibility-object-model)
   - [Exploring the accessibility tree](#exploring-the-accessibility-tree)
   - [Modifying the accessibility tree](#modifying-the-accessibility-tree)
-    - [Rearranging the tree](#rearranging-the-tree)
-    - [Virtual accessibility nodes](#virtual-accessibility-nodes)
 - [Use cases](#use-cases)
+  - [Express role and properties for a web component programmatically](#express-role-and-properties-for-a-web-component-programmatically)
+  - [Implement accessible actions](#implement-accessible-actions)
   - [Use DOM node references instead of IDREFs](#use-dom-node-references-instead-of-idrefs)
-    - [Example code](#example-code)
   - [Create virtual accessibility trees](#create-virtual-accessibility-trees)
-    - [Example code](#example-code-1)
 - [Next Steps](#next-steps)
   - [Incubation](#incubation)
 - [Additional thanks](#additional-thanks)
+- [Appendix: Supported accessibility properties and relations](#appendix-supported-accessibility-properties-and-relations)
+- [Appendix: `accessibleNode` naming](#appendix-accessiblenode-naming)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -280,10 +280,15 @@ Most DOM nodes will have an accessible node, with a few exceptions -
 an element might not have an accessible node if it's not currently attached to a visible Document,
 or if it's not currently displayed, for example.
 
+---
 :question: **Open question:**
-Should `accessibleNode` be asynchronous? That way we could defer creating the
-accessibility tree, or we could ensure that layout is clean at the time you access
-the accessibility tree.
+Should `accessibleNode` be asynchronous?
+That way we could defer creating the accessibility tree,
+or we could ensure that layout is clean at the time you access the accessibility tree.
+
+---
+
+#### Determing an element's accessible role
 
 Accessing an element's accessible node allows you to determine its role.
 This example shows how you could figure out the role assigned to an HTML INPUT element with a type of "range":
@@ -300,13 +305,17 @@ This example shows how you could figure out the role assigned to an HTML INPUT e
 </script>
 ```
 
-The set of roles returned `AccessibleNode.role` is exactly the set of
-ARIA roles. The Accessibility Object Model doesn't define any new semantics,
+The set of roles returned `AccessibleNode.role` is exactly the set of ARIA roles.
+The Accessibility Object Model doesn't define any new semantics,
 it just provides programmatic access to the role computation that was
 previously not exposed to developers.
 
-For nearly every ARIA attributes, there is a corresponding property on an `AccessibleNode` object
-with the same semantics. (The few exceptions will be discussed below.)
+#### Accessing an element's accessible properties
+
+For nearly every ARIA attribute,
+there is a corresponding property on an `AccessibleNode` object
+with the same semantics.
+(The few exceptions will be discussed below.)
 In this particular case, we can access
 the min, max, and current value of the slider
 and its text label, among other things.
@@ -318,15 +327,21 @@ axInput.rangeMax;    // returns 10.0
 axInput.label;       // returns "Rating:"
 ```
 
-To reiterate, the important thing to keep in mind is that the AOM doesn't add any
-new vocabulary or semantics; all of the properties are concepts that
-already exist in ARIA or other parts of existing web specifications.
-The only thing that's new is providing a functional, as opposed to a
-declarative, interface.
+---
+To reiterate, the AOM **doesn't** add any new vocabulary or semantics;
+all of the properties are concepts that already exist in ARIA
+or other parts of existing web specifications.
+The only thing that's new is providing a functional,
+as opposed to a declarative, interface.
 
-The AOM can be used as a form of feature detection and validation, in
-particular when using ARIA attributes. For example, we can set an
-element's role and see what role is returned in the AOM.
+---
+
+
+#### Feature detection
+
+The AOM can be used as a form of feature detection and validation,
+in particular when using ARIA attributes.
+For example, we can set an element's role and see what role is returned in the AOM.
 
 ```js
 var element = document.createElement("article");
@@ -342,14 +357,19 @@ element.setAttribute("role", "butler");
 element.accessibleNode.role;  // returns "article" because "butler" is not a valid role
 ```
 
+---
 :question: **Open question:**
 What should be returned when a node's role does not correspond to an ARIA role?
-For example, the HTML **`P`** element is semantically important, and on many
-platforms there's a native accessibility role for a paragraph, but there's no
-corresponding "paragraph" ARIA role. Options include returning an internal
-non-standardized role like "x-paragraph" that may differ by user agent,
+For example, the HTML **`P`** element is semantically important,
+and on many platforms there's a native accessibility role for a paragraph,
+but there's no corresponding "paragraph" ARIA role.
+Options include returning an internal non-standardized role like "x-paragraph"
+that may differ by user agent,
 or extending the list of roles supported by the AOM to include many non-ARIA roles.
 
+---
+
+#### Exploring accessible relationships
 In addition to examining the properties of an individual node, you can
 explore an accessible node's relationships with other nodes in the tree.
 Just like nodes in the DOM, every accessible node has a parent (unless
@@ -371,33 +391,39 @@ it's the root of the tree), and it can have any number of children.
 </script>
 ```
 
-In addition to **`parent`** and **`children`**, accessible nodes
-have relationships like **`activeDescendant`**, which expresses a
-relationship between a container element (like a listbox) and its
-active child, or **`labelFor`**, which expresses a relationship
+In addition to **`parent`** and **`children`**,
+accessible nodes have relationships like **`activeDescendant`**,
+which expresses a relationship
+between a container element (like a listbox) and its active child,
+or **`labelFor`**, which expresses a relationship
 between a label and the control that it labels.
 
-Note on synchronous updates: Accessing a property of an accessible node
-should not trigger style resolution or layout. Properties should reflect
-the last time they were computed, and when a new layout happens the
-accessibility tree should reflect the changes at that time.
+---
+**Note on synchronous updates:**
+
+Accessing a property of an accessible node should not trigger style resolution or layout.
+Properties should reflect the last time they were computed,
+and when a new layout happens the accessibility tree should reflect the changes at that time.
 
 It may make sense to have something similar to a mutation observer
 for the accessibility tree if developers need to watch for such changes.
 
+---
+
 ### Modifying the accessibility tree
 
 So far we've just seen ways the AOM makes it possible to introspect
-and explore the accessibility tree via JavaScript. This is definitely
-interesting for use cases such as testing and feature detection,
-but it doesn't really add any significant capabilities to the web
-platform. The next major category of functionality the AOM enables is
-modifying the accessibility tree, and that's where it starts to address
-major developer pain points and bridge many gaps in the current platform.
+and explore the accessibility tree via JavaScript.
+This is definitely interesting for use cases such as testing and feature detection,
+but it doesn't really add any significant capabilities to the web platform.
+The next major category of functionality the AOM enables is modifying the accessibility tree,
+and that's where it starts to address major developer pain points
+and bridge many gaps in the current platform.
 
 Nearly all properties on an accessible node can be written, not just read.
-For example, we could take the slider as in the example above and give it
-a role of "scrollbar" instead, and change its accessible label.
+For example, we could take the slider as in the example above
+and give it a role of "scrollbar" instead,
+and change its accessible label.
 
 ```html
 <label>
@@ -412,38 +438,40 @@ a role of "scrollbar" instead, and change its accessible label.
 </script>
 ```
 
-Setting a property of an accessible node immediately has an
-effect on the accessibility tree. For example, if any assistive
-technology was currently examining the user agent, it would
-quickly receive a notification that an attribute of an object
-within the web page had changed, and upon retrieving that object
-it'd get the new value of those properties.
+Setting a property of an accessible node immediately has an effect on the accessibility tree.
+For example, if any assistive technology was currently examining the user agent,
+it would quickly receive a notification
+that an attribute of an object within the web page had changed,
+and upon retrieving that object it'd get the new value of those properties.
 
-Just as with ARIA, changing properties of accessible nodes has no
-effect on the look or feel of the webpage in any other way. Only
-clients of that platform's accessibility API are affected.
+Just as with ARIA, changing properties of accessible nodes has no effect
+on the look or feel of the webpage in any other way.
+Only clients of that platform's accessibility API are affected.
 
-One very important design decision in the AOM is what should happen
-when trying to set the value of an accessible property to
-something illegal (such as a role name that doesn't exist).
+#### Handling illegal values
+
+One very important design decision in the AOM is
+what should happen when trying to set the value of an accessible property
+to something illegal (such as a role name that doesn't exist).
 Possible options include:
 
-* Doing no error checking, all values would be allowed for accessibility
-  properties, but some would just have no effect.
-* Raising an exception immediately upon trying to set an accessibility
-  property to an illegal value
-* Ignoring attemps to set an accessibility property to an illegal value.
+* Doing no error checking, all values would be allowed for accessibility properties,
+  but some would just have no effect.
+* Raising an exception immediately upon trying to set an accessibility property
+  to an illegal value
+* Ignoring attempts to set an accessibility property to an illegal value.
 
-However, one important consideration is that in current web accessibility
-specs, whether or not a value is legal or not often depends on the context.
+However, one important consideration is that in current web accessibility specs,
+whether or not a value is legal or not often depends on the context.
 
-For example, the **`checked`** property is only defined on
-accessible nodes with certain roles like **`checkbox`** and **`radio`**.
-Therefore it's illegal to try to set **`checked`** on an object with a
-role where it isn't defined, like **`heading`**. However, it seems like
-it would be unfortunate if setting `checked=true` and then setting
-`role="checkbox"` would fail, while doing it in the other order would
-succeed.
+For example,
+the **`checked`** property is only defined on accessible nodes with certain roles
+like **`checkbox`** and **`radio`**.
+Therefore it's illegal to try to set **`checked`** on an object with a role where it isn't defined,
+like **`heading`**.
+However, it seems like it would be unfortunate
+if setting `checked=true` and then setting `role="checkbox"` would fail,
+while doing it in the other order would succeed.
 
 So instead, we propose the following rule:
 
@@ -451,8 +479,7 @@ So instead, we propose the following rule:
 preserved in the accessible node's internal state. At the time the
 accessible property is accessed, illegal values are ignored.**
 
-First let's see an example of how that applies in practice when
-trying to set a role.
+First let's see an example of how that applies in practice when trying to set a role.
 
 ```js
 var heading = document.createElement("h1");
@@ -466,11 +493,12 @@ axHeading.role = "captain";
 axHeading.role;  // returns "heading" because "captain" is not legal.
 ```
 
-If ARIA attributes are used, the same behavior applies, in that
-accessing the **`role`** property returns the *computed* property
-value, which is taken from the accessible node first, from the
-ARIA attribute second, and from the HTML element's native semantics
-third.
+If ARIA attributes are used, the same behavior applies,
+in that accessing the **`role`** property returns the *computed* property value,
+which is taken:
+* from the accessible node first,
+* from the ARIA attribute second,
+* and from the HTML element's native semantics third.
 
 ```js
 var textbox = document.createElement("input");
@@ -488,8 +516,10 @@ axTextbox.role = "searchbox";
 axTextbox.role;  // returns "searchbox" because the AOM overrides ARIA.
 ```
 
-Note that one design decision we made here is that properties set on
-an accessible node are not reflected in the HTML element, for example:
+#### Reflecting properties set via AOM back to HTML
+Our decision is that
+properties set on an accessible node are not reflected in the HTML element,
+for example:
 
 ```js
 var link = document.createElement("a");
@@ -500,34 +530,35 @@ link.getAttribute("role");  // returns "link", because the AOM role is not refle
 
 There are a couple of reasons we feel this is the right solution.
 
-* Most importantly, some attributes of accessible nodes can't always
-  be reflected - in particular relationship attributes.
+* Most importantly, some attributes of accessible nodes can't always be reflected -
+  in particular relationship attributes.
   In the AOM you can use **`labeledBy`** to establish a relationship
   between one node and any other node that provides its label,
-  whereas in ARIA the `aria-labelledby` attribute is limited to
-  elements it can reference by unique ID.
+  whereas in ARIA the `aria-labelledby` attribute is limited
+  to elements it can reference by unique ID.
 * Also, adding lots of ARIA attributes to the DOM can be a performance issue,
   especially for interactive web apps with thousands of elements.
-  Using the AOM has the potential to be a more lightweight way to make
-  apps accessible.
+  Using the AOM has the potential to be a more lightweight way to make apps accessible.
 
 A side benefit of this approach is that feature detection is especially easy.
-To determine if the browser supports a certain role, just set any accessible
-node's role to that string and see if it's returned back when accessing it.
+To determine if the browser supports a certain role,
+just set any accessible node's role to that string
+and see if it's returned back when accessing it.
 While not an explicit goal, it does seem useful.
 
 #### Rearranging the tree
 
-In addition to changing properties of a single accessible node, you can
-also make changes to the relationships between multiple accessible nodes,
+In addition to changing properties of a single accessible node,
+you can also make changes to the relationships between multiple accessible nodes,
 including the parent/child relationships that form the tree structure.
 
-When modifying a relationship property, the change is reflected in the
-accessibility tree synchronously. If a node is attached as the new child
-or parent of another node, it's automatically detached from its previous
-child or parent first. That makes cycles impossible, because trying to
-conncet nodes in a way that would form a cycle would just break some
-other link in the cycle first.
+When modifying a relationship property,
+the change is reflected in the accessibility tree synchronously.
+If a node is attached as the new child or parent of another node,
+it's automatically detached from its previous child or parent first.
+That makes cycles impossible,
+because trying to connect nodes in a way that would form a cycle
+would just break some other link in the cycle first.
 
 Here are some examples:
 
@@ -536,52 +567,48 @@ axNode1.children.append(axNode2);
 ```
 
 This statement makes axNode2 the last child of axNode1.
-If axNode2 was previously somewhere else in the accessibility
-tree, it's first detached from its previous parent before being
-added here. If axNode2 was previously already a child of
-axNode1, but not the last child, this would make it the last
-child.
+If axNode2 was previously somewhere else in the accessibility tree,
+it's first detached from its previous parent before being added here.
+If axNode2 was previously already a child of axNode1,
+but not the last child, this would make it the last child.
 
 ```js
 axNode2.parent = axNode1;
 ```
 
-This statement has the same effect in most cases: if axNode2
-was not previously a child of axNode1, it gets detached from
-its previous parent, if any, and attached as the last child of
-axNode1.
+This statement has the same effect in most cases:
+if axNode2 was not previously a child of axNode1,
+it gets detached from its previous parent, if any,
+and attached as the last child of axNode1.
 
-However, unlike the statement above, if axNode2 was already a
-child of axNode1, this wouldn't rearrange it.
-If axNode2 was previously somewhere else in the accessibility
-tree, it's first detached from its previous parent before being
-added here.
-
-Trying to set the parent or child to an illegal value throws an
-exception.
+However, *if axNode2 was already a child of axNode1,
+this wouldn't rearrange it*.
 
 Trying to reparent the root of the accessibility tree for a frame
 throws an exception. The root of the tree can be modified in most
 other ways but it can't be entirely removed.
 
-Note that changing the accessibility tree happens completely
-independently of the DOM tree.
+Note that changing the accessibility tree happens
+completely independently of the DOM tree.
 
+---
 :question: **Open question:**
-What should happen if the DOM tree or layout tree changes and it affects
-accessible nodes that have already been rearranged in the
-accessibility tree?
+What should happen if the DOM tree or layout tree changes
+and it affects accessible nodes
+that have already been rearranged in the accessibility tree?
+
+---
 
 #### Virtual accessibility nodes
 
-So far we've looked into how to modify existing accessible nodes
-corresponding to DOM nodes, and even rearrange them in the
-accessibility tree.
+So far we've looked into how to modify existing accessible nodes corresponding to DOM nodes,
+and even rearrange them in the accessibility tree.
 
-The AOM also makes it possible to create new *virtual* accessible
-nodes that don't correspond to DOM elements. This makes it possible
-to represent objects on the screen that don't correspond to DOM
-elements but semantically represent real objects.
+The AOM also makes it possible to create
+new *virtual* accessible nodes that don't correspond to DOM elements.
+This makes it possible to represent objects on the screen
+that don't correspond to DOM elements
+but semantically represent real objects.
 
 The AccessibleNode constructor takes a single argument that initializes the new object's role.
 
@@ -592,59 +619,27 @@ axVirtualButton.offsetWidth = 224;
 axVirtualButton.offsetHeight = 72;
 ```
 
-A virtual AccessibleNode isn't part of the document's accessibility
-tree until it's added as the child of another element. For example,
-this code would add the virtual button we created above as a child of
-the HTML body element's accessible node:
+A virtual AccessibleNode isn't part of the document's accessibility tree
+until it's added as the child of another element.
+For example, this code would add the virtual button we created above
+as a child of the HTML body element's accessible node:
 
 ```js
 document.body.accessibleNode.children.append(axVirtualButton);
 ```
 
-### Supported accessibility properties and relations
+This has analogs in platform accessibility APIs:
+* [`AccessibilityNodeProvider`](https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeProvider.html)
+  in Android's accessibility framework
+* ['accessibilityAddChild'](https://developer.apple.com/library/mac/documentation/AppKit/Reference/NSAccessibilityElement_Class/index.html#//apple_ref/occ/instm/NSAccessibilityElement/accessibilityAddChildElement:)
+  in Apple's NSAccessibility framework
 
-The following tables list all of the accessibility properties and
-relations supported by the accessibility object model. Note that most
-of these correspond directly to an ARIA attribute; please refer to
-[the ARIA spec](https://www.w3.org/TR/wai-aria-1.1/) for details about
-the semantics of these.
-
-| attribute name | type | default value | settable | supported roles | related ARIA attributes | computed value algorithm |
-| -------------- | ---- | ------------- | -------- | --------------- | ----------------------- | ------------------------ |
-| `autocomplete` | `enum { "both", "inline", "list", "none" }` | `"none"` | settable | same as `aria-autocomplete` | `aria-autocomplete` | |
-| `colCount` | `long?` | `undefined` | settable | same as `aria-colcount` | `aria-colcount` | if any, otherwise the number of columns in a HTMLTableElement. |
-| `colIndex` | `long?` | `undefined` | settable | same as `aria-colindex` | `aria-colindex` | if any, otherwise the index of the current column for any element with a cell role. |
-| `colSpan` | `long?` | `undefined` | settable | same as `aria-colspan` | `aria-colSpan` | |
-| `description` | `DOMString` | `""` | settable | <em>all roles</em> |  | as defined in [[!ACCNAME-AAM-1.1]]. |
-| `disabled` | `boolean?` | `undefined` | settable | same as `aria-disabled` | `aria-disabled` |
-| `expanded` | `boolean?` | `undefined` | settable | same as `aria-expanded` | `aria-expanded` |
-| `focusable` | `boolean` | `false` | settable | <em>all roles</em> |  | DOM node is focusable. |
-| `focused` | `boolean` | `false` | readonly | <em>all roles</em> |  | focused. Note that it's possible for this to not correspond to the DOM Node with input focus.
-| `hasPopUp` | `boolean` | `false` | settable | same as `aria-haspopup` | `aria-haspopup` |
-| `invalid` | `enum { "grammar", "false", "spelling", "true" }` | `false` | settable | same as `aria-invalid` | `aria-invalid` |
-| `label` | `DOMString` | `""` | settable | <em>all roles</em> | `aria-label`, `aria-labelledby` | as defined in [[!ACCNAME-AAM-1.1]]. |
-| `level` | `long?` | `undefined` | settable | same as `aria-level` | `aria-level` |
-| `multiselectable` | `boolean` | `false` | settable | same as `aria-multiselectable` | `aria-multiselectable` | `aria-multiselectable` is set to true, or for an HTML `select` element with the `multi` attribute set. |
-| `offsetLeft` | `long` | `undefined` | settable | <em>all roles</em> |  |
-| `offsetWidth` | `long` | `undefined` | settable |  |  |
-| `orientation` | `enum { "horizontal", "vertical" } | undefined` | `undefined` | settable | same as `aria-orientation` | `aria-orientation` |
-| `placeholder` | `DOMString?` | `undefined` | settable | same as `aria-placeholder` | `aria-placeholder` |
-| `posInSet` | `long?` | `undefined` | settable | same as `aria-posinset` | `aria-posinset` |
-| `rangeValue` | `double?` | `undefined` | settable | same as `aria-valuenow` | `aria-valuenow` |
-| `rangeMin` | `double?` | `undefined` | settable | same as `aria-valuemin` | `aria-valuemin` |
-| `rangeMax` | `double?` | `undefined` | settable | same as `aria-valuemax` | `aria-valuemax` |
-| `readonly` | `boolean?` | `undefined` | settable | same as `aria-readonly` | `aria-readonly` |
-| `required` | `boolean?` | `undefined` | settable | same as `aria-required` | `aria-required` |
-| `roleDescription` | `DOMString` | `undefined` | settable | same as `aria-roledescription` | `aria-roledescription` |
-| `rowCount` | `long?` | `undefined` | settable | same as `aria-rowcount` | `aria-rowcount` |
-| `rowIndex` | `long?` | `undefined` | settable | same as `aria-rowindex` | `aria-rowindex` |
-| `rowSpan` | `long?` | `undefined` | settable | same as `aria-rowspan` | `aria-rowspan` |
-| `setSize` | `long?` | `undefined` | settable | same as `aria-setsize` | `aria-setsize` |
-| `sort` | `enum { "ascending", "descending", "none", "other" }` | `"none"` | settable | same as `aria-sort` | `aria-sort` |
-| `value` | `DOMString?` | `undefined` | settable | <em>all widget roles</em> |  |
-| `visible` | `boolean` | `true` | readonly | <em>all roles</em> | `aria-hidden` | the accessibility tree because the DOM node is not visible or not displayed, or because the DOM node has the `aria-hidden` attribute set. |
 
 ## Use cases
+
+### Express role and properties for a web component programmatically
+
+### Implement accessible actions
 
 ### Use DOM node references instead of IDREFs
 Some HTML and ARIA features require reference to another element by IDREF,
@@ -686,7 +681,8 @@ axInput.activeDescendant = axOption1;
 
 ### Create virtual accessibility trees
 
-Some authors create web interfaces using an HTML Canvas or some other direct-drawing API to render an interface
+Some authors create web interfaces using an HTML Canvas
+or some other direct-drawing API to render an interface
 instead of using native HTML elements.
 
 Currently the only way to make this type of solution accessible
@@ -777,3 +773,49 @@ Many thanks for valuable feedback, advice, and tools from:
 * Marcos Caceres
 * Nan Wang
 * Robin Berjon
+
+## Appendix: Supported accessibility properties and relations
+
+The following tables list all of the accessibility properties and relations
+supported by the accessibility object model.
+Note that most of these correspond directly to an ARIA attribute;
+please refer to
+[the ARIA spec](https://www.w3.org/TR/wai-aria-1.1/)
+for details about the semantics of each of these.
+
+| attribute name | type | default value | settable | supported roles | related ARIA attributes | computed value algorithm |
+| -------------- | ---- | ------------- | -------- | --------------- | ----------------------- | ------------------------ |
+| `autocomplete` | `enum { "both", "inline", "list", "none" }` | `"none"` | settable | same as `aria-autocomplete` | `aria-autocomplete` | |
+| `colCount` | `long?` | `undefined` | settable | same as `aria-colcount` | `aria-colcount` | if any, otherwise the number of columns in a HTMLTableElement. |
+| `colIndex` | `long?` | `undefined` | settable | same as `aria-colindex` | `aria-colindex` | if any, otherwise the index of the current column for any element with a cell role. |
+| `colSpan` | `long?` | `undefined` | settable | same as `aria-colspan` | `aria-colSpan` | |
+| `description` | `DOMString` | `""` | settable | <em>all roles</em> |  | as defined in [[!ACCNAME-AAM-1.1]]. |
+| `disabled` | `boolean?` | `undefined` | settable | same as `aria-disabled` | `aria-disabled` |
+| `expanded` | `boolean?` | `undefined` | settable | same as `aria-expanded` | `aria-expanded` |
+| `focusable` | `boolean` | `false` | settable | <em>all roles</em> |  | DOM node is focusable. |
+| `focused` | `boolean` | `false` | readonly | <em>all roles</em> |  | focused. Note that it's possible for this to not correspond to the DOM Node with input focus.
+| `hasPopUp` | `boolean` | `false` | settable | same as `aria-haspopup` | `aria-haspopup` |
+| `invalid` | `enum { "grammar", "false", "spelling", "true" }` | `false` | settable | same as `aria-invalid` | `aria-invalid` |
+| `label` | `DOMString` | `""` | settable | <em>all roles</em> | `aria-label`, `aria-labelledby` | as defined in [[!ACCNAME-AAM-1.1]]. |
+| `level` | `long?` | `undefined` | settable | same as `aria-level` | `aria-level` |
+| `multiselectable` | `boolean` | `false` | settable | same as `aria-multiselectable` | `aria-multiselectable` | `aria-multiselectable` is set to true, or for an HTML `select` element with the `multi` attribute set. |
+| `offsetLeft` | `long` | `undefined` | settable | <em>all roles</em> |  |
+| `offsetWidth` | `long` | `undefined` | settable |  |  |
+| `orientation` | `enum { "horizontal", "vertical" } | undefined` | `undefined` | settable | same as `aria-orientation` | `aria-orientation` |
+| `placeholder` | `DOMString?` | `undefined` | settable | same as `aria-placeholder` | `aria-placeholder` |
+| `posInSet` | `long?` | `undefined` | settable | same as `aria-posinset` | `aria-posinset` |
+| `rangeValue` | `double?` | `undefined` | settable | same as `aria-valuenow` | `aria-valuenow` |
+| `rangeMin` | `double?` | `undefined` | settable | same as `aria-valuemin` | `aria-valuemin` |
+| `rangeMax` | `double?` | `undefined` | settable | same as `aria-valuemax` | `aria-valuemax` |
+| `readonly` | `boolean?` | `undefined` | settable | same as `aria-readonly` | `aria-readonly` |
+| `required` | `boolean?` | `undefined` | settable | same as `aria-required` | `aria-required` |
+| `roleDescription` | `DOMString` | `undefined` | settable | same as `aria-roledescription` | `aria-roledescription` |
+| `rowCount` | `long?` | `undefined` | settable | same as `aria-rowcount` | `aria-rowcount` |
+| `rowIndex` | `long?` | `undefined` | settable | same as `aria-rowindex` | `aria-rowindex` |
+| `rowSpan` | `long?` | `undefined` | settable | same as `aria-rowspan` | `aria-rowspan` |
+| `setSize` | `long?` | `undefined` | settable | same as `aria-setsize` | `aria-setsize` |
+| `sort` | `enum { "ascending", "descending", "none", "other" }` | `"none"` | settable | same as `aria-sort` | `aria-sort` |
+| `value` | `DOMString?` | `undefined` | settable | <em>all widget roles</em> |  |
+| `visible` | `boolean` | `true` | readonly | <em>all roles</em> | `aria-hidden` | the accessibility tree because the DOM node is not visible or not displayed, or because the DOM node has the `aria-hidden` attribute set. |
+
+## Appendix: `accessibleNode` naming
