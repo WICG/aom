@@ -337,7 +337,7 @@ element.setAttribute("role", "butler");
 element.accessibleNode.role;  // returns "article" because "butler" is not a valid role
 ```
 
-**Open question:**
+:question: **Open question:**
 What should be returned when a node's role does not correspond to an ARIA role?
 For example, the HTML **`P`** element is semantically important, and on many
 platforms there's a native accessibility role for a paragraph, but there's no
