@@ -265,8 +265,8 @@
             readonly attribute AccessibleDOMNode? accessibleNode;
           };
         </pre>
-        <p>
-          The <code>accessibleNode</code> attribute returns the <a>accessible
+        <p data-dfn-for="Node">
+          The <dfn>accessibleNode</dfn> attribute returns the <a>accessible
           node</a> associated with this <code>DOM node</code>, or
           <code>null</code> if this DOM node is not currently rendered as
           part of a web page.
@@ -276,13 +276,6 @@
         <h3>
           <code>AccessibleNode</code> and <code>AccessibleDOMNode</code> interfaces
         </h3>
-        <p>
-          An AccessibleNode is an interface that represents one node
-          in the user agent's accessibility tree. A subclass,
-          AccessibleDOMNode, can be retrieved directly from a DOM
-          Node, or a new AccessibleNode can be constructed and
-          inserted into the accessibility tree.
-        </p>
         <pre class="idl">
         [Constructor(DOMString role)]
         interface AccessibleNode : EventTarget {
@@ -303,44 +296,51 @@
         };
         </pre>
         <p>
-          The AccessibleNode constructor, when called, returns a new
-          empty AccessibleNode object with its role initialized to
-          the provided value. The AccessibleNode has no associated
+          An <dfn>AccessibleNode</dfn> is an interface that represents one node
+          in the user agent's <a>accessibility tree</a>. A subclass,
+          <a>AccessibleDOMNode</a>, can be retrieved directly from a DOM
+          Node, or a new <a>AccessibleNode</a> can be constructed and
+          inserted into the <a>accessibility tree</a>.
+        </p>
+        <p>
+          The <a>AccessibleNode</a>'s constructor, when called, returns a new
+          empty <a>AccessibleNode</a> instance with its <a>role</a> initialized to
+          the provided value. The <a>AccessibleNode</a> has no associated
           DOM Node and is not attached to the document's accessibility
           tree, it must be explicitly added as a child of another
-          AccessibilityNode.
+          <a>AccessibileNode</a>.
         </p>
-        <p id="source">
-          Let an AccessibleNode's <dfn>source</dfn> be an internal
+        <p>
+          Let an <a>AccessibleNode</a>'s <dfn>source</dfn> be an internal
           dictionary containing attributes that the author has set.
-          Attributes in an AccessibleNode's <em>source</em>, when valid,
+          Attributes in an AccessibleNode's <a>source</a>, when valid,
           supercede all other rules in the computation of that attribute.
         </p>
         <p>
-          The <dfn>role</dfn> attribute, on setting, stores the provided
-          DOMString in the AccessibleNode's <dfn>source</dfn>.
+          The <dfn data-dfn-for="AccessibleNode">role</dfn> attribute, on setting,
+          stores the provided DOMString in the <a>AccessibleNode</a>'s <a>source</a>.
           On getting, it runs the following algorithm:
           <ul>
-            <li>If the AccessibleNode's source contains a valid <dfn>role</dfn>
+            <li>If the <a>AccessibleNode</a>'s <a>source</a> contains a valid <a>ARIA role</a>
               according to the [[!WAI-ARIA]] spec, return that role.
             <li>Otherwise, if this is an AccessibleDOMNode and its associated
-              DOM node has a valid <dfn>role</dfn> attribute according to the
+              DOM node has a valid <a data-link-for="Node">role</a> attribute according to the
               [[!WAI-ARIA]] spec, return that role.
-            <li>Otherwise, if this is an AccessibleDOMNode, return the
-              <dfn>computed role</dfn> for this node according to the
+            <li>Otherwise, if this is an <a>AccessibleDOMNode</a>, return the
+              <a>computed role</a> for this node according to the
               [[!HTML-AAM-1.0]] spec.
             <li>Otherwise, return the empty string.
           </ul>
         </p>
-        <p>
+        <p data-dfn-for="AccessibleNode">
           The <dfn>setAttribute</dfn> method, when called with the
           name of an <a href="#attribute">accessibility attribute</a>,
           stores the provided value in the AccessibleNode's
           <a href="#source">source</a>.
         </p>
-        <p>
+        <p data-dfn-for="AccessibleNode">
           The <dfn>getAttribute</dfn> method, when called with the
-          name of an <a href="#attribute">accessibility attribute</a>,
+          name of an <a>accessibility attribute</a>,
           runs the following algorithm:
           <ul>
             <li>If this attribute is not defined for the AccessibleNode's
@@ -355,12 +355,13 @@
           </ul>
         </p>
         <p>
-          For each supported <a href="#attribute">accessibility
+          For each supported <a>accessibility
             attribute</a>, the following partial interface applies.
           <pre class="idl">
             partial interface AccessibleNode {
-              attribute <em>typename</em> attributeName;
-            };</pre>
+              attribute typename attributeName;
+            };
+          </pre>
           Setting the attribute must invoke setAttribute() with the first
           argument being the attribute name, and the second argument the
           given value.  Getting the attribute must invoke getAttribute()
@@ -368,7 +369,7 @@
         </p>
         <p>
           The <dfn>setRelation</dfn> method, when called with the
-          name of an <a href="#relations">relationship attribute</a>,
+          name of an <a>relationship attribute</a>,
           stores the provided value in the AccessibleNode's
           <a href="#source">source</a>.
         </p>
@@ -404,7 +405,7 @@
         </p>
         <p>
           The <dfn>getRelation</dfn> method, when called with the
-          name of an <a href="#relations">relationship attribute</a>,
+          name of an <a>relationship attribute</a>,
           runs the following algorithm:
           <ul>
             <li>If the AccessibleNode's source contains a valid value
@@ -421,12 +422,13 @@
           </ul>
         </p>
         <p>
-          For each supported <a href="#relations">relationship
+          For each supported <a>relationship
           attribute</a>, the following partial interface applies.
           <pre class="idl">
             partial interface AccessibleNode {
-              attribute <em>typename</em> relationName;
-            };</pre>
+              attribute typename relationName;
+            };
+          </pre>
           Setting the attribute must invoke setRelation() with the first
           argument being the attribute name, and the second argument the
           given value.  Getting the attribute must invoke getRelation()
@@ -512,7 +514,7 @@
       </p>
       <table>
         <caption>
-          Accessibility attribute table
+          <dfn>Accessibility attribute table</dfn>
         </caption>
         <thead>
           <tr>
@@ -1045,7 +1047,7 @@
         <p>
           All AccessibilityNodes are EventTargets, so authors
           can register event listeners on them. AccessibilityNodes
-          receive special <dfn>accessibility input events</dfn>
+          receive special <a>accessibility input events</a>
           that represent explicit intents to control the user agent
           via an accessibility API
         </p>
@@ -1164,7 +1166,7 @@
           (by calling <code>preventDefault()</code>) after completely
           going through the capture and bubble phases in the accessibility
           tree, the event executes its <dfn>fallback behavior</dfn>,
-          as defined in the table above.
+          as defined in the <a>accessibility attribute table</a>.
         </p>
         <p>
           When an event's fallback behavior involves firing a DOM
@@ -1190,7 +1192,7 @@
               target.
             <li>After capture and bubble phases in the accessibility tree,
               if <code>preventDefault()</code> was not called, the
-              event's <dfn>fallback behavior</dfn> is triggered. In this
+              event's <a>fallback behavior</a> is triggered. In this
               case it fires a DOM <code>"click"</code> event on the
               targer AccessibleNode's associated DOM node, going through
               capture and bubble phases in the DOM tree.
