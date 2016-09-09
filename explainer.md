@@ -3,10 +3,8 @@
 **Editors:**
 
 * Alice Boxhall, Google, aboxhall@google.com
-* Bogdan Brinza, Microsoft, bbrinza@microsoft.com
 * James Craig, Apple, jcraig@apple.com
 * Dominic Mazzoni, Google, dmazzoni@google.com
-* Cynthia Shelley, Microsoft, cyns@microsoft.com
 * Alexander Surkov, Mozilla, surkov.alexander@gmail.com
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -774,6 +772,8 @@ but without introducing any new semantics.
 Many thanks for valuable feedback, advice, and tools from:
 
 * Alex Russell
+* Bogdan Brinza
+* Cynthia Shelley
 * David Bolter
 * Domenic Denicola
 * Ian Hickson
@@ -782,6 +782,8 @@ Many thanks for valuable feedback, advice, and tools from:
 * Nan Wang
 * Robin Berjon
 
+Bogdan Brinza and Cynthia Shelley of Microsoft were editors of an
+earlier draft of this spec but are no longer participating.
 
 ## Appendix: `accessibleNode` naming
 
@@ -831,4 +833,3 @@ for details about the semantics of each of these.
 | `sort` | `enum { "ascending", "descending", "none", "other" }` | `"none"` | settable | same as `aria-sort` | `aria-sort` |
 | `value` | `DOMString?` | `undefined` | settable | <em>all widget roles</em> |  |
 | `visible` | `boolean` | `true` | readonly | <em>all roles</em> | `aria-hidden` | the accessibility tree because the DOM node is not visible or not displayed, or because the DOM node has the `aria-hidden` attribute set. |
-
