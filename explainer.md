@@ -1,6 +1,6 @@
 # Accessibility Object Model
 
-**Editors:**
+**Authors:**
 
 * Alice Boxhall, Google, aboxhall@google.com
 * James Craig, Apple, jcraig@apple.com
@@ -35,7 +35,7 @@
 ## Introduction
 
 This effort aims to create a JavaScript API
-to allow developers to explore and modify the accessibility tree
+to allow developers to modify (and eventually explore) the accessibility tree
 for an HTML page.
 
 ## Background: assistive technology and the accessibility tree
@@ -186,8 +186,8 @@ We plan to split this work into four phases,
 which will respectively allow authors to:
 
 1. modify the semantic properties of the accessibility node associated with a particular DOM node,
-3. directly respond to messages from assistive technology,
-3. create accessibility nodes which are not directly associated with a DOM node, and
+3. directly respond to events (or actions) from assistive technology,
+3. create virtual accessibility nodes which are not directly associated with a DOM node, and
 4. programmatically explore the accessibility tree
    and access the computed properties of accessibility nodes.
 
@@ -280,8 +280,7 @@ customElements.define("x-checkbox", CustomCheckbox);
 <custom-checkbox checked>Receive promotional offers</custom-checkbox>
 ```
 
-Furthermore, Accessible Properties would allow specifying accessible relationships
-without requiring IDREFs,
+Furthermore, writing Accessible Properties would allow specifying accessible relationships without requiring IDREFs,
 as authors can now pass DOM object references:
 
 ```js
@@ -289,7 +288,7 @@ el.accessibleNode.describedBy = [el1, el2, el3];
 el.accessibleNode.activeDescendant = el2;
 ```
 
-Moreover, Accessible Properties would enable authors using Shadow DOM
+Moreover, writing Accessible Properties would enable authors using Shadow DOM
 to specify relationships which cross over Shadow DOM boundaries.
 
 Today, an author attempting to express a relationship across Shadow DOM boundaries
@@ -349,7 +348,7 @@ Currently, there is no way to connect custom HTML elements to accessible actions
 For example, the custom slider above with a role of `slider`
 prompts a suggestion on VoiceOver for iOS
 to perform swipe gestures to increment or decrement,
-but there is no way to handle that gesture via the DOM API.
+but there is no way to handle that semantic event via the DOM API.
 
 The API for Accessible Actions will be specified at a later date.
 
@@ -464,6 +463,7 @@ Many thanks for valuable feedback, advice, and tools from:
 
 * Alex Russell
 * Bogdan Brinza
+* Chris Fleizach
 * Cynthia Shelley
 * David Bolter
 * Domenic Denicola
@@ -472,9 +472,10 @@ Many thanks for valuable feedback, advice, and tools from:
 * Marcos Caceres
 * Nan Wang
 * Robin Berjon
+* Tess O'Connor
 
-Bogdan Brinza and Cynthia Shelley of Microsoft were editors of an
-earlier draft of this spec but are no longer participating.
+Bogdan Brinza and Cynthia Shelley of Microsoft were credited as authors of an
+earlier draft of this spec but are no longer actively participating.
 
 ## Appendix: `accessibleNode` naming
 
