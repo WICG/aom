@@ -321,25 +321,6 @@ input.accessibleNode.activeDescendant = optionList;
 
 This would allow the relationship to be expressed naturally.
 
-**Accessible properties and reflection**
-
-The element's `accessibleNode` property would reflect attributes set via ARIA:
-
-```html
-<div id="foo" role="button"></div>
-```
-
-```js
-console.log(document.getElementById("foo").accessibleNode.role);  // "button"
-```
-
-However, it would *not* reflect back to ARIA attributes:
-
-```js
-document.getElementById("foo").accessibleNode.role = "checkbox";
-document.getElementById("foo").getAttribute("role");  // Still returns "button"
-```
-
 ### Phase 2: Accessible Actions
 
 **Accessible Actions** will allow authors to react to events coming from assistive technology.
