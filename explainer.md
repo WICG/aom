@@ -193,8 +193,7 @@ which will respectively allow authors to:
 
 In the following sections we'll outline each of these phases.
 
-### Phase 1: Accessible Properties
-
+### Phase 1: Modifying Accessible Properties
 
 This phase will explain and augment the existing capabilities of
 [ARIA](https://www.w3.org/TR/wai-aria-1.1/).
@@ -349,7 +348,7 @@ which does not rely on fallback or visually-hidden DOM content.
 
 The API for Virtual Accessibility Nodes will be specified at a later date.
 
-### Phase 4: Computed Accessibility Tree
+### Phase 4: Full Introspection of an Accessibility Tree
 
 The **Computed Accessibility Tree** API will allow authors to access
 the full computed accessibility tree -
@@ -377,7 +376,7 @@ This will make it possible to:
 
 ![All phases of the AOM shown on the flow chart](images/DOM-a11y-tree-AOM.png)
 
-* Phase 1, Accessible Properties,
+* Phase 1, Modifying Accessible Properties,
   will allow *setting* accessible properties for a DOM node,
   including accessible relationships.
 * Phase 2, Accessible Actions,
