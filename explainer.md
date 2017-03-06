@@ -258,7 +258,7 @@ class CustomCheckbox extends HTMLElement {
 
   // When the custom "checked" attribute changes,
   // keep the accessible checked state in sync.
-  attributeChangedCallback(name, old, newValue) {
+  attributeChangedCallback(name, oldValue, newValue) {
     switch(name) {
     case "checked":
       this.accessibleNode.checked = (newValue !== null);
@@ -272,7 +272,7 @@ class CustomCheckbox extends HTMLElement {
   }
 }
 
-customElements.define("x-checkbox", CustomCheckbox);
+customElements.define("custom-checkbox", CustomCheckbox);
 ```
 
 ```html
