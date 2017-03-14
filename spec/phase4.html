@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Accessibility Object Model, Phase 4
+    </title>
+    <meta charset='utf-8'>
+    <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
+    class='remove'>
+    </script>
+    <script class='remove'>
+    /*Make tidy happy*/
+    var respecConfig = {
+          // specification status (e.g. WD, LCWD, WG-NOTE, etc.). If in doubt use ED.
+          specStatus:           "unofficial",
+          // the specification's short name, as in http://www.w3.org/TR/short-name/
+          shortName:            "aom",
+
+          // if your specification has a subtitle that goes below the main
+          // formal title, define it here
+          // subtitle   :  "an excellent document",
+
+          // if you wish the publication date to be other than the last modification, set this
+          // publishDate:  "2009-08-06",
+
+          // if the specification's copyright date is a range of years, specify
+          // the start date here:
+          // copyrightStart: "2005"
+
+          // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+          // and its maturity status
+          // previousPublishDate:  "1977-03-15",
+          // previousMaturity:  "WD",
+
+          // if there a publicly available Editor's Draft, this is the link
+          // edDraftURI:           "http://berjon.com/",
+
+          // if this is a LCWD, uncomment and set the end of its review period
+          // lcEnd: "2009-08-05",
+
+          // editors, add as many as you like
+          // only "name" is required
+          editors:  [
+              {
+                  name:       "Alice Boxhall"
+              ,   url:        "http://google.com"
+              ,   mailto:     "aboxhall@google.com"
+              ,   company:    "Google"
+              ,   companyURL: "http://google.com/"
+              },
+              {
+                  name:       "James Craig"
+              ,   url:        "http://apple.com"
+              ,   mailto:     "jcraig@apple.com"
+              ,   company:    "Apple"
+              ,   companyURL: "http://apple.com/"
+              },
+              {
+                  name:       "Dominic Mazzoni"
+              ,   url:        "http://google.com"
+              ,   mailto:     "dmazzoni@google.com"
+              ,   company:    "Google"
+              ,   companyURL: "http://google.com/"
+              },
+              {
+                  name:       "Alexander Surkov"
+              ,   url:        "http://mozilla.org/"
+              ,   mailto:     "surkov.alexander@gmail.com"
+              ,   company:    "Mozilla"
+              ,   companyURL: "http://mozilla.org/"
+              },
+          ],
+          // name of the WG
+          //         wg:           "None",
+
+          // URI of the public WG page
+          //         wgURI:        "http://example.org/really-cool-wg",
+
+          // name (without the @w3c.org) of the public mailing to which comments are due
+          //          wgPublicList: "spec-writers-anonymous",
+
+          // URI of the patent status for this WG, for Rec-track documents
+          // !!!! IMPORTANT !!!!
+          // This is important for Rec-track documents, do not copy a patent URI from a random
+          // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+          // Team Contact.
+          //        wgPatentURI:  "",
+          // !!!! IMPORTANT !!!! MAKE THE ABOVE BLINK IN YOUR HEAD
+      };
+    </script>
+  </head>
+  <body>
+    <section id="introduction">
+      <h1>Introduction</h1>
+      <p>
+        This document is the spec for Phase 4 of the Accessibility Object
+        Model spec. For background, please refer to the
+        <a href="https://github.com/WICG/aom/blob/master/explainer.md">
+          Accessibility Object Model Explainer</a> for the background and
+        motivation, and then
+        <a href="index.html">Phase 1</a>,
+        <a href="phase2.html">Phase 2</a>, and
+        <a href="phase3.html">Phase 3</a>.
+      </p>
+    </section>
+    <section id="computedtree">
+      <h2>
+        Phase 4: Computed Accessibility Tree
+      </h2>
+      <p>
+        The Computed Accessibility Tree API will allow authors to
+        access the full computed accessibility tree - all computed
+        properties for the accessibility node associated with each
+        DOM node, plus the ability to walk the computed tree
+        structure including virtual nodes.
+      </p>
+      <p>
+        This will make it possible to:
+      </p>
+      <ul>
+        <li>write any programmatic test which asserts anything about the semantic properties of an element or a page.
+        <li>build a reliable browser-based assistive technology - for example, a browser extension which uses the accessibility tree to implement a screen reader, screen magnifier, or other assistive functionality; or an in-page tool.
+        <li>detect whether an accessibility property has been successfully applied (via ARIA or otherwise) to an element - for example, to detect whether a browser has implemented a particular version of ARIA.
+        <li>do any kind of console-based debugging/checking of accessibility tree issues.
+          react to accessibility tree state, for example, detecting the exposed role of an element and modifying the accessible help text to suit.
+      </ul>
+      <p>
+        One implication of implementing this phase is that all browsers must agree on
+        exposing the *same* accessibility tree for the same given webpage, otherwise
+        differences will invariably lead to authored pages that work in some browsers
+        but not others. Care must be taken to define this phase in such a way that
+        maintains a high degree of compatibility between browsers, without exposing any
+        internal details and nuances.
+      </p>
+    </section>
+  </body>
+</html>
