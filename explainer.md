@@ -19,16 +19,20 @@
   - [ARIA](#aria)
 - [Gaps in the web platform's accessibility story](#gaps-in-the-web-platforms-accessibility-story)
 - [The Accessibility Object Model](#the-accessibility-object-model)
-  - [Phase 1: Accessible Properties](#phase-1-accessible-properties)
+  - [Phase 1: Modifying Accessible Properties](#phase-1-modifying-accessible-properties)
+    - [Use cases for Accessible Properties](#use-cases-for-accessible-properties)
+    - [No reflection](#no-reflection)
+    - [Validation](#validation)
+    - [Computed accessible properties](#computed-accessible-properties)
   - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
   - [Phase 3: Virtual Accessibility Nodes](#phase-3-virtual-accessibility-nodes)
-  - [Phase 4: Computed Accessibility Tree](#phase-4-computed-accessibility-tree)
+  - [Phase 4: Full Introspection of an Accessibility Tree](#phase-4-full-introspection-of-an-accessibility-tree)
   - [Phases: Summary](#phases-summary)
   - [Audience for the proposed API](#audience-for-the-proposed-api)
 - [Next Steps](#next-steps)
   - [Incubation](#incubation)
 - [Additional thanks](#additional-thanks)
-- [Appendix: `accessibleNode` naming](#appendix-accessiblenode-naming)
+- [Appendix: `AccessibleNode` naming](#appendix-accessiblenode-naming)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -180,9 +184,9 @@ because the APIs aren't yet sufficient -
 in particular, they are much less expressive than the native APIs that the browser communicates with.
 
 In the description of each of the phases of the Accessibility Object Model
-spec below, we discuss specific gaps - things that currently can't be
-achieved using current web accessibility APIs, or can't be achieved without
-cumbersome workarounds.
+spec below, we discuss specific gaps -
+things that currently can't be achieved using current web accessibility APIs,
+or can't be achieved without cumbersome workarounds.
 
 ## The Accessibility Object Model
 
@@ -289,7 +293,8 @@ the implementation rather than exposed as a leaky abstraction:
 ```
 
 Furthermore, writing Accessible Properties would allow specifying accessible relationships without requiring IDREFs,
-as authors can now pass object references. Currently attributes like aria-describedby and aria-activedescendant
+as authors can now pass object references.
+Currently attributes like aria-describedby and aria-activedescendant
 take one or more IDREFs, like this:
 
 ```html
@@ -343,24 +348,19 @@ ARIA attributes, they are never reflected. Similarly, Accessible Properties
 do not reflect equivalent implicit properties of their associated DOM elements,
 either.
 
-Specifically, all of the supported attributes on AccessibleNode return null
-initially. It doesn't matter if the associated DOM element has a computed
-role, or if you give it an explicit ARIA role or ARIA attributes - none of
-these are ever reflected in the AccessibleNode object.
-
 ```js
 button = document.createElement("button");
 button.innerHTML = "Next";
-console.log(button.accessibleNode.role);   // null
-console.log(button.accessibleNode.label);  // null
+console.log(button.accessibleNode.role);   // null, not "button"
+console.log(button.accessibleNode.label);  // null, not "Next"
 
 button.setAttribute("role", "link");
 button.setAttribute("aria-label", "Next Page");
-console.log(button.accessibleNode.role);   // null
-console.log(button.accessibleNode.label);  // null
+console.log(button.accessibleNode.role);   // null, not "link"
+console.log(button.accessibleNode.label);  // null, not "Next Page"
 ```
 
-Similarly, setting Accessible Properties on an AccessibleNode does not
+Similarly, setting Accessible Properties on an `AccessibleNode` does not
 affect corresponding ARIA attributes at all.
 
 ```js
@@ -369,6 +369,10 @@ button.accessibleNode.label = "Next Page (Ctrl+N)";
 console.log(button.getAttribute("role"));  // still "link"
 console.log(button.getAttribute("aria-label"));  // still "Next Page"
 ```
+
+This is analogous to the `style` attribute, which allows
+reading and setting an element's local style, while
+`getComputedStyle()` allows access to the full computed style.
 
 Part of the reasoning behind this is that there are some cases in which
 Accessible Properties are more expressive than ARIA attributes - for example,
@@ -386,13 +390,9 @@ leaking it.
 #### Validation
 
 Querying an Accessible Property can be used as a limited
-form of validation and feature detection. In particular, accessing an
-unsupported accessible property returns `undefined`, and accessing a supported
-but unset or invalid accessible property returns `null`.
+form of validation and feature detection.
 
-Let's walk through this in detail.
-
-On an uninitialized AccessibleNode, properties that are supported by the
+On an uninitialized `AccessibleNode`, properties that are supported by the
 browser will return `null` initially, while unsupported / unrecognized
 properties return `undefined`:
 
@@ -420,10 +420,6 @@ web developers a way to do some feature detection and learn
 exactly which accessible properties are supported in a particular
 browser version.
 
-Note also that invalid types will also result in returning null.
-For example, rowIndex must be an integer, so trying to set it to a
-string or a floating-point value results in null too.
-
 ```js
 cell.accessibleNode.rowIndex = 5;
 console.log(cell.accessibleNode.rowIndex); // 5
@@ -436,9 +432,7 @@ console.log(cell.accessibleNode.rowIndex); // null
 #### Computed accessible properties
 
 In Phase 4 the Accessibility Object Model spec will provide a way to get the computed
-value of accessibility properties. This is similar to how the `style` attribute of a
-DOM element only reflects the local style of that element and not the computed style
-from CSS.
+value of accessibility properties.
 
 The reason this will be done via a separate mechanism is because the computed
 value of many accessible properties requires layout. Allowing web authors to query
@@ -449,31 +443,24 @@ would introduce confusing performance bottlenecks.
 
 **Accessible Actions** will allow authors to react to user input events coming from assistive technology.
 
-In web standards, the word "event" is overloaded to mean two related but distinct concepts:
+For example:
 
-* Notifications that the user has generated some sort of input, such as clicking the
-  mouse button or pressing a key.
-* Notifications that the browser has changed state in some important way, such as
-  that a page has loaded, or focus has moved.
-
-To minimize confusion, we will use the term `action` to represent a user input event from
-the user to the browser and/or web app via accessibility APIs.
-
-For example, a user may be using voice control software and they may speak the name of a
-button somewhere in a web page. The voice control software finds the button matching that
-name in the accessibility tree and sends an *action* to the browser to click on that button.
-
-That same user may then issue a voice command to scroll down by one page. The voice control
-software finds the root element for the web page and sends it the scroll *action*.
-
-As another example, a mobile screen reader user may navigate to a slider, then perform
-a gesture to increment a range-based control. The screen reader sends the browser an
-increment *action* on the slider element in the accessibility tree.
+* A user may be using voice control software and they may speak the name of a
+  button somewhere in a web page.
+  The voice control software finds the button matching that name in the
+  accessibility tree and sends an *action* to the browser to click on that button.
+* That same user may then issue a voice command to scroll down by one page.
+  The voice control software finds the root element for the web page and sends
+  it the scroll *action*.
+* A mobile screen reader user may navigate to a slider, then perform a gesture to
+  increment a range-based control.
+  The screen reader sends the browser an increment *action* on the slider element
+  in the accessibility tree.
 
 Currently, browsers implement partial support by accessible actions either by
 implementing built-in support for native HTML elements (for example, a native
 HTML `<input type="range">` already supports increment and decrement actions,
-and buttons support click and focus actions.
+and text boxes already support actions to set the value or insert text.
 
 However, there is no way for web authors to listen to accessible actions on
 custom elements.  For example, the custom slider above with a role of `slider`
@@ -481,7 +468,10 @@ prompts a suggestion on VoiceOver for iOS to perform swipe gestures to increment
 or decrement, but there is no way to handle that semantic event via any web API.
 
 Accessible Actions gives web developers a mechanism to listen for accessible
-actions directly, by adding event listeners on an AccessibleNode.
+actions directly, by adding event listeners on an `AccessibleNode`.
+This is analogous to listening for user interaction events on a DOM node,
+except that the interaction event arrives via an assistive technology API,
+so it is directed to the accessible node first.
 
 For example, to implement a custom slider, the author could simply listen for
 `increment` and `decrement` events.
@@ -497,15 +487,15 @@ customSlider.accessibleNode.addEventListener('decrement', function() {
 
 The supported actions would include:
 
-* click
-* contextmenu
-* focus
-* setvalue
-* increment
-* decrement
-* select
-* scroll
-* dismiss
+* `click`
+* `contextmenu`
+* `focus`
+* `setvalue`
+* `increment`
+* `decrement`
+* `select`
+* `scroll`
+* `dismiss`
 
 
 ### Phase 3: Virtual Accessibility Nodes
@@ -522,7 +512,7 @@ of custom-drawn APIs.
 On the web, this would allow creating an accessible solution to canvas-based UI
 which does not rely on fallback or visually-hidden DOM content.
 
-Constructing a node can be achieved simply by creating an AccessibleNode
+Constructing a node can be achieved simply by creating an `AccessibleNode`
 object directly rather than accessing one from a DOM element:
 
 ```js
@@ -532,7 +522,7 @@ virtualNode.label = "Play Game";
 ```
 
 To place the new virtual node in the accessibility tree, you can append
-a child to another AccessibleNode.
+a child to another `AccessibleNode`.
 
 ```js
 document.body.accessibleNode.appendChild(virtualNode);
@@ -712,19 +702,18 @@ earlier draft of this spec but are no longer actively participating.
 
 We have chosen the name `AccessibleNode` for the class representing one
 node in the accessibility tree as exposed by the Accessibility Object Model,
-and `accessibleNode` as the method to access the accessible node from a
+and `accessibleNode` as the accessor for the accessible node from a
 DOM element.
 
 In choosing this name, we have tried to pick a balance between brevity,
 clarity, and generality.
 
-* Brevity: The name should be as short as possible, but without
-  using contractions, abbreviations, or acronyms.
-* Clarity: The name should be as clear as possible - web developers
-  should be able to guess its purpose if they encounter it while
-  inspecting a DOM element.
-* Generality: The name should not be too narrow and limit the scope
-  of the spec.
+* Brevity: The name should be as short as possible.
+* Clarity: The name should reflect the function of the API,
+  without using opaque abbreviations or contractions -
+  the purpose of the property on Element should be possible to
+  guess if a developer encounters it while debugging.
+* Generality: The name should not be too narrow and limit the scope of the spec.
 
 Below we've collected all of the serious names that have been proposed
 and a concise summary of the pros and cons of each.
