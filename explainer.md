@@ -228,7 +228,7 @@ would create a different mechanism to achieve the same result:**
 
 ```js
 el.accessibleNode.role = "checkbox";  // (See link below for naming concerns)
-el.accessibleNode.checked = "true";
+el.accessibleNode.checked = true;
 ```
 
 (There are some [notes on `accessibleNode` naming](#appendix-accessiblenode-naming).)
@@ -304,8 +304,8 @@ take one or more IDREFs, like this:
 Accessible Properties would allow passing object references instead:
 
 ```js
-el.accessibleNode.describedBy = [el1, el2];
-el.accessibleNode.activeDescendant = el3;
+el.accessibleNode.describedBy = [accessibleNode1, accessibleNode2];
+el.accessibleNode.activeDescendant = accessibleNode3;
 ```
 
 Moreover, writing Accessible Properties would enable authors using Shadow DOM
@@ -336,7 +336,7 @@ an author could specify this relationship programmatically instead:
 ```js
 const input = comboBox.shadowRoot.querySelector("input");
 const optionList = comboBox.querySelector("custom-optionlist");
-input.accessibleNode.activeDescendant = optionList;
+input.accessibleNode.activeDescendant = optionList.accessibleNode;
 ```
 
 This would allow the relationship to be expressed naturally.
