@@ -22,8 +22,8 @@
   - [Phase 1: Modifying Accessible Properties](#phase-1-modifying-accessible-properties)
     - [Use cases for Accessible Properties](#use-cases-for-accessible-properties)
     - [No reflection](#no-reflection)
-    - [Validation](#validation)
     - [Computed accessible properties](#computed-accessible-properties)
+    - [Validation](#validation)
   - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
   - [Phase 3: Virtual Accessibility Nodes](#phase-3-virtual-accessibility-nodes)
   - [Phase 4: Full Introspection of an Accessibility Tree](#phase-4-full-introspection-of-an-accessibility-tree)
@@ -387,6 +387,16 @@ to be a more efficient alternative. It also promotes creating custom elements
 that are clean and fully encapsulate their own accessibility rather than
 leaking it.
 
+#### Computed accessible properties
+
+In Phase 4 the Accessibility Object Model spec will provide a way to get the computed
+value of accessibility properties.
+
+The reason this will be done via a separate mechanism is because the computed
+value of many accessible properties requires layout. Allowing web authors to query
+the computed value of an accessible property at any time via a simple property access
+would introduce confusing performance bottlenecks.
+
 #### Validation
 
 Querying an Accessible Property can be used as a limited
@@ -428,16 +438,6 @@ console.log(cell.accessibleNode.rowIndex); // null
 cell.accessibleNode.rowIndex = "5";
 console.log(cell.accessibleNode.rowIndex); // null
 ```
-
-#### Computed accessible properties
-
-In Phase 4 the Accessibility Object Model spec will provide a way to get the computed
-value of accessibility properties.
-
-The reason this will be done via a separate mechanism is because the computed
-value of many accessible properties requires layout. Allowing web authors to query
-the computed value of an accessible property at any time via a simple property access
-would introduce confusing performance bottlenecks.
 
 ### Phase 2: Accessible Actions
 
