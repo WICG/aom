@@ -648,6 +648,8 @@ meaning that it will not be part of the `accessibleNode` interface.
 **User experience**
 Compared to the previous three phases,
 accessing the computed accessibility tree will have the least direct impact on users.
+In the spirit of the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies),
+it makes sense to tackle this work last.
 
 ### Phases: Summary
 
