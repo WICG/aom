@@ -106,7 +106,7 @@
         Phase 2: Accessible Actions
       </h2>
         <p>
-          In this phase, we extent AccessibleNode so that it's also an
+          In this phase, we extend AccessibleNode so that it's also an
           EventTarget.  AccessibleNodes receive
           special <b>accessibility input events</b> or <b>accessible
           actions</b> that represent explicit intents to control the
@@ -119,15 +119,22 @@
         </pre>
         <p>
           Accessibility input events are needed for two reasons.
-          First, because it's possible to create AccessibleNodes
-          that don't correspond to a DOM node and authors need to
-          be able to listen to events on these nodes. Second,
-          because there are many types of specific user intents
-          that can be communicated to the user agent via accessibility
-          APIs that don't correspond to existing keyboard and mouse
-          events - for example some assistive technology has
-          keystrokes or gestures to increment a slider, or dismiss
-          a pop-up.
+          <ul>
+            <li>
+              First, because it's possible to create AccessibleNodes
+              that don't correspond to a DOM node and authors need to
+              be able to listen to events on these nodes.
+            </li>
+            <li>
+              Second,
+              because there are many types of specific user intents
+              that can be communicated to the user agent via accessibility
+              APIs that don't correspond to existing keyboard and mouse
+              events - for example some assistive technology has
+              keystrokes or gestures to increment a slider, or dismiss
+              a pop-up.
+            </li>
+          </ul>
         </p>
         <pre class="idl">
           interface AccessibleSetValueEvent : Event {
@@ -143,7 +150,7 @@
               <th>event name</th>
               <th>type</th>
               <th>valid roles</th>
-              <th>fallback behavior</th>
+              <th>fallback behavior (see below)</th>
             </tr>
           </thead>
           <tbody>
