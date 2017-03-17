@@ -24,6 +24,7 @@
     - [AOM and ARIA](#aom-and-aria)
       - [No reflection](#no-reflection)
       - [ARIA takes precedence](#aria-takes-precedence)
+      - [Reasoning](#reasoning)
     - [Computed accessible properties](#computed-accessible-properties)
     - [Validation](#validation)
   - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
@@ -383,7 +384,10 @@ For example, in the case in the previous section,
 `clickBtn` would have a computed role of `"button"`
 even though its `accessibleNode` has a `role` of `"link"`.
 
-This means that:
+##### Reasoning
+
+The reasons for these decisions are discussed in #60,
+but in summary the benefits are:
 - Authors can use ARIA to modify elements which apply their own default Accessibility Properties,
 as in the case of Custom Elements;
 - ARIA is still a source of truth in the DOM tree;
