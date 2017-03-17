@@ -1,3 +1,18 @@
-Check out the [explainer](https://github.com/a11y-api/a11y-api/blob/master/explainer.md).
+## The Accessibility Object Model (AOM)
 
-[Draft spec](https://wicg.github.io/aom/spec/)
+This effort aims to create a JavaScript API to allow developers to
+modify (and eventually explore) the accessibility tree for an HTML
+page.
+
+## Editors:
+
+* Alice Boxhall, Google, aboxhall@google.com
+* James Craig, Apple, jcraig@apple.com
+* Dominic Mazzoni, Google, dmazzoni@google.com
+* Alexander Surkov, Mozilla, surkov.alexander@gmail.com
+
+## Details
+
+Read the [Explainer](https://github.com/WICG/aom/blob/master/explainer.md)
+
+Read the [Spec](https://wicg.github.io/aom/spec/)
