@@ -640,8 +640,9 @@ In order for this API to be useful,
 it needs to work consistently across browsers,
 so that developers don't need to write special case code for each.
 
-Before we can create an API which allows accessing the computed properties,
-we need to ensure that we will have a consistent API across browsers.
+We want to take the appropriate time to ensure we can agree
+on the details for how the tree should be computed
+and represented.
 
 **Performance**
 Computing the value of many accessible properties requires layout.
