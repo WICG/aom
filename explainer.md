@@ -21,12 +21,16 @@
 - [The Accessibility Object Model](#the-accessibility-object-model)
   - [Phase 1: Modifying Accessible Properties](#phase-1-modifying-accessible-properties)
     - [Use cases for Accessible Properties](#use-cases-for-accessible-properties)
-    - [No reflection](#no-reflection)
+    - [AOM and ARIA](#aom-and-aria)
+      - [No reflection](#no-reflection)
+      - [ARIA takes precedence](#aria-takes-precedence)
+      - [Reasoning](#reasoning)
     - [Computed accessible properties](#computed-accessible-properties)
     - [Validation](#validation)
   - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
   - [Phase 3: Virtual Accessibility Nodes](#phase-3-virtual-accessibility-nodes)
   - [Phase 4: Full Introspection of an Accessibility Tree](#phase-4-full-introspection-of-an-accessibility-tree)
+    - [Why is accessing the computed properties being addressed last?](#why-is-accessing-the-computed-properties-being-addressed-last)
   - [Phases: Summary](#phases-summary)
   - [Audience for the proposed API](#audience-for-the-proposed-api)
 - [Next Steps](#next-steps)
@@ -41,6 +45,10 @@
 This effort aims to create a JavaScript API
 to allow developers to modify (and eventually explore) the accessibility tree
 for an HTML page.
+
+If you're already familiar with the accessibility tree and ARIA,
+[The Accessibility Object Model](#the-accessibility-object-model)
+section is the discussion of the actual proposal.
 
 ## Background: assistive technology and the accessibility tree
 
@@ -190,7 +198,7 @@ or can't be achieved without cumbersome workarounds.
 
 ## The Accessibility Object Model
 
-This spec proposes the *Accessibility Object Model*.
+This spec proposes the *Accessibility Object Model* (AOM).
 We plan to split this work into four phases,
 which will respectively allow authors to:
 
@@ -341,70 +349,80 @@ input.accessibleNode.activeDescendant = optionList.accessibleNode;
 
 This would allow the relationship to be expressed naturally.
 
-#### No reflection
+#### AOM and ARIA
 
-Even though there's correspondence between Accessible Properties and
-ARIA attributes, they are never reflected. Similarly, Accessible Properties
-do not reflect equivalent implicit properties of their associated DOM elements,
-either.
+While AOM and ARIA both affect the computed accessible properties of a node,
+and have the same vocabulary,
+they are separate interfaces.
 
-```js
-button = document.createElement("button");
-button.innerHTML = "Next";
-console.log(button.accessibleNode.role);   // null, not "button"
-console.log(button.accessibleNode.label);  // null, not "Next"
+##### No reflection
 
-button.setAttribute("role", "link");
-button.setAttribute("aria-label", "Next Page");
-console.log(button.accessibleNode.role);   // null, not "link"
-console.log(button.accessibleNode.label);  // null, not "Next Page"
+ARIA does not reflect to AOM:
+
+```html
+<div "clickBtn" role="button">Click here</div>
 ```
 
-Similarly, setting Accessible Properties on an `AccessibleNode` does not
-affect corresponding ARIA attributes at all.
-
 ```js
-button.accessibleNode.role = "menuitem";
-button.accessibleNode.label = "Next Page (Ctrl+N)";
-console.log(button.getAttribute("role"));  // still "link"
-console.log(button.getAttribute("aria-label"));  // still "Next Page"
+console.log(clickBtn.accessibleNode.role);   // null, not "button"
 ```
 
-This is analogous to the `style` attribute, which allows
-reading and setting an element's local style, while
-`getComputedStyle()` allows access to the full computed style.
+And AOM does not reflect to ARIA:
 
-Part of the reasoning behind this is that there are some cases in which
-Accessible Properties are more expressive than ARIA attributes - for example,
-referencing elements that don't have IDs. Since there would be no way to
-represent those cases as DOM attribute.
+```html
+clickBtn.accessibleNode.role = "link";
 
-Another reason is for efficiency and tidiness: setting a DOM attribute is more
-heavyweight than setting a property of an object from JavaScript. Authors who
-are concerned about the performance of their web application or the bloated
-size of their generated HTML will find using the Accessibility Object Model
-to be a more efficient alternative. It also promotes creating custom elements
-that are clean and fully encapsulate their own accessibility rather than
-leaking it.
+console.log(clickBtn.getAttribute("role"));  // Still "button"
+```
+
+##### ARIA takes precedence
+
+In the case where and AOM Accessible Property and the corresponding ARIA attribute have different values,
+the ARIA attribute takes precedence.
+
+For example, in the case in the previous section,
+`clickBtn` would have a computed role of `"button"`
+even though its `accessibleNode` has a `role` of `"link"`.
+
+##### Reasoning
+
+The reasons for these decisions are discussed in #60,
+but in summary the benefits are:
+- Authors can use ARIA to modify elements which apply their own default Accessibility Properties,
+as in the case of Custom Elements;
+- ARIA is still a source of truth in the DOM tree;
+- There is no need to handle cases such as related nodes where Accessible Properties
+can express things which ARIA cannot;
+- Setting Accessible Properties will not have the performance implications
+of setting a DOM attribute.
 
 #### Computed accessible properties
 
-In Phase 4 the Accessibility Object Model spec will provide a way to get the computed
-value of accessibility properties.
+Accessible Properties explicitly **will not** allow authors to access
+the _computed_ accessible node properties corresponding to a given DOM node:
 
-The reason this will be done via a separate mechanism is because the computed
-value of many accessible properties requires layout. Allowing web authors to query
-the computed value of an accessible property at any time via a simple property access
-would introduce confusing performance bottlenecks.
+```html
+<button id="composeBtn">Compose</button>
+```
+```js
+var composeBtn = document.getElementById('composeBtn');
+console.log(composeBtn.accessibleNode.role);  // null, not "button"
+console.log(composeBtn.accessibleNode.label);  // null, not "Compose"
+```
+
+This is analogous to the `style` attribute,
+which allows reading and setting an element's local style,
+while `getComputedStyle()` allows access to the full computed style.
+
+[Phase 4](#phase-4-full-introspection-of-an-accessibility-tree) will allow accessing the computed properties.
 
 #### Validation
 
-Querying an Accessible Property can be used as a limited
-form of validation and feature detection.
+Querying an Accessible Property can be used as a limited form of validation and feature detection.
 
-On an uninitialized `AccessibleNode`, properties that are supported by the
-browser will return `null` initially, while unsupported / unrecognized
-properties return `undefined`:
+On an uninitialized `AccessibleNode`,
+properties that are supported by the browser will return `null` initially,
+while unsupported / unrecognized properties return `undefined`:
 
 ```js
 console.log(el.accessibleNode.role); // null
@@ -543,7 +561,7 @@ document.body.accessibleNode.removeChild(virtualNode);
 
 In addition, calling appendChild on a node that's already inserted somewhere else
 in the accessibility tree will implicitly remove it from its old location and
-append it to the 
+append it to the
 
 Finally, the AOM also provides `insertChild` that's analogous to the DOM Node
 insertChild method, taking a zero-based index and then a child.
@@ -612,6 +630,34 @@ This will make it possible to:
   * react to accessibility tree state,
     for example, detecting the exposed role of an element
     and modifying the accessible help text to suit.
+
+#### Why is accessing the computed properties being addressed last?
+
+**Consistency**
+Currently, the accessibility tree is not standardized between browsers:
+Each implements accessibility tree computation slightly differently.
+In order for this API to be useful,
+it needs to work consistently across browsers,
+so that developers don't need to write special case code for each.
+
+We want to take the appropriate time to ensure we can agree
+on the details for how the tree should be computed
+and represented.
+
+**Performance**
+Computing the value of many accessible properties requires layout.
+Allowing web authors to query the computed value of an accessible property
+synchronously via a simple property access
+would introduce confusing performance bottlenecks.
+
+We will likely want to create an asynchronous mechanism for this reason,
+meaning that it will not be part of the `accessibleNode` interface.
+
+**User experience**
+Compared to the previous three phases,
+accessing the computed accessibility tree will have the least direct impact on users.
+In the spirit of the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies),
+it makes sense to tackle this work last.
 
 ### Phases: Summary
 
