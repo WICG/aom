@@ -155,7 +155,7 @@
       </section>
       <section id="inclusion">
         <h2>Criteria for Inclusion</h2>
-        <p>This specification is not intended to solve all accessibility problems on the web. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
+        <p>This specification is not intended to solve all accessibility problems on the Web. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
         <p>
           We have defined <a href="criteria.html">Inclusion/Exclusion Criteria</a>
           in order to clarify exactly what will be considered in-scope.
@@ -277,7 +277,6 @@
           // Accessible label and description.
           attribute DOMString? label;
           attribute iterable&lt;AccessibleNode&gt; labeledBy;
-          attribute DOMString? description;
           attribute iterable&lt;AccessibleNode&gt; describedBy;
 
           // Global states and properties.
@@ -347,15 +346,15 @@
           greater detail below.
         </p>
         <p>
-          Values set on a DOM element's AccessibleNode become the primary source of
-          truth for the browser's implementation of native accessibility APIs for
-          that accessibility property, overriding the equivalent ARIA
-          attribute if valid.
+          Values set on a DOM element's AccessibleNode are used
+          for the browser's implementation of native accessibility APIs for
+          that accessibility property.
+          When both an AccessibleNode property and its equivalent ARIA attribute
+          are both present, the ARIA attribute overrides the AccessibleNode
+          property.
         </p>
         <p>
-          If a property of AccessibleNode is set to an invalid value, it is ignored
-          and the calculation of that ARIA attribute falls back on the ARIA attribute,
-          if present, and on the element's native semantics otherwise.
+          If a property of AccessibleNode is set to an invalid value, it is ignored.
         </p>
       </section>
       <section id="mapping">
