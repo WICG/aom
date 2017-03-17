@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>
-      Accessibility Object Model
+      Accessibility Object Model, Phase 1
     </title>
     <meta charset='utf-8'>
     <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
@@ -140,18 +140,13 @@
       <section id="explainer">
         <h2>Explainer</h2>
         <p>
-          <b>Note:</b> This spec is an <b>early draft</b> and doesn't
-          contain all of the relevant background material,
-          definitions, and motivation behind the design decisions.
-        </p>
-        <p>
           Please refer to the
-          <a href="https://github.com/a11y-api/a11y-api/blob/master/explainer.md">
+          <a href="https://github.com/WICG/aom/blob/master/explainer.md">
             Accessibility Object Model Explainer</a> for the background and
           motivation.
         </p>
         <p>If you have questions, comments, or other feedback, please
-          <a href="https://github.com/a11y-api/a11y-api/issues">file an issue</a> on GitHub.
+          <a href="https://github.com/WICG/aom/issues">file an issue</a> on GitHub.
         </p>
       </section>
       <section id="scope">
@@ -160,9 +155,9 @@
       </section>
       <section id="inclusion">
         <h2>Criteria for Inclusion</h2>
-        <p>The first version of this specification is not intended to be complete. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
+        <p>This specification is not intended to solve all accessibility problems on the Web. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
         <p>
-          We have defined <a href="http://a11y-api.github.io/a11y-api/spec/criteria.html">Inclusion/Exclusion Criteria</a>
+          We have defined <a href="criteria.html">Inclusion/Exclusion Criteria</a>
           in order to clarify exactly what will be considered in-scope.
         </p>
       </section>
@@ -173,20 +168,20 @@
       </h2>
       <section>
         <h3>
-          Extensions to the <code>Node</code> interface
+          Extensions to the <code>Element</code> interface
         </h3>
         <p>
-          The author can request an <a>accessible node</a> from any [[!DOM]]
-          <code>Node</code> that is rendered as part of a web page.
+          The author can request an <i>accessible node</i> from any valid [[!DOM]]
+          <code>Element</code>.
         </p>
         <pre class="idl">
-          partial interface Node {
+          partial interface Element {
             readonly attribute AccessibleNode accessibleNode;
           };
         </pre>
-        <p data-dfn-for="Node">
-          The <dfn>accessibleNode</dfn> attribute returns the <a>accessible
-          node</a> associated with this <code>DOM node</code>. It always returns
+        <p data-dfn-for="Element">
+          The <dfn>accessibleNode</dfn> attribute returns the <i>accessible
+          node</i> associated with this <code>DOM element</code>. It always returns
           a valid object if the browser supports the AOM.
         </p>
       </section>
@@ -197,22 +192,102 @@
         <pre class="idl">
         enum AutocompleteType { "none", "inline", "list", "both" };
         enum CheckedType { "false", "mixed", "true" };
+        enum CurrentType { "page", "step", "location", "date", "time", "true", "false" };
         enum InvalidType { "false", "true", "grammar", "spelling" };
         enum LiveType { "off", "polite", "assertive" };
         enum LiveRelevantType { "additions", "additions text", "all", "removals", "text" };
         enum OrientationType { "horizontal", "vertical" };
+        enum RoleType {
+          "alert",
+          "alertdialog",
+          "application",
+          "article",
+          "banner",
+          "button",
+          "cell",
+          "checkbox",
+          "columnheader",
+          "combobox",
+          "complementary",
+          "contentinfo",
+          "definition",
+          "dialog",
+          "directory",
+          "document",
+          "feed",
+          "figure",
+          "form",
+          "grid",
+          "gridcell",
+          "group",
+          "heading",
+          "img",
+          "link",
+          "list",
+          "listbox",
+          "listitem",
+          "log",
+          "main",
+          "marquee",
+          "math",
+          "menu",
+          "menubar",
+          "menuitem",
+          "menuitemcheckbox",
+          "menuitemradio",
+          "navigation",
+          "none",
+          "note",
+          "option",
+          "presentation",
+          "progressbar",
+          "radio",
+          "radiogroup",
+          "region",
+          "row",
+          "rowgroup",
+          "rowheader",
+          "scrollbar",
+          "search",
+          "searchbox",
+          "separator",
+          "slider",
+          "spinbutton",
+          "status",
+          "switch",
+          "tab",
+          "table",
+          "tablist",
+          "tabpanel",
+          "term",
+          "textbox",
+          "timer",
+          "toolbar",
+          "tooltip",
+          "tree",
+          "treegrid",
+          "treeitem"
+        };
         enum SortType { "none", "ascending", "descending", "other" };
 
         interface AccessibleNode {
-          attribute DOMString role;
+          attribute RoleType role;
+          attribute DOMString? roleDescription;
 
           // Accessible label and description.
           attribute DOMString? label;
-          attribute DOMString? description;
+          attribute iterable&lt;AccessibleNode&gt; labeledBy;
+          attribute iterable&lt;AccessibleNode&gt; describedBy;
+
+          // Global states and properties.
+          attribute CurrentType? current;
 
           // Widget properties.
           attribute AutocompleteType? autocomplete;
           attribute boolean? hidden;
+          attribute DOMString? keyShortcuts;
+          attribute boolean? modal;
+          attribute boolean? multiline;
           attribute boolean? multiselectable;
           attribute OrientationType? orientation;
           attribute boolean? readonly;
@@ -225,30 +300,29 @@
           attribute boolean? expanded;
           attribute boolean? disabled;
           attribute InvalidType? invalid;
-          attribute boolean hasPopUp;
+          attribute boolean? hasPopUp;
+          attribute boolean? pressed;
 
           // Control values.
-          attribute DOMString? value;
+          attribute DOMString? valueText;
           attribute DOMString? placeholder;
-          attribute double? rangeValue;
-          attribute double? rangeMin;
-          attribute double? rangeMax;
-          attribute double? rangeStep;
+          attribute double? valueNow;
+          attribute double? valueMin;
+          attribute double? valueMax;
 
           // Live regions.
-          attribute boolean? liveAtomic;
-          attribute boolean? liveBusy;
-          attribute LiveType? liveStatus;
-          attribute LiveRelevantType? liveRelevant;
+          attribute boolean? atomic;
+          attribute boolean? busy;
+          attribute LiveType? live;
+          attribute LiveRelevantType? relevant;
 
-          // Relationships.
+          // Other relationships.
           attribute AccessibleNode? activeDescendant;
           attribute iterable&lt;AccessibleNode&gt; controls;
-          attribute iterable&lt;AccessibleNode&gt; describedBy;
           attribute AccessibleNode? details;
           attribute AccessibleNode? errorMessage;
           attribute AccessibleNode? flowTo;
-          attribute iterable&lt;AccessibleNode&gt; labeledBy;
+          attribute iterable&lt;AccessibleNode&gt; owns;
 
           // Collections.
           attribute unsigned long? colCount;
@@ -263,21 +337,24 @@
         };
         </pre>
         <p>
+          Initially all AccessibleNode properties must return null.
+        </p>
+        <p>
           All AccessibleNode properties, on setting, store the provided value.
-          On getting, they return the user-provided value if present, and otherwise
-          the value from the associated DOM Node's equivalent ARIA attribute, if any,
-          and otherwise they return null.
+          On getting, they return the user-provided value if present and valid,
+          and null otherwise. The validity of a property valid is specified in
+          greater detail below.
         </p>
         <p>
-          Values set on a DOM Node's AccessibleNode become the primary source of
-          truth for the browser's implementation of native accessibility APIs for
-          that accessibility property, overriding the equivalent ARIA
-          attribute if valid.
+          Values set on a DOM element's AccessibleNode are used
+          for the browser's implementation of native accessibility APIs for
+          that accessibility property.
+          When both an AccessibleNode property and its equivalent ARIA attribute
+          are both present, the ARIA attribute overrides the AccessibleNode
+          property.
         </p>
         <p>
-          If a property of AccessibleNode is set to an invalid value, it is ignored
-          and the calculation of that ARIA attribute falls back on the ARIA attribute,
-          if present, and on the node's native semantics otherwise.
+          If a property of AccessibleNode is set to an invalid value, it is ignored.
         </p>
       </section>
       <section id="mapping">
@@ -285,12 +362,18 @@
           Mapping to ARIA attributes
         </h3>
         <p>
-          Nearly all accessibility properties on the AccessibleNode interface have an
-          equivalent ARIA attribute. When they do, the mappings are very straightforward.
-          This table shows the mappings and indicates the ones that have different semantics
-          explained below.
+          In Phase 1, there's a 1:1 correspondence between the set of
+          properties on AccessibleNode and the list of valid ARIA
+          attributes from the [[!WAI-ARIA]] 1.1 spec.
+          This table shows the mappings and also includes deprecated
+          ARIA attributes that are not mapped into AccessibleNode
+          properties.
         </p>
-
+        <p>
+          The Accessibility Object Model does not define new semantics.
+          The semantic meaning of each AccessibleNode property
+          is identical to the meaning of the ARIA attribute.
+        </p>
       <table>
         <caption>
           <dfn>Accessibility property table</dfn>
@@ -309,9 +392,19 @@
             <td><code>aria-activedescendant</code></td>
           </tr>
           <tr>
+            <td><code>atomic</code></td>
+            <td><code>boolean</code></td>
+            <td><code>aria-atomic</code></td>
+          </tr>
+          <tr>
             <td><code>autocomplete</code></td>
             <td><code>enum { "both", "inline", "list", "none" }?</code></td>
             <td><code><nobr>aria-autocomplete</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>busy</code></td>
+            <td><code>boolean</code></td>
+            <td><code>aria-busy</code></td>
           </tr>
           <tr>
             <td><code>checked</code></td>
@@ -339,14 +432,9 @@
             <td><code>aria-controls</code></td>
           </tr>
           <tr>
-            <td><code>description</code></td>
-            <td><code>DOMString</code></td>
-            <td>*</td>
-          </tr>
-          <tr>
-            <td><code>details</code></td>
-            <td><code>AccessibleNode</code></td>
-            <td><code>aria-details</code></td>
+            <td><code>current</code></td>
+            <td><code>enum { "page", "step", "location", "date", "time", "true", "false" }?</code></td>
+            <td><code><nobr>aria-current</nobr></code></td>
           </tr>
           <tr>
             <td><code>describedBy</code></td>
@@ -354,9 +442,21 @@
             <td><code>aria-describedby</code></td>
           </tr>
           <tr>
+            <td><code>details</code></td>
+            <td><code>AccessibleNode</code></td>
+            <td><code>aria-details</code></td>
+          </tr>
+          <tr>
             <td><code>disabled</code></td>
             <td><code>boolean?</code></td>
             <td><code><nobr>aria-disabled</nobr></code></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><code><nobr>aria-dropeffect</nobr></code>
+              (deprecated)
+            </td>
           </tr>
           <tr>
             <td><code>errorMessage</code></td>
@@ -367,6 +467,18 @@
             <td><code>expanded</code></td>
             <td><code>boolean?</code></td>
             <td><code><nobr>aria-expanded</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>flowTo</code></td>
+            <td><code>AccessibleNode</code></td>
+            <td><code>aria-flowto</code></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><code><nobr>aria-grabbed</nobr></code>
+              (deprecated)
+            </td>
           </tr>
           <tr>
             <td><code>hasPopUp</code></td>
@@ -384,19 +496,39 @@
             <td><code><nobr>aria-invalid</nobr></code></td>
           </tr>
           <tr>
+            <td><code>keyShortcuts</code></td>
+            <td><code>DOMString?</code></td>
+            <td><code><nobr>aria-keyshortcuts</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>DOMString</code></td>
+            <td>aria-label</td>
+          </tr>
+          <tr>
             <td><code>labeledBy</code></td>
             <td><code>iterable&lt;AccessibleNode&gt;</code></td>
             <td><code>aria-labelledby</code></td>
           </tr>
           <tr>
-            <td><code>label</code></td>
-            <td><code>DOMString</code></td>
-            <td>*</td>
-          </tr>
-          <tr>
             <td><code>level</code></td>
             <td><code>unsigned long?</code></td>
             <td><code><nobr>aria-level</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>live</code></td>
+            <td><code>enum { "polite", "assertive", "off" }?</code></td>
+            <td><code><nobr>aria-live</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>modal</code></td>
+            <td><code>boolean</code></td>
+            <td><code><nobr>aria-modal</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>multiline</code></td>
+            <td><code>boolean</code></td>
+            <td><code><nobr>aria-multiline</nobr></code></td>
           </tr>
           <tr>
             <td><code>multiselectable</code></td>
@@ -409,6 +541,11 @@
             <td><code><nobr>aria-orientation</nobr></code></td>
           </tr>
           <tr>
+            <td><code>owns</code></td>
+            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
+            <td><code>aria-owns</code></td>
+          </tr>
+          <tr>
             <td><code>placeholder</code></td>
             <td><code>DOMString?</code></td>
             <td><code><nobr>aria-placeholder</nobr></code></td>
@@ -419,29 +556,29 @@
             <td><code><nobr>aria-posinset</nobr></code></td>
           </tr>
           <tr>
-            <td><code>rangeValue</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuenow</nobr></code></td>
+            <td><code>pressed</code></td>
+            <td><code>enum { "false", "mixed", "true" }</code></td>
+            <td><code><nobr>aria-pressed</nobr></code></td>
           </tr>
-          <tr>
-            <td><code>rangeMin</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuemin</nobr></code></td>
           </tr>
-          <tr>
-            <td><code>rangeMax</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuemax</nobr></code></td>
-          </tr>
-          <tr>
             <td><code>readonly</code></td>
             <td><code>boolean?</code></td>
             <td><code><nobr>aria-readonly</nobr></code></td>
           </tr>
           <tr>
+            <td><code>relevant</code></td>
+            <td><code>DOMString</code></td>
+            <td><code><nobr>aria-relevant</nobr></code></td>
+          </tr>
+          <tr>
             <td><code>required</code></td>
             <td><code>boolean?</code></td>
             <td><code><nobr>aria-required</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>roleDescription</code></td>
+            <td><code>DOMString</code></td>
+            <td><code><nobr>aria-roledescription</nobr></code></td>
           </tr>
           <tr>
             <td><code>rowCount</code></td>
@@ -474,331 +611,109 @@
             <td><code><nobr>aria-sort</nobr></code></td>
           </tr>
           <tr>
-            <td><code>value</code></td>
+            <td><code>valueMax</code></td>
+            <td><code>double?</code></td>
+            <td><code><nobr>aria-valuemax</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>valueMin</code></td>
+            <td><code>double?</code></td>
+            <td><code><nobr>aria-valuemin</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>valueNow</code></td>
+            <td><code>double?</code></td>
+            <td><code><nobr>aria-valuenow</nobr></code></td>
+          </tr>
+          <tr>
+            <td><code>valueText</code></td>
             <td><code>DOMString?</code></td>
-            <td>*</td>
+            <td><code><nobr>aria-valuetext</nobr></code></td>
           </tr>
         </tbody>
       </table>
-
+      </section>
+      <section id="Types">
+        <h3>
+          Types
+        </h3>
         <p>
-          In web accessibility, every node in the accessibility
-          tree has an <dfn>accessible name</dfn> and
-          <dfn>accessible description</dfn>, which are computed
-          using the algorithm described in [[!ACCNAME-AAM-1.1]].
-          The name is primary, the description is secondary.
+          While ARIA attributes are all strings, AccessibleNode properties
+          can have many different types. Most of these are straightforward,
+          for example <code>valueNow</code>, <code>valueMin</code>, and
+          <code>valueMax</code> are of type <code>double</code>, while
+          <code>rowCount</code>, <code>rowIndex</code>, etc. are of type
+          <code>unsigned long</code>.
         </p>
         <p>
-          There are many possible sources of the accessible name
-          of an element from its declarative markup. As an example,
-          an HTML INPUT element may get its accessible name from
-          an associated LABEL element, from the <code>title</code>
-          attribute, from the <code>aria-label</code>
-          attribute, from the <code>aria-labelledby</code>
-          attribute, or more. The [[!ACCNAME-AAM-1.1]] algorithm
-          specifies exactly how these combine to form the final
-          accessible name.
+          The primary difference is with ARIA attributes that take one
+          or more IDREFs. In AccessibleNode, they take references to
+          one or more AccessibleNodes directly. This makes it possible
+          to establish relationships between nodes that aren't in the
+          same <i>tree scope</i>, such as in different frames (with the
+          same origin), or in the shadow DOM of a custom element.
         </p>
         <p>
-          When using the AccessibleNode interface, it's much simpler.
-          The <code>label</code> property determines the accessible
-          name and the <code>description</code> property determines
-          the accessible description. In addition, the
-          <code>labelledBy</code> attribute contains references to
-          other accessible nodes that provided the label for a node,
-          and the <code>describedBy</code> attribute contains
-          references to other accessible nodes that provided
-          the description, but those relation attributes are
-          informational only.
+          In particular,
+          <code>activeDescendant</code>,
+          <code>details</code>,
+          <code>errorMessage</code>, and
+          <code>flowTo</code> are set with another AccessibleNode,
+          while <code>controls</code>, <code>labeledBy</code>, and
+          <code>describedBy</code> all take any array-like object
+          of AccessibleNodes.
+        </p>
+      </section>
+      <section id="validation">
+        <h3>
+          Validation
+        </h3>
+        <p>
+          Upon setting a property of AccessibleNode, no validation is
+          done. The user-provided value is simply stored. This is to
+          ensure that backwards compatibility is maintained; when a new
+          property is added or a new value is recognized as valid, authors
+          do not have to worry that browsers who have not yet added support
+          will break or throw an exception upon encountering this code.
         </p>
         <p>
-          In particular, setting an AccessibleNode's
-          <code>labelledBy</code> or <code>describedBy</code>
-          attributes will have <em>no effect</em> on its
-          accessible name or description. The only purpose of
-          setting them is to communicate the relationship between
-          nodes to assistive technology. Set the
-          <code>label</code> and <code>description</code>
-          attributes directly if you want those to change.
+          There are two circumstances that cause an AccessibleNode
+          property to be accessed. The first is when the browser is
+          computing the platform-specific accessibility properties for a
+          node in the native browser accessibility tree. In that case, in any
+          case where the browser would have previously checked an ARIA
+          attribute, it must access the equivalent AccessibleNode property
+          first, and use it if present and valid. The second circumstance
+          is when the AccessibleNode property is accessed explicitly from
+          JavaScript.
         </p>
         <p>
-          Similarly, the <code>value</code> property represents the
-          text value of a control, such as a text field or slider.
-          ARIA notably only provides a way to override the value for
-          range widgets using <code>aria-valuetext</code>, but the
-          <code>value</code> property of an AccessibleNode can be used
-          to override the value of any control that takes a value.
+          In both of those cases, the AccessibleNode property is
+          *validated* at the time it's accessed, and if invalid,
+          treated the same as if it was *not present*. In the case
+          of native accessibility support, it means falling back on
+          ARIA or native DOM semantics, and in the case of direct
+          access from JavaScript, returning <code>null</code>.
         </p>
-
-        <p>
-          The following ARIA attributes have no direct mapping:
-        </p>
-
-        <ul>
-          <li><code>aria-current</code> (TODO)
-          <li><code>aria-dropeffect</code> - deliberate since deprecated in ARIA 1.1
-          <li><code>aria-grabbed</code> - deliberate since deprecated in ARIA 1.1
-          <li><code>aria-keyshortcuts</code> (TODO)
-          <li><code>aria-label</code> - <code>label</code> has slightly different semantics
-          <li><code>aria-modal</code> (TODO)
-          <li><code>aria-multiline</code> (TODO)
-          <li><code>aria-owns</code> - tricky to reconcile with more explicit tree reordering later
-          <li><code>aria-pressed</code> (TODO)
-          <li><code>aria-roledescription</code> (TODO)
-          <li><code>aria-valuetext</code> - <code>value</code> has slightly different semantics
-        </ul>
       </section>
     </section>
     <section id="actions">
       <h2>
         Phase 2: Accessible Actions
       </h2>
-        <p>
-          In this phase, we extent AccessibleNode so that it's also an
-          EventTarget.  AccessibleNodes receive
-          special <b>accessibility input events</b> or <b>accessible
-          actions</b> that represent explicit intents to control the
-          user agent via an accessibility API
-        </p>
-        <pre class="idl">
-          interface AccessibleNode : EventTarget {
-            ...
-          };
-        </pre>
-        <p>
-          Accessibility input events are needed for two reasons.
-          First, because it's possible to create AccessibleNodes
-          that don't correspond to a DOM node and authors need to
-          be able to listen to events on these nodes. Second,
-          because there are many types of specific user intents
-          that can be communicated to the user agent via accessibility
-          APIs that don't correspond to existing keyboard and mouse
-          events - for example some assistive technology has
-          keystrokes or gestures to increment a slider, or dismiss
-          a pop-up.
-        </p>
-        <pre class="idl">
-          interface AccessibleSetValueEvent : Event {
-            attribute DOMString value;
-          };
-        </pre>
-        <table>
-          <caption>
-            Accessibility event table
-          </caption>
-          <thead>
-            <tr>
-              <th>event name</th>
-              <th>type</th>
-              <th>valid roles</th>
-              <th>fallback behavior</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>"accessibleclick"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td><em>all roles</em></td>
-              <td>Fire <code>"click"</code> event on DOM node</td>
-            </tr>
-            <tr>
-              <td><code>"accessiblefocus"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td><em>all roles</em></td>
-              <td>Focus the associated DOM element</td>
-            </tr>
-            <tr>
-              <td><code>"accessiblesetvalue"</code></td>
-              <td><code>AccessibleSetValueEvent</code></td>
-              <td>
-                <code>"scrollbar"</code>,
-                <code>"slider"</code>
-              </td>
-              <td>Change value of INPUT or TEXTAREA element</td>
-            </tr>
-            <tr>
-              <td><code>"accessibleincrement"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td>
-                <code>"scrollbar"</code>,
-                <code>"slider"</code>
-              </td>
-              <td>
-                Change value of INPUT type="range",
-                otherwise fire <code>"keypress"</code> with a
-                RightArrow key code
-              </td>
-            </tr>
-            <tr>
-              <td><code>"accessibledecrement"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td>
-                <code>"scrollbar"</code>,
-                <code>"slider"</code>
-              </td>
-              <td>
-                Change value of INPUT type="range",
-                otherwise fire <code>"keypress"</code> with a
-                LeftArrow key code
-              </td>
-            </tr>
-            <tr>
-              <td><code>"accessibleselect"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td>
-                <code>"cell"</code>,
-                <code>"option"</code>
-              </td>
-              <td>
-                Change selectedIndex of SELECT
-                otherwise fire <code>"click"</code> event
-              </td>
-            </tr>
-            <tr>
-              <td><code>"accessiblescrollintoview"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td><em>all roles</em></td>
-              <td>scroll DOM node into view</td>
-            </tr>
-            <tr>
-              <td><code>"accessibledismiss"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
-              <td><em>all roles</em></td>
-              <td>fire <code>"keypress"</code> with a
-                Escape key code</td>
-            </tr>
-          </tbody>
-        </table>
-        <p>
-          Accessibility input events go through capture and bubble
-          phases, just like DOM events. The only difference is that
-          the capture and bubble phases happen entirely in the
-          accessibility tree. If the event is not canceled
-          (by calling <code>preventDefault()</code>) after completely
-          going through the capture and bubble phases in the accessibility
-          tree, the event executes its <dfn>fallback behavior</dfn>,
-          as defined in the <a>accessibility attribute table</a>.
-        </p>
-        <p>
-          When an event's fallback behavior involves firing a DOM
-          event, the event's target will be the associated DOM node
-          of the target AccessibleNode, or the associated DOM node
-          of the nearest ancestor of the target AccessibleNode that
-          has one. Fallback DOM events will go through capture and
-          bubble phases just like any other DOM events.
-        </p>
-        <p>
-          As an example, suppose an accessible click event is received
-          on a button. Here's the sequence of what will occur:
-          <ol>
-            <li>Capturing event listeners are called, starting with the
-              root of the accessibility tree, and continuing along the
-              ancestor chain until reaching the target AccessibleNode in
-              the accessibility tree.
-            <li>If none of the capturing event listeners stop
-              propagation, normal (non-capturing) event listeners on the
-              target AccessibleNode are called, and if
-              <code>stopPropagation()</code> is not called, the event
-              bubbles up to all event listeners on ancestors of the
-              target.
-            <li>After capture and bubble phases in the accessibility tree,
-              if <code>preventDefault()</code> was not called, the
-              event's <a>fallback behavior</a> is triggered. In this
-              case it fires a DOM <code>"click"</code> event on the
-              targer AccessibleNode's associated DOM node, going through
-              capture and bubble phases in the DOM tree.
-          </ol>
-        </p>
-
-        <p>
-          The following were considered as possible accessibility
-          input events but were deferred for a future version of the
-          spec. Please file a bug if you have a compelling use case
-          for one of these.
-        </p>
-        <ul>
-          <li><code>"addtoselection"</code>
-          <li><code>"collapse"</code>
-          <li><code>"delete"</code>
-          <li><code>"expand"</code>
-          <li><code>"medianext"</code>
-          <li><code>"mediapause"</code>
-          <li><code>"mediaprevious"</code>
-          <li><code>"mediastart"</code>
-          <li><code>"mediastop"</code>
-          <li><code>"removefromselection"</code>
-          <li><code>"scroll"</code>
-          <li><code>"zoom"</code>
-        </ul>
-      <section>
-        <h3>Privacy concerns</h3>
-        <p>
-          This phase raises some potential privacy concerns. If a web app
-          receives an accessibility input event, it now knows for a fact
-          that assistive technology or some other client of a native
-          accessibility API is running. There is potential that this could be
-          used to track or discriminate against some users.
-        </p>
-        <p>
-          To address these concerns, a web site should not be able to
-          receive these events until the user has explicitly opted in to
-          allow those events to be received by that web site. The exact
-          protocol is TBD.
-        </p>
-      </section>
+      <p>See <a href="phase2.html">Phase 2</a></p>
     </section>
-    <section class="virtual">
+    <section id="actions">
       <h2>
         Phase 3: Virtual Accessibility Nodes
       </h2>
-      <p>
-        Virtual Accessibility Nodes will allow authors to expose
-        "virtual" accessibility nodes, which are not associated directly
-        with any particular DOM node, to assistive technology.
-      </p>
-      <p>
-        This mechanism is often present in native accessibility APIs,
-        in order to allow authors more granular control over the
-        accessibility of custom-drawn APIs.
-      </p>
-      <p>
-        On the web, this would allow creating an accessible solution
-        to canvas-based UI which does not rely on fallback or
-        visually-hidden DOM content.
-      </p>
-      <p>
-        The API for Virtual Accessibility Nodes will be specified at a later date.
-      </p>
+      <p>See <a href="phase3.html">Phase 3</a></p>
     </section>
-    <section id="computedtree">
+    <section id="actions">
       <h2>
         Phase 4: Computed Accessibility Tree
       </h2>
-      <p>
-        The Computed Accessibility Tree API will allow authors to
-        access the full computed accessibility tree - all computed
-        properties for the accessibility node associated with each
-        DOM node, plus the ability to walk the computed tree
-        structure including virtual nodes.
-      </p>
-      <p>
-        This will make it possible to:
-      </p>
-      <ul>
-        <li>write any programmatic test which asserts anything about the semantic properties of an element or a page.
-        <li>build a reliable browser-based assistive technology - for example, a browser extension which uses the accessibility tree to implement a screen reader, screen magnifier, or other assistive functionality; or an in-page tool.
-        <li>detect whether an accessibility property has been successfully applied (via ARIA or otherwise) to an element - for example, to detect whether a browser has implemented a particular version of ARIA.
-        <li>do any kind of console-based debugging/checking of accessibility tree issues.
-          react to accessibility tree state, for example, detecting the exposed role of an element and modifying the accessible help text to suit.
-      </ul>
-      <p>
-        One implication of implementing this phase is that all browsers must agree on
-        exposing the *same* accessibility tree for the same given webpage, otherwise
-        differences will invariably lead to authored pages that work in some browsers
-        but not others. Care must be taken to define this phase in such a way that
-        maintains a high degree of compatibility between browsers, without exposing any
-        internal details and nuances.
-      </p>
+      <p>See <a href="phase4.html">Phase 4</a></p>
     </section>
     <section class="appendix">
       <h2>

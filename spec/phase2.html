@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Accessibility Object Model, Phase 2
+    </title>
+    <meta charset='utf-8'>
+    <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
+    class='remove'>
+    </script>
+    <script class='remove'>
+    /*Make tidy happy*/
+    var respecConfig = {
+          // specification status (e.g. WD, LCWD, WG-NOTE, etc.). If in doubt use ED.
+          specStatus:           "unofficial",
+          // the specification's short name, as in http://www.w3.org/TR/short-name/
+          shortName:            "aom",
+
+          // if your specification has a subtitle that goes below the main
+          // formal title, define it here
+          // subtitle   :  "an excellent document",
+
+          // if you wish the publication date to be other than the last modification, set this
+          // publishDate:  "2009-08-06",
+
+          // if the specification's copyright date is a range of years, specify
+          // the start date here:
+          // copyrightStart: "2005"
+
+          // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+          // and its maturity status
+          // previousPublishDate:  "1977-03-15",
+          // previousMaturity:  "WD",
+
+          // if there a publicly available Editor's Draft, this is the link
+          // edDraftURI:           "http://berjon.com/",
+
+          // if this is a LCWD, uncomment and set the end of its review period
+          // lcEnd: "2009-08-05",
+
+          // editors, add as many as you like
+          // only "name" is required
+          editors:  [
+              {
+                  name:       "Alice Boxhall"
+              ,   url:        "http://google.com"
+              ,   mailto:     "aboxhall@google.com"
+              ,   company:    "Google"
+              ,   companyURL: "http://google.com/"
+              },
+              {
+                  name:       "James Craig"
+              ,   url:        "http://apple.com"
+              ,   mailto:     "jcraig@apple.com"
+              ,   company:    "Apple"
+              ,   companyURL: "http://apple.com/"
+              },
+              {
+                  name:       "Dominic Mazzoni"
+              ,   url:        "http://google.com"
+              ,   mailto:     "dmazzoni@google.com"
+              ,   company:    "Google"
+              ,   companyURL: "http://google.com/"
+              },
+              {
+                  name:       "Alexander Surkov"
+              ,   url:        "http://mozilla.org/"
+              ,   mailto:     "surkov.alexander@gmail.com"
+              ,   company:    "Mozilla"
+              ,   companyURL: "http://mozilla.org/"
+              },
+          ],
+          // name of the WG
+          //         wg:           "None",
+
+          // URI of the public WG page
+          //         wgURI:        "http://example.org/really-cool-wg",
+
+          // name (without the @w3c.org) of the public mailing to which comments are due
+          //          wgPublicList: "spec-writers-anonymous",
+
+          // URI of the patent status for this WG, for Rec-track documents
+          // !!!! IMPORTANT !!!!
+          // This is important for Rec-track documents, do not copy a patent URI from a random
+          // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+          // Team Contact.
+          //        wgPatentURI:  "",
+          // !!!! IMPORTANT !!!! MAKE THE ABOVE BLINK IN YOUR HEAD
+      };
+    </script>
+  </head>
+  <body>
+    <section id="introduction">
+      <h1>Introduction</h1>
+      <p>
+        This document is the spec for Phase 2 of the Accessibility Object
+        Model spec. For background, please refer to the
+        <a href="https://github.com/WICG/aom/blob/master/explainer.md">
+          Accessibility Object Model Explainer</a> for the background and
+        motivation, and then
+        <a href="index.html">Phase 1</a>.
+      </p>
+    </section>
+    <section id="actions">
+      <h2>
+        Phase 2: Accessible Actions
+      </h2>
+        <p>
+          In this phase, we extend AccessibleNode so that it's also an
+          EventTarget.  AccessibleNodes receive
+          special <b>accessibility input events</b> or <b>accessible
+          actions</b> that represent explicit intents to control the
+          user agent via an accessibility API
+        </p>
+        <pre class="idl">
+          interface AccessibleNode : EventTarget {
+            ...
+          };
+        </pre>
+        <p>
+          Accessibility input events are needed for two reasons.
+          <ul>
+            <li>
+              First, because it's possible to create AccessibleNodes
+              that don't correspond to a DOM node and authors need to
+              be able to listen to events on these nodes.
+            </li>
+            <li>
+              Second,
+              because there are many types of specific user intents
+              that can be communicated to the user agent via accessibility
+              APIs that don't correspond to existing keyboard and mouse
+              events - for example some assistive technology has
+              keystrokes or gestures to increment a slider, or dismiss
+              a pop-up.
+            </li>
+          </ul>
+        </p>
+        <pre class="idl">
+          interface AccessibleSetValueEvent : Event {
+            attribute DOMString value;
+          };
+        </pre>
+        <table>
+          <caption>
+            Accessibility event table
+          </caption>
+          <thead>
+            <tr>
+              <th>event name</th>
+              <th>type</th>
+              <th>valid roles</th>
+              <th>fallback behavior (see below)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>"accessibleclick"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>Fire <code>"click"</code> event on DOM node</td>
+            </tr>
+            <tr>
+              <td><code>"accessiblefocus"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>Focus the associated DOM element</td>
+            </tr>
+            <tr>
+              <td><code>"accessiblesetvalue"</code></td>
+              <td><code>AccessibleSetValueEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>Change value of INPUT or TEXTAREA element</td>
+            </tr>
+            <tr>
+              <td><code>"accessibleincrement"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>
+                Change value of INPUT type="range",
+                otherwise fire <code>"keypress"</code> with a
+                RightArrow key code
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessibledecrement"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"scrollbar"</code>,
+                <code>"slider"</code>
+              </td>
+              <td>
+                Change value of INPUT type="range",
+                otherwise fire <code>"keypress"</code> with a
+                LeftArrow key code
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessibleselect"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td>
+                <code>"cell"</code>,
+                <code>"option"</code>
+              </td>
+              <td>
+                Change selectedIndex of SELECT
+                otherwise fire <code>"click"</code> event
+              </td>
+            </tr>
+            <tr>
+              <td><code>"accessiblescrollintoview"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>scroll DOM node into view</td>
+            </tr>
+            <tr>
+              <td><code>"accessibledismiss"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>fire <code>"keypress"</code> with a
+                Escape key code</td>
+            </tr>
+            <tr>
+              <td><code>"accessiblecontextmenu"</code></td>
+              <td><code>AccessibleInputEvent</code></td>
+              <td><em>all roles</em></td>
+              <td>fire <code>"keypress"</code> with a
+                Context Menu key code, or simulate a right-click
+                on the target node.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Accessibility input events go through capture and bubble
+          phases, just like DOM events. The only difference is that
+          the capture and bubble phases happen entirely in the
+          accessibility tree. If the event is not canceled
+          (by calling <code>preventDefault()</code>) after completely
+          going through the capture and bubble phases in the accessibility
+          tree, the event executes its <dfn>fallback behavior</dfn>,
+          as defined in the <a>accessibility attribute table</a>.
+        </p>
+        <p>
+          When an event's fallback behavior involves firing a DOM
+          event, the event's target will be the associated DOM node
+          of the target AccessibleNode, or the associated DOM node
+          of the nearest ancestor of the target AccessibleNode that
+          has one. Fallback DOM events will go through capture and
+          bubble phases just like any other DOM events.
+        </p>
+        <p>
+          As an example, suppose an accessible click event is received
+          on a button. Here's the sequence of what will occur:
+          <ol>
+            <li>Capturing event listeners are called, starting with the
+              root of the accessibility tree, and continuing along the
+              ancestor chain until reaching the target AccessibleNode in
+              the accessibility tree.
+            <li>If none of the capturing event listeners stop
+              propagation, normal (non-capturing) event listeners on the
+              target AccessibleNode are called, and if
+              <code>stopPropagation()</code> is not called, the event
+              bubbles up to all event listeners on ancestors of the
+              target.
+            <li>After capture and bubble phases in the accessibility tree,
+              if <code>preventDefault()</code> was not called, the
+              event's <a>fallback behavior</a> is triggered. In this
+              case it fires a DOM <code>"click"</code> event on the
+              targer AccessibleNode's associated DOM node, going through
+              capture and bubble phases in the DOM tree.
+          </ol>
+        </p>
+
+        <p>
+          The following were considered as possible accessibility
+          input events but were deferred for a future version of the
+          spec. Please file a bug if you have a compelling use case
+          for one of these.
+        </p>
+        <ul>
+          <li><code>"addtoselection"</code>
+          <li><code>"collapse"</code>
+          <li><code>"delete"</code>
+          <li><code>"expand"</code>
+          <li><code>"medianext"</code>
+          <li><code>"mediapause"</code>
+          <li><code>"mediaprevious"</code>
+          <li><code>"mediastart"</code>
+          <li><code>"mediastop"</code>
+          <li><code>"removefromselection"</code>
+          <li><code>"scroll"</code>
+          <li><code>"zoom"</code>
+        </ul>
+      <section>
+        <h3>Privacy concerns</h3>
+        <p>
+          This phase raises some potential privacy concerns. If a web app
+          receives an accessibility input event, it now knows for a fact
+          that assistive technology or some other client of a native
+          accessibility API is running. There is potential that this could be
+          used to track or discriminate against some users.
+        </p>
+        <p>
+          To address these concerns, a web site should not be able to
+          receive these events until the user has explicitly opted in to
+          allow those events to be received by that web site. The exact
+          protocol is TBD.
+        </p>
+      </section>
+    </section>
+    <section id="actions">
+      <h2>
+        Phase 3: Virtual Accessibility Nodes
+      </h2>
+      <p>See <a href="phase3.html">Phase 3</a></p>
+    </section>
+    <section id="actions">
+      <h2>
+        Phase 4: Computed Accessibility Tree
+      </h2>
+      <p>See <a href="phase4.html">Phase 4</a></p>
+    </section>
+  </body>
+</html>
