@@ -197,7 +197,7 @@ or can't be achieved without cumbersome workarounds.
 
 ## The Accessibility Object Model
 
-This spec proposes the *Accessibility Object Model*.
+This spec proposes the *Accessibility Object Model* (AOM).
 We plan to split this work into four phases,
 which will respectively allow authors to:
 
