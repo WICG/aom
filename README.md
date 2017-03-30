@@ -13,6 +13,6 @@ page.
 
 ## Details
 
-Read the [Explainer](https://github.com/WICG/aom/blob/master/explainer.md)
+Read the [Explainer](./explainer.md)
 
 Read the [Spec](https://wicg.github.io/aom/spec/)
