@@ -203,7 +203,7 @@ or can't be achieved without cumbersome workarounds.
 ## The Accessibility Object Model
 
 This spec proposes the *Accessibility Object Model* (AOM).
-We plan to split this work into four phases,
+We plan to split this work into five phases,
 which will respectively allow authors to:
 
 1. modify the semantic properties of the accessibility node associated with a particular DOM node,
@@ -390,8 +390,9 @@ even though its `"role"` attribute is `"button"`.
 - Not reflecting from `accessibleNode` back to ARIA means:
   - There is no need to handle cases such as related nodes where Accessible Properties
 can express things which ARIA cannot;
-  - Setting Accessible Properties will not have the performance implications
-of setting a DOM attribute.
+  - Setting Accessible Properties 
+  will be guaranteed not to trigger a layout for most users,
+  unlike setting a DOM attribute.
 - `accessibleNode` properties taking precedence means:
   - authors do not need to explicitly remove ARIA attributes
   to ensure `accessibleNode` properties apply,
@@ -471,15 +472,23 @@ which improves the ergonomics of ARIA;
 
 #### Validation
 
-The ARIA spec defines a
+While ARIA attributes all require string values,
+`accessibleNode` properties are JavasScript values 
+which can be more strongly typed. 
+The ARIA spec defines a 
 [finite list of value types](https://www.w3.org/TR/wai-aria-1.1/#propcharacteristic_value)
-which a particular ARIA attribute may take.
+which a particular ARIA attribute may take. 
+Where there is a clear [mapping](https://www.w3.org/TR/wai-aria-1.1/#typemapping)
+from an ARIA attribute type on to a basic JavaScript type, 
+the corresponding `accessibleNode` properties will be of that type.
 
-Where these types have a clear 
-[mapping](https://www.w3.org/TR/wai-aria-1.1/#typemapping) 
-on to a basic JavaScript type,
-for example "true/false" which maps directly to a boolean type,
-the `accessibleNode` property can be set to that type.
+For example ["true/false"](https://www.w3.org/TR/wai-aria-1.1/#valuetype_true-false)
+maps directly on to a `boolean` type. 
+So, `disabled`, which corresponds to the _true/false_ attribute `aria-disabled`, 
+is a `boolean` property on `accessibleNode`. 
+Similarly, `aria-rowindex` is an
+[integer](https://www.w3.org/TR/wai-aria-1.1/#valuetype_integer) attribute, 
+so the corresponding `rowIndex` property on `accessibleNode` is of type `long`.
 
 ```js
 el.accessibleNode.disabled = true;
@@ -559,7 +568,7 @@ This is analogous to the `style` attribute,
 which allows reading and setting an element's local style,
 while `getComputedStyle()` allows access to the full computed style.
 
-[Phase 4](#phase-4-full-introspection-of-an-accessibility-tree) will allow accessing the computed properties.
+[Phase 5](#phase-5-full-introspection-of-an-accessibility-tree) will allow accessing the computed properties.
 
 ### Phase 3: Accessible Actions
 
