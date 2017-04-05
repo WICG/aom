@@ -21,15 +21,19 @@
 - [The Accessibility Object Model](#the-accessibility-object-model)
   - [Phase 1: Modifying Accessible Properties](#phase-1-modifying-accessible-properties)
     - [Use cases for Accessible Properties](#use-cases-for-accessible-properties)
-    - [AOM and ARIA](#aom-and-aria)
-      - [No reflection](#no-reflection)
-      - [ARIA takes precedence](#aria-takes-precedence)
-      - [Reasoning](#reasoning)
-    - [Computed accessible properties](#computed-accessible-properties)
+    - [AOM does not reflect to ARIA](#aom-does-not-reflect-to-aria)
+    - [AOM takes precedence](#aom-takes-precedence)
+    - [Reasoning](#reasoning)
+    - [Reading properties in phase 1](#reading-properties-in-phase-1)
+  - [Phase 2: Querying author-provided semantics](#phase-2-querying-author-provided-semantics)
+    - [ARIA does reflect to AOM](#aria-does-reflect-to-aom)
+    - ["dirty value flag" model](#dirty-value-flag-model)
+    - [Reasoning](#reasoning-1)
     - [Validation](#validation)
-  - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
-  - [Phase 3: Virtual Accessibility Nodes](#phase-3-virtual-accessibility-nodes)
-  - [Phase 4: Full Introspection of an Accessibility Tree](#phase-4-full-introspection-of-an-accessibility-tree)
+    - [Computed accessible properties](#computed-accessible-properties)
+  - [Phase 3: Accessible Actions](#phase-3-accessible-actions)
+  - [Phase 4: Virtual Accessibility Nodes](#phase-4-virtual-accessibility-nodes)
+  - [Phase 5: Full Introspection of an Accessibility Tree](#phase-5-full-introspection-of-an-accessibility-tree)
     - [Why is accessing the computed properties being addressed last?](#why-is-accessing-the-computed-properties-being-addressed-last)
   - [Phases: Summary](#phases-summary)
   - [Audience for the proposed API](#audience-for-the-proposed-api)
@@ -199,13 +203,15 @@ or can't be achieved without cumbersome workarounds.
 ## The Accessibility Object Model
 
 This spec proposes the *Accessibility Object Model* (AOM).
-We plan to split this work into four phases,
+We plan to split this work into five phases,
 which will respectively allow authors to:
 
 1. modify the semantic properties of the accessibility node associated with a particular DOM node,
+2. read back the _author-provided_ semantic properties which have been set via ARIA
+  or via the phase 1 object, 
 3. directly respond to events (or actions) from assistive technology,
-3. create virtual accessibility nodes which are not directly associated with a DOM node, and
-4. programmatically explore the accessibility tree
+4. create virtual accessibility nodes which are not directly associated with a DOM node, and
+5. programmatically explore the accessibility tree
    and access the computed properties of accessibility nodes.
 
 In the following sections we'll outline each of these phases.
@@ -349,25 +355,10 @@ input.accessibleNode.activeDescendant = optionList.accessibleNode;
 
 This would allow the relationship to be expressed naturally.
 
-#### AOM and ARIA
+#### AOM does not reflect to ARIA
 
-While AOM and ARIA both affect the computed accessible properties of a node,
-and have the same vocabulary,
-they are separate interfaces.
-
-##### No reflection
-
-ARIA does not reflect to AOM:
-
-```html
-<div "clickBtn" role="button">Click here</div>
-```
-
-```js
-console.log(clickBtn.accessibleNode.role);   // null, not "button"
-```
-
-And AOM does not reflect to ARIA:
+Setting a property on `accessibleNode`
+does not modify the corresponding ARIA attribute.
 
 ```html
 clickBtn.accessibleNode.role = "link";
@@ -375,26 +366,189 @@ clickBtn.accessibleNode.role = "link";
 console.log(clickBtn.getAttribute("role"));  // Still "button"
 ```
 
-##### ARIA takes precedence
+#### AOM takes precedence
 
-In the case where and AOM Accessible Property and the corresponding ARIA attribute have different values,
-the ARIA attribute takes precedence.
+In the case where and AOM Accessible Property
+and the corresponding ARIA attribute
+have different values,
+the AOM (`accessibleNode`) property takes precedence.
 
-For example, in the case in the previous section,
-`clickBtn` would have a computed role of `"button"`
-even though its `accessibleNode` has a `role` of `"link"`.
+```html
+<div "clickBtn" role="button">Click here</div>
+```
 
-##### Reasoning
+```js
+clickBtn.accessibleNode.role = "link";
+```
 
-The reasons for these decisions are discussed in #60,
-but in summary the benefits are:
-- Authors can use ARIA to modify elements which apply their own default Accessibility Properties,
-as in the case of Custom Elements;
-- ARIA is still a source of truth in the DOM tree;
-- There is no need to handle cases such as related nodes where Accessible Properties
+For example, in the above case,
+`clickBtn` would have a computed role of `"link"`
+even though its `"role"` attribute is `"button"`.
+
+#### Reasoning
+
+- Not reflecting from `accessibleNode` back to ARIA means:
+  - There is no need to handle cases such as related nodes where Accessible Properties
 can express things which ARIA cannot;
-- Setting Accessible Properties will not have the performance implications
-of setting a DOM attribute.
+  - Setting Accessible Properties 
+  will be guaranteed not to trigger a layout for most users,
+  unlike setting a DOM attribute.
+- `accessibleNode` properties taking precedence means:
+  - authors do not need to explicitly remove ARIA attributes
+  to ensure `accessibleNode` properties apply,
+  - `accessibleNode` provides the maximum value and
+  can be a single touch point for defining semantics
+
+#### Reading properties in phase 1
+
+In phase 1, querying the `accessibleNode` object is not possible.
+Attempting to read any of the properties on `accessibleNode`
+will cause an exception.
+
+```js
+console.log(element.accessibleNode.role);  // throws exception
+```
+
+### Phase 2: Querying author-provided semantics
+
+Phase 2 will allow reading back author-set semantics
+via the `accessibleNode` object.
+
+```js
+console.log(element.accessibleNode.role);  // returns author-set role
+```
+
+#### ARIA does reflect to AOM
+
+An ARIA attribute is reflected to the corresponding `accessibleNode` property:
+
+```html
+<div "clickBtn" role="button">Click here</div>
+```
+
+```js
+console.log(clickBtn.accessibleNode.role);   // "button"
+```
+
+#### "dirty value flag" model
+
+In order for the `accessibleNode` properties to always take precedence,
+while also reflecting ARIA attributes from the DOM,
+they will follow the
+[dirty value flag](https://html.spec.whatwg.org/multipage/forms.html#concept-fe-dirty)
+model used by `input`.
+
+This means that once a value has been written to an `accessibleNode`,
+the corresponding ARIA attribute *will never be read again*
+in the accessibility tree computation process,
+even if the value on `accessibleNode` is set to `null`.
+
+```html
+<div id="promo" role="checkbox" aria-checked="true">Receive promotional offers</div>
+```
+
+```js
+console.log(promo.accessibleNode.role);  // "checkbox", reflected from DOM
+promo.accessibleNode.role = "switch";
+console.log(promo.accessibleNode.role);  // now "switch"
+promo.accessibleNode.role = null;
+console.log(promo.accessibleNode.role);  // now `null`
+```
+
+#### Reasoning
+
+Again, more details reasoning is discussed in #60,
+but in summary the benefits are:
+- Reflecting from ARIA DOM attributes to `accessibleNode` means that
+authors can read ARIA attributes without using getAttribute(),
+which improves the ergonomics of ARIA;
+- The "dirty value flag" model results logically from the one-way reflection
+  from ARIA attributes to `accessibilityNode` properties,
+  while having `accessibilityNode` properties take strict precedence.
+  - Without this model,
+  it would be ambiguous what should happen when setting an `accessibilityNode` property
+  to `null`: should it stay `null`, or go back to reflecting the ARIA attribute?
+  - And if the latter, how would you ever override the ARIA attribute to get back to a default value?
+
+#### Validation
+
+While ARIA attributes all require string values,
+`accessibleNode` properties are JavasScript values 
+which can be more strongly typed. 
+The ARIA spec defines a 
+[finite list of value types](https://www.w3.org/TR/wai-aria-1.1/#propcharacteristic_value)
+which a particular ARIA attribute may take. 
+Where there is a clear [mapping](https://www.w3.org/TR/wai-aria-1.1/#typemapping)
+from an ARIA attribute type on to a basic JavaScript type, 
+the corresponding `accessibleNode` properties will be of that type.
+
+For example ["true/false"](https://www.w3.org/TR/wai-aria-1.1/#valuetype_true-false)
+maps directly on to a `boolean` type. 
+So, `disabled`, which corresponds to the _true/false_ attribute `aria-disabled`, 
+is a `boolean` property on `accessibleNode`. 
+Similarly, `aria-rowindex` is an
+[integer](https://www.w3.org/TR/wai-aria-1.1/#valuetype_integer) attribute, 
+so the corresponding `rowIndex` property on `accessibleNode` is of type `long`.
+
+```js
+el.accessibleNode.disabled = true;
+console.log(el.accessibleNode.disabled); // true
+el.accessibleNode.disabled = "false";
+console.log(el.accessibleNode.disabled); // true - "false" is truthy
+
+cell.accessibleNode.rowIndex = 5;
+console.log(cell.accessibleNode.rowIndex); // 5
+cell.accessibleNode.rowIndex = 5.7;
+console.log(cell.accessibleNode.rowIndex); // 6 - rounded 
+cell.accessibleNode.rowIndex = "5.7";
+console.log(cell.accessibleNode.rowIndex); // 5 - parsed
+```
+
+For ARIA attributes which take
+a _true/false/undefined, _tristate_, _token_ or _token list_ value,
+the `accessibleNode` property type will be a `string`,
+but only a _valid token value_ may be set.
+
+```js
+el.accessibleNode.sort = "ascending";  // ok
+console.log(el.accessibleNode.sort);   // "ascending"
+el.accessibleNode.sort = "down";       // not ok
+console.log(el.accessibleNode.sort);   // `null`
+``` 
+
+Querying an Accessible Property can thus be used
+as a limited form of **validation** and **feature detection**.
+
+On an uninitialized `AccessibleNode`,
+properties that are supported by the browser will return `null` initially,
+while unsupported / unrecognized properties return `undefined`:
+
+```js
+console.log(el.accessibleNode.role);          // null
+console.log(el.accessibleNode.label);         // null
+console.log(el.accessibleNode.bodyMassIndex); // undefined
+```
+
+When setting the value of an accessible property, that value can
+be subsequently retrieved, but only if set to something valid:
+
+```js
+el.accessibleNode.role = "button";
+console.log(el.accessibleNode.role);      // "button"
+
+el.accessibleNode.role = "banana";
+console.log(el.accessibleNode.role);      // null
+
+el.accessibleNode.role = "banana button";
+console.log(el.accessibleNode.role);      // "button"
+```
+
+If a later spec added "banana" as a valid role,
+and a particular browser supported it,
+that string would be returned in the second two cases.
+This gives web developers a way to do some feature detection
+and learn exactly which accessible properties are supported
+in a particular browser version.
 
 #### Computed accessible properties
 
@@ -414,50 +568,9 @@ This is analogous to the `style` attribute,
 which allows reading and setting an element's local style,
 while `getComputedStyle()` allows access to the full computed style.
 
-[Phase 4](#phase-4-full-introspection-of-an-accessibility-tree) will allow accessing the computed properties.
+[Phase 5](#phase-5-full-introspection-of-an-accessibility-tree) will allow accessing the computed properties.
 
-#### Validation
-
-Querying an Accessible Property can be used as a limited form of validation and feature detection.
-
-On an uninitialized `AccessibleNode`,
-properties that are supported by the browser will return `null` initially,
-while unsupported / unrecognized properties return `undefined`:
-
-```js
-console.log(el.accessibleNode.role); // null
-console.log(el.accessibleNode.label); // null
-console.log(el.accessibleNode.bodyMassIndex); // undefined
-```
-
-When setting the value of an accessible property, that value can
-be subsequently retrieved, but only if set to something valid:
-
-```js
-el.accessibleNode.role = "button";
-console.log(el.accessibleNode.role); // "button"
-
-el.accessibleNode.role = "key";
-console.log(el.accessibleNode.role); // null
-```
-
-Note that "key" is not one of the valid roles in the ARIA spec.
-If a later spec added "key" as a valid role, and a particular
-browser supported it, that string would be returned. This gives
-web developers a way to do some feature detection and learn
-exactly which accessible properties are supported in a particular
-browser version.
-
-```js
-cell.accessibleNode.rowIndex = 5;
-console.log(cell.accessibleNode.rowIndex); // 5
-cell.accessibleNode.rowIndex = 5.7;
-console.log(cell.accessibleNode.rowIndex); // null
-cell.accessibleNode.rowIndex = "5";
-console.log(cell.accessibleNode.rowIndex); // null
-```
-
-### Phase 2: Accessible Actions
+### Phase 3: Accessible Actions
 
 **Accessible Actions** will allow authors to react to user input events coming from assistive technology.
 
@@ -516,7 +629,7 @@ The supported actions would include:
 * `dismiss`
 
 
-### Phase 3: Virtual Accessibility Nodes
+### Phase 4: Virtual Accessibility Nodes
 
 **Virtual Accessibility Nodes** will allow authors
 to expose "virtual" accessibility nodes,
@@ -607,7 +720,7 @@ document.activeElement is unchanged.
 When the focused DOM element changes, accessible focus follows it:
 the DOM element's associated accessible node gets focused.
 
-### Phase 4: Full Introspection of an Accessibility Tree
+### Phase 5: Full Introspection of an Accessibility Tree
 
 The **Computed Accessibility Tree** API will allow authors to access
 the full computed accessibility tree -
@@ -666,12 +779,14 @@ it makes sense to tackle this work last.
 * Phase 1, Modifying Accessible Properties,
   will allow *setting* accessible properties for a DOM element,
   including accessible relationships.
-* Phase 2, Accessible Actions,
+* Phase 2, Reading Accessible Properties
+  will allow *reading* the *author-set* accessible properties for a DOM element.
+* Phase 3, Accessible Actions,
   will allow *reacting* to user actions from assistive technology.
-* Phase 3, Virtual Accessibility Nodes,
+* Phase 4, Virtual Accessibility Nodes,
   will allow the creation of accessibility nodes which are not associated with DOM elements.
-* Phase 4, Computed Accessibility Tree,
-  will allow *reading* the computed accessible properties for accessibility nodes,
+* Phase 5, Computed Accessibility Tree,
+  will allow *reading* the *computed* accessible properties for accessibility nodes,
   whether associated with DOM elements or virtual,
   and walking the computed accessibility tree.
 
