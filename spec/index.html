@@ -190,88 +190,8 @@
           <code>AccessibleNode</code> interface
         </h3>
         <pre class="idl">
-        enum AutocompleteType { "none", "inline", "list", "both" };
-        enum CheckedType { "false", "mixed", "true" };
-        enum CurrentType { "page", "step", "location", "date", "time", "true", "false" };
-        enum InvalidType { "false", "true", "grammar", "spelling" };
-        enum LiveType { "off", "polite", "assertive" };
-        enum LiveRelevantType { "additions", "additions text", "all", "removals", "text" };
-        enum OrientationType { "horizontal", "vertical" };
-        enum RoleType {
-          "alert",
-          "alertdialog",
-          "application",
-          "article",
-          "banner",
-          "button",
-          "cell",
-          "checkbox",
-          "columnheader",
-          "combobox",
-          "complementary",
-          "contentinfo",
-          "definition",
-          "dialog",
-          "directory",
-          "document",
-          "feed",
-          "figure",
-          "form",
-          "grid",
-          "gridcell",
-          "group",
-          "heading",
-          "img",
-          "link",
-          "list",
-          "listbox",
-          "listitem",
-          "log",
-          "main",
-          "marquee",
-          "math",
-          "menu",
-          "menubar",
-          "menuitem",
-          "menuitemcheckbox",
-          "menuitemradio",
-          "navigation",
-          "none",
-          "note",
-          "option",
-          "presentation",
-          "progressbar",
-          "radio",
-          "radiogroup",
-          "region",
-          "row",
-          "rowgroup",
-          "rowheader",
-          "scrollbar",
-          "search",
-          "searchbox",
-          "separator",
-          "slider",
-          "spinbutton",
-          "status",
-          "switch",
-          "tab",
-          "table",
-          "tablist",
-          "tabpanel",
-          "term",
-          "textbox",
-          "timer",
-          "toolbar",
-          "tooltip",
-          "tree",
-          "treegrid",
-          "treeitem"
-        };
-        enum SortType { "none", "ascending", "descending", "other" };
-
         interface AccessibleNode {
-          attribute RoleType role;
+          attribute DOMString? role;
           attribute DOMString? roleDescription;
 
           // Accessible label and description.
@@ -280,26 +200,26 @@
           attribute iterable&lt;AccessibleNode&gt; describedBy;
 
           // Global states and properties.
-          attribute CurrentType? current;
+          attribute DOMString? current;
 
           // Widget properties.
-          attribute AutocompleteType? autocomplete;
+          attribute DOMString? autocomplete;
           attribute boolean? hidden;
           attribute DOMString? keyShortcuts;
           attribute boolean? modal;
           attribute boolean? multiline;
           attribute boolean? multiselectable;
-          attribute OrientationType? orientation;
+          attribute DOMString? orientation;
           attribute boolean? readonly;
           attribute boolean? required;
           attribute boolean? selected;
-          attribute SortType? sort;
+          attribute DOMString? sort;
 
           // Widget states.
-          attribute CheckedType checked;
+          attribute DOMString? checked;
           attribute boolean? expanded;
           attribute boolean? disabled;
-          attribute InvalidType? invalid;
+          attribute DOMString? invalid;
           attribute boolean? hasPopUp;
           attribute boolean? pressed;
 
@@ -313,8 +233,8 @@
           // Live regions.
           attribute boolean? atomic;
           attribute boolean? busy;
-          attribute LiveType? live;
-          attribute LiveRelevantType? relevant;
+          attribute DOMString? live;
+          attribute DOMString? relevant;
 
           // Other relationships.
           attribute AccessibleNode? activeDescendant;
@@ -398,7 +318,7 @@
           </tr>
           <tr>
             <td><code>autocomplete</code></td>
-            <td><code>enum { "both", "inline", "list", "none" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-autocomplete</nobr></code></td>
           </tr>
           <tr>
@@ -408,7 +328,7 @@
           </tr>
           <tr>
             <td><code>checked</code></td>
-            <td><code>enum { "false", "mixed", "true" }</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-checked</nobr></code></td>
           </tr>
           <tr>
@@ -433,7 +353,7 @@
           </tr>
           <tr>
             <td><code>current</code></td>
-            <td><code>enum { "page", "step", "location", "date", "time", "true", "false" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-current</nobr></code></td>
           </tr>
           <tr>
@@ -492,7 +412,7 @@
           </tr>
           <tr>
             <td><code>invalid</code></td>
-            <td><code>enum { "grammar", "false", "spelling", "true" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-invalid</nobr></code></td>
           </tr>
           <tr>
@@ -517,7 +437,7 @@
           </tr>
           <tr>
             <td><code>live</code></td>
-            <td><code>enum { "polite", "assertive", "off" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-live</nobr></code></td>
           </tr>
           <tr>
@@ -537,7 +457,7 @@
           </tr>
           <tr>
             <td><code>orientation</code></td>
-            <td><code>enum { "horizontal", "vertical" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-orientation</nobr></code></td>
           </tr>
           <tr>
@@ -557,7 +477,7 @@
           </tr>
           <tr>
             <td><code>pressed</code></td>
-            <td><code>enum { "false", "mixed", "true" }</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-pressed</nobr></code></td>
           </tr>
           </tr>
@@ -607,7 +527,7 @@
           </tr>
           <tr>
             <td><code>sort</code></td>
-            <td><code>enum { "ascending", "descending", "none", "other" }?</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-sort</nobr></code></td>
           </tr>
           <tr>
@@ -670,30 +590,13 @@
         </h3>
         <p>
           Upon setting a property of AccessibleNode, no validation is
-          done. The user-provided value is simply stored. This is to
+          done. The user-provided value is simply stored, converted to the
+          appropriate type via the standard rules for JavaScript types.
+          This is to
           ensure that backwards compatibility is maintained; when a new
           property is added or a new value is recognized as valid, authors
           do not have to worry that browsers who have not yet added support
           will break or throw an exception upon encountering this code.
-        </p>
-        <p>
-          There are two circumstances that cause an AccessibleNode
-          property to be accessed. The first is when the browser is
-          computing the platform-specific accessibility properties for a
-          node in the native browser accessibility tree. In that case, in any
-          case where the browser would have previously checked an ARIA
-          attribute, it must access the equivalent AccessibleNode property
-          first, and use it if present and valid. The second circumstance
-          is when the AccessibleNode property is accessed explicitly from
-          JavaScript.
-        </p>
-        <p>
-          In both of those cases, the AccessibleNode property is
-          *validated* at the time it's accessed, and if invalid,
-          treated the same as if it was *not present*. In the case
-          of native accessibility support, it means falling back on
-          ARIA or native DOM semantics, and in the case of direct
-          access from JavaScript, returning <code>null</code>.
         </p>
       </section>
     </section>
