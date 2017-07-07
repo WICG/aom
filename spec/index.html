@@ -196,8 +196,8 @@
 
           // Accessible label and description.
           attribute DOMString? label;
-          attribute iterable&lt;AccessibleNode&gt; labeledBy;
-          attribute iterable&lt;AccessibleNode&gt; describedBy;
+          attribute AccessibleNodeList? labeledBy;
+          attribute AccessibleNodeList? describedBy;
 
           // Global states and properties.
           attribute DOMString? current;
@@ -210,7 +210,7 @@
           attribute boolean? multiline;
           attribute boolean? multiselectable;
           attribute DOMString? orientation;
-          attribute boolean? readonly;
+          attribute boolean? readOnly;
           attribute boolean? required;
           attribute boolean? selected;
           attribute DOMString? sort;
@@ -220,8 +220,8 @@
           attribute boolean? expanded;
           attribute boolean? disabled;
           attribute DOMString? invalid;
-          attribute boolean? hasPopUp;
-          attribute boolean? pressed;
+          attribute DOMString? hasPopUp;
+          attribute DOMString? pressed;
 
           // Control values.
           attribute DOMString? valueText;
@@ -238,21 +238,21 @@
 
           // Other relationships.
           attribute AccessibleNode? activeDescendant;
-          attribute iterable&lt;AccessibleNode&gt; controls;
+          attribute AccessibleNodeList? controls;
           attribute AccessibleNode? details;
           attribute AccessibleNode? errorMessage;
-          attribute AccessibleNode? flowTo;
-          attribute iterable&lt;AccessibleNode&gt; owns;
+          attribute AccessibleNodeList? flowTo;
+          attribute AccessibleNodeList? owns;
 
           // Collections.
-          attribute unsigned long? colCount;
+          attribute long? colCount;
           attribute unsigned long? colIndex;
           attribute unsigned long? colSpan;
           attribute unsigned long? posInSet;
-          attribute unsigned long? rowCount;
+          attribute long? rowCount;
           attribute unsigned long? rowIndex;
           attribute unsigned long? rowSpan;
-          attribute unsigned long? setSize;
+          attribute long? setSize;
           attribute unsigned long? level;
         };
         </pre>
@@ -276,6 +276,31 @@
         <p>
           If a property of AccessibleNode is set to an invalid value, it is ignored.
         </p>
+      </section>
+      <section>
+        <h3>
+          <code>AccessibleNodeList</code> interface
+        </h3>
+        <p>
+          An <code>AccessibleNodeList</code> represents an ordered
+          list of AccessibleNodes.
+          It's used to represent relationships between one
+          <code>AccessibleNode</code> and other
+          <code>AccessibleNodes</code> in the accessibility tree.
+          Unlike <code>AccessibleNode</code>, <code>AccessibleNodeList</code>
+          has a constructor.
+        </p>
+        <pre class="idl">
+        [
+          Constructor(optional sequence&lt;AccessibleNode&gt; nodes = [])
+        ]
+        interface AccessibleNodeList {
+          attribute unsigned long length;
+          getter AccessibleNode? item(unsigned long index);
+          setter void (unsigned long index, AccessibleNode node);
+          void add(AccessibleNode node, optional AccessibleNode? before = null);
+          void remove(long index);
+        };
       </section>
       <section id="mapping">
         <h3>
@@ -308,12 +333,12 @@
         <tbody>
           <tr>
             <td><code>activeDescendant</code></td>
-            <td><code>AccessibleNode</code></td>
+            <td><code>AccessibleNode?</code></td>
             <td><code>aria-activedescendant</code></td>
           </tr>
           <tr>
             <td><code>atomic</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code>aria-atomic</code></td>
           </tr>
           <tr>
@@ -323,7 +348,7 @@
           </tr>
           <tr>
             <td><code>busy</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code>aria-busy</code></td>
           </tr>
           <tr>
@@ -333,7 +358,7 @@
           </tr>
           <tr>
             <td><code>colCount</code></td>
-            <td><code>unsigned long?</code></td>
+            <td><code>long?</code></td>
             <td><code><nobr>aria-colcount</nobr></code></td>
           </tr>
           <tr>
@@ -348,7 +373,7 @@
           </tr>
           <tr>
             <td><code>controls</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
+            <td><code>AccessibleNodeList?</code></td>
             <td><code>aria-controls</code></td>
           </tr>
           <tr>
@@ -358,12 +383,12 @@
           </tr>
           <tr>
             <td><code>describedBy</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
+            <td><code>AccessibleNodeList?</code></td>
             <td><code>aria-describedby</code></td>
           </tr>
           <tr>
             <td><code>details</code></td>
-            <td><code>AccessibleNode</code></td>
+            <td><code>AccessibleNode?</code></td>
             <td><code>aria-details</code></td>
           </tr>
           <tr>
@@ -380,7 +405,7 @@
           </tr>
           <tr>
             <td><code>errorMessage</code></td>
-            <td><code>AccessibleNode</code></td>
+            <td><code>AccessibleNode?</code></td>
             <td><code>aria-errormessage</code></td>
           </tr>
           <tr>
@@ -390,7 +415,7 @@
           </tr>
           <tr>
             <td><code>flowTo</code></td>
-            <td><code>AccessibleNode</code></td>
+            <td><code>AccessibleNodeList?</code></td>
             <td><code>aria-flowto</code></td>
           </tr>
           <tr>
@@ -402,12 +427,12 @@
           </tr>
           <tr>
             <td><code>hasPopUp</code></td>
-            <td><code>boolean</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-haspopup</nobr></code></td>
           </tr>
           <tr>
             <td><code>hidden</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code><nobr>aria-hidden</nobr></code></td>
           </tr>
           <tr>
@@ -422,13 +447,13 @@
           </tr>
           <tr>
             <td><code>label</code></td>
-            <td><code>DOMString</code></td>
-            <td>aria-label</td>
+            <td><code>DOMString?</code></td>
+            <td><code><nobr>aria-label</nobr><code></td>
           </tr>
           <tr>
             <td><code>labeledBy</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
-            <td><code>aria-labelledby</code></td>
+            <td><code>AccessibleNodeList?</code></td>
+            <td><code>aria-labeledby,<br>aria-labelledby</code></td>
           </tr>
           <tr>
             <td><code>level</code></td>
@@ -442,17 +467,17 @@
           </tr>
           <tr>
             <td><code>modal</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code><nobr>aria-modal</nobr></code></td>
           </tr>
           <tr>
             <td><code>multiline</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code><nobr>aria-multiline</nobr></code></td>
           </tr>
           <tr>
             <td><code>multiselectable</code></td>
-            <td><code>boolean</code></td>
+            <td><code>boolean?</code></td>
             <td><code><nobr>aria-multiselectable</nobr></code></td>
           </tr>
           <tr>
@@ -462,7 +487,7 @@
           </tr>
           <tr>
             <td><code>owns</code></td>
-            <td><code>iterable&lt;AccessibleNode&gt;</code></td>
+            <td><code>AccessibleNodeList?</code></td>
             <td><code>aria-owns</code></td>
           </tr>
           <tr>
@@ -481,13 +506,13 @@
             <td><code><nobr>aria-pressed</nobr></code></td>
           </tr>
           </tr>
-            <td><code>readonly</code></td>
+            <td><code>readOnly</code></td>
             <td><code>boolean?</code></td>
             <td><code><nobr>aria-readonly</nobr></code></td>
           </tr>
           <tr>
             <td><code>relevant</code></td>
-            <td><code>DOMString</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-relevant</nobr></code></td>
           </tr>
           <tr>
@@ -497,12 +522,12 @@
           </tr>
           <tr>
             <td><code>roleDescription</code></td>
-            <td><code>DOMString</code></td>
+            <td><code>DOMString?</code></td>
             <td><code><nobr>aria-roledescription</nobr></code></td>
           </tr>
           <tr>
             <td><code>rowCount</code></td>
-            <td><code>unsigned long?</code></td>
+            <td><code>long?</code></td>
             <td><code><nobr>aria-rowcount</nobr></code></td>
           </tr>
           <tr>
@@ -522,7 +547,7 @@
           </tr>
           <tr>
             <td><code>setSize</code></td>
-            <td><code>unsigned long?</code></td>
+            <td><code>long?</code></td>
             <td><code><nobr>aria-setsize</nobr></code></td>
           </tr>
           <tr>
@@ -562,8 +587,7 @@
           can have many different types. Most of these are straightforward,
           for example <code>valueNow</code>, <code>valueMin</code>, and
           <code>valueMax</code> are of type <code>double</code>, while
-          <code>rowCount</code>, <code>rowIndex</code>, etc. are of type
-          <code>unsigned long</code>.
+          <code>rowCount</code> is of type <code>long</code>.
         </p>
         <p>
           The primary difference is with ARIA attributes that take one
@@ -576,12 +600,15 @@
         <p>
           In particular,
           <code>activeDescendant</code>,
-          <code>details</code>,
-          <code>errorMessage</code>, and
-          <code>flowTo</code> are set with another AccessibleNode,
-          while <code>controls</code>, <code>labeledBy</code>, and
-          <code>describedBy</code> all take any array-like object
-          of AccessibleNodes.
+          <code>details</code>, and
+          <code>errorMessage</code>
+          are set with another AccessibleNode, while
+          <code>controls</code>,
+          <code>flowTo</code>,
+          <code>labeledBy</code>,
+          <code>describedBy</code>, and
+          <code>owns</code>
+          all take an AccessibleNodeList.
         </p>
       </section>
       <section id="validation">
