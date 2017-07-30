@@ -360,7 +360,7 @@ they are separate interfaces.
 ARIA does not reflect to AOM:
 
 ```html
-<div "clickBtn" role="button">Click here</div>
+<div id="clickBtn" role="button">Click here</div>
 ```
 
 ```js
