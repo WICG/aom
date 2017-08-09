@@ -141,6 +141,29 @@
             attribute DOMString value;
           };
         </pre>
+        <style>
+          table{
+            border:solid 2px #999;
+            border-width:1px 0 0 1px;
+            margin:0.1em 0 1em;
+            padding:0;
+            border-spacing:0;
+            border-collapse:collapse;
+          }
+          th, td{
+            border:solid 2px #999;
+            border-width:0 1px 1px 0;
+            padding:0.15em 0.3em 0.1em;
+            vertical-align:top;
+            text-align:left;
+          }
+          th+th, td+td{
+            width:auto;
+          }
+          th{
+            background-color:#eee;
+          }
+        </style>
         <table>
           <caption>
             Accessibility event table
@@ -156,13 +179,13 @@
           <tbody>
             <tr>
               <td><code>"accessibleclick"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td><em>all roles</em></td>
               <td>Fire <code>"click"</code> event on DOM node</td>
             </tr>
             <tr>
               <td><code>"accessiblefocus"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td><em>all roles</em></td>
               <td>Focus the associated DOM element</td>
             </tr>
@@ -170,14 +193,16 @@
               <td><code>"accessiblesetvalue"</code></td>
               <td><code>AccessibleSetValueEvent</code></td>
               <td>
+                <code>"combobox"</code>,
                 <code>"scrollbar"</code>,
-                <code>"slider"</code>
+                <code>"slider"</code>,
+                <code>"textbox"</code>
               </td>
               <td>Change value of INPUT or TEXTAREA element</td>
             </tr>
             <tr>
               <td><code>"accessibleincrement"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td>
                 <code>"scrollbar"</code>,
                 <code>"slider"</code>
@@ -190,7 +215,7 @@
             </tr>
             <tr>
               <td><code>"accessibledecrement"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td>
                 <code>"scrollbar"</code>,
                 <code>"slider"</code>
@@ -203,7 +228,7 @@
             </tr>
             <tr>
               <td><code>"accessibleselect"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td>
                 <code>"cell"</code>,
                 <code>"option"</code>
@@ -215,20 +240,20 @@
             </tr>
             <tr>
               <td><code>"accessiblescrollintoview"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td><em>all roles</em></td>
               <td>scroll DOM node into view</td>
             </tr>
             <tr>
               <td><code>"accessibledismiss"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td><em>all roles</em></td>
               <td>fire <code>"keypress"</code> with a
                 Escape key code</td>
             </tr>
             <tr>
               <td><code>"accessiblecontextmenu"</code></td>
-              <td><code>AccessibleInputEvent</code></td>
+              <td><code>Event</code></td>
               <td><em>all roles</em></td>
               <td>fire <code>"keypress"</code> with a
                 Context Menu key code, or simulate a right-click
@@ -297,6 +322,369 @@
           <li><code>"scroll"</code>
           <li><code>"zoom"</code>
         </ul>
+    </section>
+      <section>
+        <h3>Platform compatibility table</h3>
+
+        <p>
+          The following table shows proposed accessible actions and
+          the native actions or methods they correspond to on each platform
+          with an accessibility API.
+        </p>
+        <p>
+          When an action maps cleanly to a method or action on all or nearly
+          all platforms, that's good evidence that it's a good candidate for
+          an accessible action in the Accessibility Object Model.
+          When an action doesn't map cleanly, that means it's potentially
+          more risky for compatibility.
+        </p>
+        <p>
+          In the table below, Tier 1 actions appear to have broad support
+          across almost all platforms. Tier 2 actions are supported on
+          at least 2 unrelated platforms. The remaining native actions
+          are shown below.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Action</th>
+              <th>Mac</th>
+              <th>iOS</th>
+              <th>MSAA + IAccessible2</th>
+              <th>UIA</th>
+              <th>Android</th>
+              <th>ATK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Activate</td>
+              <td>AXPressAction</td>
+              <td>accessibilityActivate</td>
+              <td>IAccessible::accDoDefaultAction</td>
+              <td>InvokeProvider::Invoke<br>
+                IToggleProvider::Toggle
+              </td>
+              <td>ACTION_CLICK</td>
+              <td>atk_action_do_action</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Focus</td>
+              <td>set AXFocused true</td>
+              <td></td>
+              <td>IAccessible::accSelect SELFLAG_TAKEFOCUS</td>
+              <td></td>
+              <td>
+                ACTION_FOCUS<br>
+                ACTION_CLEAR_FOCUS
+              </td>
+              <td>atk_component_grab_focus
+              </td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>ScrollByPage</td>
+              <td></td>
+              <td>accessibilityScroll</td>
+              <td></td>
+              <td>IScrollProvider::Scroll</td>
+              <td>
+                ACTION_SCROLL_BACKWARD<br>
+                ACTION_SCROLL_DOWN<br>
+                ACTION_SCROLL_FORWARD<br>
+                ACTION_SCROLL_LEFT<br>
+                ACTION_SCROLL_RIGHT<br>
+                ACTION_SCROLL_UP
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>ScrollIntoView</td>
+              <td>
+                AXScrollToVisible,<br>
+                set AXVisibleCharacterRange
+              </td>
+              <td></td>
+              <td>IAccessible2::scrollTo<br>
+                IAccessibleText::scrollSubstringTo</td>
+              <td>IScrollItemProvider::ScrollIntoView</td>
+              <td>ACTION_SHOW_ON_SCREEN</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>SecondaryClick</td>
+              <td>AXShowMenuAction</td>
+              <td>accessibilityPerformMagicTap</td>
+              <td></td>
+              <td></td>
+              <td>
+                ACTION_LONG_CLICK<br>
+                ACTION_CONTEXT_CLICK
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Select</td>
+              <td>
+                AXPickAction<br>
+                set AXSelected,<br>
+                set AXSelectedChildren<br>
+                set AXSelectedRows
+              </td>
+              <td></td>
+              <td>
+                IAccessible::accSelect SELFLAG_TAKESELECTION<br>
+                IAccessible::accSelect SELFLAG_ADDSELECTION<br>
+                IAccessible::accSelect SELFLAG_EXTENDSELECTION<br>
+                IAccessible::accSelect SELFLAG_REMOVESELECTION<br>
+                IAccessibleTable::selectColumn<br>
+                IAccessibleTable::selectRow<br>
+                IAccessibleTable::unselectColumn<br>
+                IAccessibleTable::unselectRow
+              </td>
+              <td></td>
+              <td>ACTION_SELECT</td>
+              <td>
+                atk_selection_add_selection<br>
+                atk_selection_clear_selection<br>
+                atk_selection_remove_selection<br>
+                atk_selection_select_all_selection
+              </td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>SetNumericValue</td>
+              <td>set AXValue</td>
+              <td></td>
+              <td>IAccessibleValue::setCurrentValue</td>
+              <td>IRangeValueProvider::SetValue</td>
+              <td>ACTION_SET_PROGRESS</td>
+              <td>atk_value_set_value</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>SetTextValue</td>
+              <td>set AXValue</td>
+              <td></td>
+              <td></td>
+              <td>
+                <br>
+                IValueProvider::SetValue</td>
+              <td>ACTION_SET_TEXT</td>
+              <td>atk_editable_text_set_text_contents</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Cancel</td>
+              <td>AXCancelAction</td>
+              <td>accessibilityPerformEscape</td>
+              <td></td>
+              <td>IWindowProvider::Close</td>
+              <td>ACTION_DISMISS</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Collapse</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>IExpandCollapseProvider::Collapse</td>
+              <td>ACTION_COLLAPSE</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>CopyText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::copyText</td>
+              <td></td>
+              <td>ACTION_COPY</td>
+              <td>atk_editable_text_copy_text</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>CutText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::cutText</td>
+              <td></td>
+              <td>ACTION_CUT</td>
+              <td>atk_editable_text_cut_text</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Decrement</td>
+              <td>AXDecrementAction</td>
+              <td>accessibilityDecrement</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Expand</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>IExpandCollapseProvider::Expand</td>
+              <td>ACTION_EXPAND</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Increment</td>
+              <td>AXIncrementAction</td>
+              <td>accessibilityIncrement</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>InsertText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::insertText</td>
+              <td></td>
+              <td></td>
+              <td>atk_editable_text_insert_text</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>PasteText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::pasteText</td>
+              <td></td>
+              <td>ACTION_PASTE</td>
+              <td>atk_editable_text_paste_text</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>ReplaceText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::replaceText</td>
+              <td></td>
+              <td></td>
+              <td>
+                atk_editable_text_set_text_contents,<br>
+                atk_editable_text_delete_text,<br>
+                atk_editable_text_insert_text
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>DeleteText</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::deleteText</td>
+              <td></td>
+              <td></td>
+              <td>atk_editable_text_delete_text</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>ScrollToPoint</td>
+              <td></td>
+              <td></td>
+              <td>
+                IAccessible2::scrollToPoint<br>
+                IAccessibleText::scrollSubstringToPoint
+              </td>
+              <td>IScrollProvider::SetScrollPercent</td>
+              <td>ACTION_SCROLL_TO_POSITION</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>
+                SetSelectedTextRange
+              </td>
+              <td>
+                set AXSelectedText<br>
+                set AXSelectedTextMarkerRange<br>
+                set AXSelectedTextRange
+              </td>
+              <td></td>
+              <td>
+                IAccessibleText::addSelection<br>
+                IAccessibleText::removeSelection<br>
+                IAccessibleText::setCaretOffset<br>
+                IAccessibleText::setSelection
+              </td>
+              <td></td>
+              <td>
+                ACTION_CLEAR_SELECTION<br>
+                ACTION_SET_SELECTION
+              </td>
+              <td>
+                atk_selection_add_selection<br>
+                atk_selection_clear_selection<br>
+                atk_selection_remove_selection<br>
+                atk_selection_select_all_selection<br>
+                atk_text_add_selection<br>
+                atk_text_remove_selection<br>
+                atk_text_set_caret_offset
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>SetTextAttributes</td>
+              <td></td>
+              <td></td>
+              <td>IAccessibleEditableText::setAttributes</td>
+              <td></td>
+              <td></td>
+              <td>atk_editable_text_set_run_attributes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Actions unique to macOS:</h3>
+        <ul>
+          <li>AXConfirmAction</li>
+          <li>AXDeleteAction</li>
+          <li>AXRaiseAction</li>
+          <li>AXShowAlternateUIAction</li>
+          <li>AXShowDefaultUIAction</li>
+          <li>set AXCaretBrowsingEnabled</li>
+          <li>set AXDisclosing</li>
+          <li>set AXGrabbed</li>
+          <li>set AXPreventKeyboardDOMEventDispatch</li>
+        </ul>
+
+        <h3>Actions unique to UIA</h3>
+        <ul>
+          <li>IDockProvider::SetDockPosition</li>
+          <li>IMultipleViewProvider::SetCurrentView</li>
+          <li>ITransformProvider::Move</li>
+          <li>ITransformProvider::Resize</li>
+          <li>ITransformProvider::Rotate</li>
+          <li>IWindowProvider::SetVisualState (minimized, maximized, normal)</li>
+          </ul>
+
+        <h3>Actions unique to Android:</h3>
+        <ul>
+          <li>ACTION_ACCESSIBILITY_FOCUS</li>
+          <li>ACTION_CLEAR_ACCESSIBILITY_FOCUS</li>
+          <li>ACTION_NEXT_AT_MOVEMENT_GRANULARITY</li>
+          <li>ACTION_NEXT_HTML_ELEMENT</li>
+          <li>ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY</li>
+          <li>ACTION_PREVIOUS_HTML_ELEMENT</li>
+        </ul>
+      </section>
+
       <section>
         <h3>Privacy concerns</h3>
         <p>
@@ -309,8 +697,30 @@
         <p>
           To address these concerns, a web site should not be able to
           receive these events until the user has explicitly opted in to
-          allow those events to be received by that web site. The exact
-          protocol is TBD.
+          allow those events to be received by that web site.
+        </p>
+        <p>
+          A new web permission should be added, "accessibility-events", with
+          a default value of "ask".
+        </p>
+        <p>
+          A website can add event listeners to AOM nodes without triggering any
+          permission checks. However, as soon as an accessibility event would
+          trigger an AOM event listener, at that point the user is prompted
+          to see if they want to enable the site to be able to listen for
+          accessibility events.
+        </p>
+        <p>
+          Example permission dialog text:
+          <b>
+            "The site www.example.com would like to
+            respond to accessibility events." [Allow] [Block]
+          </b>
+        </p>
+        <p>
+          Because of the potential privacy concerns, maybe this permission should
+          only be available on secure sites? Many other permissions have gone
+          that route.
         </p>
       </section>
     </section>
