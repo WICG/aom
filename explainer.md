@@ -29,6 +29,9 @@
     - [Strong typing](#strong-typing)
   - [Phase 2: Accessible Actions](#phase-2-accessible-actions)
   - [Phase 3: Virtual Accessibility Nodes](#phase-3-virtual-accessibility-nodes)
+    - [Bounding boxes](#bounding-boxes)
+    - [Focus and Selection](#focus-and-selection)
+    - [Announcements](#announcements)
   - [Phase 4: Full Introspection of an Accessibility Tree](#phase-4-full-introspection-of-an-accessibility-tree)
     - [Why is accessing the computed properties being addressed last?](#why-is-accessing-the-computed-properties-being-addressed-last)
   - [Phases: Summary](#phases-summary)
@@ -480,29 +483,31 @@ except that the interaction event arrives via an assistive technology API,
 so it is directed to the accessible node first.
 
 For example, to implement a custom slider, the author could simply listen for
-`increment` and `decrement` events.
+`accessibleincrement` and `accessibledecrement` events.
 
 ```js
-customSlider.accessibleNode.addEventListener('increment', function() {
+customSlider.accessibleNode.addEventListener('accessibleincrement', function() {
   customSlider.value += 1;
 });
-customSlider.accessibleNode.addEventListener('decrement', function() {
+customSlider.accessibleNode.addEventListener('accessibledecrement', function() {
   customSlider.value -= 1;
 });
 ```
 
-The supported actions would include:
+Here are the supported new event types to listen to:
 
-* `click`
-* `contextmenu`
-* `focus`
-* `setvalue`
-* `increment`
-* `decrement`
-* `select`
-* `scroll`
-* `dismiss`
+* `accessibleclick`
+* `accessiblefocus`
+* `accessiblesetvalue`
+* `accessibleincrement`
+* `accessibledecrement`
+* `accessibleselect`
+* `accessiblescrollintoview`
+* `accessibledismiss`
+* `accessiblecontextmenu`
 
+For more details,
+[see the spec](https://wicg.github.io/aom/spec/phase2.html).
 
 ### Phase 3: Virtual Accessibility Nodes
 
@@ -549,28 +554,33 @@ document.body.accessibleNode.removeChild(virtualNode);
 
 In addition, calling appendChild on a node that's already inserted somewhere else
 in the accessibility tree will implicitly remove it from its old location and
-append it to the
+append it to the new location.
 
-Finally, the AOM also provides `insertChild` that's analogous to the DOM Node
-insertChild method, taking a zero-based index and then a child.
+Finally, the AOM also provides `insertBefore` that's analogous to the DOM Node
+insertBefore method.
 
 A few additional properties are needed in order for virtual accessible nodes
 to be complete.
 
+#### Bounding boxes
+
 To specify the location of a virtual accessible node on the screen, its
-left, top, width, and height can all be expressed in any valid CSS units,
+left, top, width, and height can all be expressed as pixel coordinates
 relative to any ancestor in the accessibility tree.
 
 ```js
-virtualNode.offsetLeft = "30px";
-virtualNode.offsetTop = "20px";
-virtualNode.offsetWidth = "400px";
-virtualNode.offsetHeight = "300px";
+virtualNode.offsetLeft = 30;
+virtualNode.offsetTop = 20;
+virtualNode.offsetWidth = 400;
+virtualNode.offsetHeight = 300;
 virtualNode.offsetParent = document.body.accessibleNode;
 ```
 
 If offsetParent is left unset, the coordinates are interpreted relative to
-the accessible node's parent.
+the accessible node's corresponding DOM Element, or the nearest DOM Element
+ancestor.
+
+#### Focus and Selection
 
 To make a node focusable, the `focusable` attribute can be set. This is
 similar to setting tabIndex=-1 on a DOM element.
@@ -594,6 +604,40 @@ document.activeElement is unchanged.
 
 When the focused DOM element changes, accessible focus follows it:
 the DOM element's associated accessible node gets focused.
+
+Selection works in a similar way: to override the DOM selection,
+call `AccessibleNode.select(startNode, startOffset, endNode, endOffset)`.
+The start and end offsets are interpreted to be relative to a node's
+accessible name.
+
+The following code demonstrates creating a virtual phone number text box,
+giving it focus, and selecting the first three digits.
+
+```js
+var textbox = new AccessibleNode();
+textbox.role = "textbox";
+textbox.label = "Enter your phone number";
+document.getElementById("canvas").accessibleNode.appendChild(textbox);
+var contents = new AccessibleNode();
+contents.label = "408-555-1212";
+textbox.appendChild(contents);
+
+textbox.focus();
+AccessibleNode.select(contents, 0, contents, 3);
+```
+
+To make this example complete, the bounding boxes should be set too.
+A future addition to the spec should make it possible to expose the
+bounding box of individual characters and character ranges too.
+
+#### Announcements
+
+Sometimes it's necessary to draw attention to a node, for example when
+it appears or has a message for the user.  Calling
+`announce(announcement, importance)` is a new convenient alternative
+to using ARIA live regions.  The `announcement` argument is the text
+to be communicated to the user, and the `importance` is either
+`"polite"` or `"assertive"`, as in an ARIA live region.
 
 ### Phase 4: Full Introspection of an Accessibility Tree
 

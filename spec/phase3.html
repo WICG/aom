@@ -109,7 +109,7 @@
       <p>
         Virtual Accessibility Nodes will allow authors to expose
         "virtual" accessibility nodes, which are not associated directly
-        with any particular DOM node, to assistive technology.
+        with any particular DOM element, to assistive technology.
       </p>
       <p>
         This mechanism is often present in native accessibility APIs,
@@ -121,9 +121,200 @@
         to canvas-based UI which does not rely on fallback or
         visually-hidden DOM content.
       </p>
-      <p>
-        The API for Virtual Accessibility Nodes will be specified at a later date.
-      </p>
+      <section id="accessiblenode">
+        <h3>
+          Additions to <code>AccessibleNode</code> interface
+        </h3>
+        <p>
+          This phase of the spec gives <code>AccessibleNode</code>
+          a constructor, making it possible to construct an
+          <code>AccessibleNode</code> that isn't associated with
+          a DOM element. Other additions include an Element accessor,
+          bounding box attributes, tree building methods,
+          and methods to affect announcements and focus.
+        </p>
+        <pre class="idl">
+        [Constructor]
+        interface AccessibleNode : EventTarget {
+          readonly attribute Element? element;
+
+          attribute AccessibleNode? offsetParent;
+          attribute long? offsetLeft;
+          attribute long? offsetTop;
+          attribute long? offsetWidth;
+          attribute long? offsetHeight;
+
+          void appendChild(AccessibleNode child);
+          void insertBefore(AccessibleNode child, AccessibleNode before);
+          void removeChild(AccessibleNode child);
+
+          void announce(DOMString announcement, DOMString importance);
+
+          attribute boolean? focusable;
+          void focus();
+          static void select(AccessibleNode startNode,
+                             unsigned long? startOffset,
+                             AccessibleNode endNode,
+                             unsigned long? endOffset);
+        };
+        </pre>
+      </section>
+      <section id="constructor">
+        <h3>
+          Constructor and Virtual AccessibleNodes.
+        </h3>
+        <p>
+          The <code>AccessibleNode</code> constructor takes no arguments.
+          Constructing an AccessibleNode directly always
+          creates an AccessibleNode that isn't associated with a
+          DOM element. We will refer to such AccessibleNodes as
+          <em>virtual</em> AccessibleNodes.
+        </p>
+        <p>
+          Virtual AccessibleNodes are not part of the accessibility tree
+          for a page until they're inserted as a child of a non-virtual
+          AccessibleNode, i.e. one with a corresponding DOM element, or
+          as a child of an AccessibleNode that's already part of the
+          accessibility tree for a page.
+        </p>
+      </section>
+      <section id="element">
+        <h3>
+          Element accessor
+        </h3>
+        <p>
+          The readonly <code>element</code> property of an
+          <code>AccessibleNode</code> returns the associated DOM element,
+          if any. For a virtual AccessibleNode (one that was explicitly
+          constructed), it returns null.
+        </p>
+      </section>
+      <section id="tree">
+        <h3>
+          Tree Building
+        </h3>
+        <p>
+          Virtual AccessibleNodes can be added to the accessibilty
+          tree by calling <code>appendChild</code> or
+          <code>insertBefore</code> on a parent AccessibleNode, and they
+          can be removed by calling <code>removeChild</code>.
+        </p>
+        <p>
+          When adding an AccessibleNode as the child of another, the
+          child must be a virtual AccessibleNode, not one with a
+          corresponding DOM element. It is not allowed to use
+          these methods to try to rearrange the accessibility tree
+          for the DOM-backed part of the page. Essentially these
+          methods let you add a virtual subtree anywhere.
+        </p>
+        <p>
+          When a DOM element has children in the DOM, and its accessible
+          node also has virtual accessible children attached, in the
+          resulting accessibility tree the DOM children will come
+          first and the accessible children will come last.
+        </p>
+        <p>
+          If you use <code>appendChild</code> or <code>insertBefore</code>
+          to try to insert a node that was already somewhere in the tree,
+          it's automatically reparented to the new location.
+        </p>
+      </section>
+      <section id="boundingbox">
+        <h3>
+          Bounding Box
+        </h3>
+        <p>
+          The bounding box of an AccessibleNodes with a corresponding
+          DOM element is the same as the corresponding DOM element by
+          default, but virtual AccessibleNodes require a way to specify
+          their bounding box. It's also allowed to use these attributes
+          to override the bounding box of an AccessibleNode with a
+          corresponding DOM element.
+        </p>
+        <p>
+          By default, the bounding box is in the coordinate system of
+          the corresponding DOM element, or the nearest ancestor DOM
+          element.  Setting <code>offsetLeft</code>, <code>offsetTop</code>,
+          <code>offsetWidth</code>, and <code>offsetHeight</code> fully
+          specify the new bounding box.
+        </p>
+        <p>
+          In addition, you can set <code>offsetParent</code> to any other
+          AccessibleNode, and the coordinates (<code>offsetLeft</code>, etc.)
+          will be interpreted in the coordinate system of that parent
+          instead.
+        </p>
+        <p>
+          For example, you can specify coordinates relative to
+          the document body like this:
+          <pre>accessibleNode.offsetParent = document.body.accessibleNode;</pre>
+        </p>
+      </section>
+      <section id="announcements">
+        <h3>
+          Announcements
+        </h3>
+        <p>
+          Sometimes it's necessary to draw attention to a node,
+          for example when it appears or has a message for the user.
+          Calling <code>announce(announcement, importance)</code> is a
+          new convenient alternative to using ARIA live regions.
+          The <code>announcement</code> argument is the text to be
+          communicated to the user, and the <code>importance</code>
+          is either <code>"polite"</code> or <code>"assertive"</code>,
+          as in an ARIA live region.
+        </p>
+      </section>
+      <section id="focus_selection">
+        <h3>
+          Focus and Selection Control
+        </h3>
+        <p>
+          In order to for virtual accessible nodes to be used for
+          full-featured interactive UI, they need to be able to
+          take focus and selection.
+        </p>
+        <p>
+          The <code>focusable</code> attribute controls whether or not
+          an AccessibleNode is described as focusable to assistive
+          technology. Most assistive technology will not try to focus
+          a node that's not marked as focusable.
+        </p>
+        <p>
+          If <code>focusable</code> is set to null or undefined, then
+          if the accessible node has a corresponding DOM Element, whether
+          or not it is focusable is derived from the focusability of the
+          DOM Element. If <code>focusable</code> is set to null or undefined
+          on a virtual accessible node, it defaults to <code>false</code>.
+        </p>
+        <p>
+          To focus an <code>AccessibleNode</code>,
+          call <code>focus()</code>. This sets the focus within
+          that Document's accessibility tree to that node and
+          communicates that to any assistive technology.
+        </p>
+        <p>
+          Calling focus() on an <code>AccessibleNode</code> has no
+          effect on DOM focus. <code>document.activeElement</code>
+          does not change.
+        </p>
+        <p>
+          However, the reverse is true: whenever DOM focus changes,
+          it always focuses its corresponding AccessibleNode by default.
+          If you want to override that behavior, you can add an
+          EventListener that updates accessible focus whenever DOM focus
+          changes.
+        </p>
+        <p>
+          Selection works similarly. You can set selection in the
+          accessibility tree by using a static method on AccessibleNode
+          to set the start and end nodes, and the start and end offsets.
+          This selection is communicated to assistive technology, but it
+          does not override DOM selection. Whenever DOM selection changes,
+          that affects accessibility selection, but not the other way
+          around.
+        </p>
+      </section>
     </section>
     <section id="actions">
       <h2>
