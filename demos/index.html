@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 
 <!--
-  JS Accessibility API Demos
-  2016
+  Accessibility Object Model Presentation
+  2017
 
-  Based on:
-  Using ARIA to create accessible interactive web apps
-  Dominic Mazzoni and Rachel Shearer
-  2011
-
-  Based on the Google I/O 2011 HTML slides template
-  Created by Luke Mahé and Marcin Wichary
+  Based on previous HTML slide presentation code authored by:
+  Dominic Mazzoni, Rachel Shearer, Luke Mahé and Marcin Wichary.
 
   Copyright Google Inc.
 
@@ -29,589 +24,635 @@
 
 <html>
   <head>
-    <title>JS A11y API Demos</title>
+    <title>Accessibility Object Model</title>
+    <meta charset="utf-8"/>
+    <script src="slides.js"></script>
+    <script src="aom_slides.js"></script>
+    <link rel="stylesheet" href="aom_styles.css">
+  </head>
 
-    <meta charset='utf-8' />
-    <script src='slides.js'></script>
-    <script>
-      var slides;
-      var showAllSlidesButton;
-      var ignoreFocusEvents = false;
-
-      function $(element) {
-        return document.getElementById(element);
-      }
-
-      function onSlideEnter() {
-        console.log('onSlideEnter');
-        window.setTimeout(function() {
-          document.activeElement.blur();
-          window.setTimeout(function() {
-            var slideIndex = parseInt(location.hash.substr(1), 10) - 1;
-            ignoreFocusEvents = true;
-            slides[slideIndex].focus();
-            console.log('onSlideEnter focus');
-            window.setTimeout(function() {
-              ignoreFocusEvents = false;
-            }, 0);
-          }, 600);
-        }, 600);
-      }
-
-      function onFocus(e) {
-        console.log('focus ' + e.target);
-        document.pageXOffset = 0;
-        if (ignoreFocusEvents) {
-          console.log('ignore focus');
-          return true;
-        }
-        var t = e.target;
-        while (t && t.tagName != 'ARTICLE') {
-          t = t.parentElement;
-        }
-        if (t) {
-          var slideIndex = parseInt(t.getAttribute('slideIndex'), 10);
-          if (curSlide != slideIndex) {
-            console.log('Focus switch from ' +
-                        (curSlide + 1) + ' to ' + (slideIndex + 1));
-            curSlide = slideIndex;
-            updateSlides();
-            document.body.scrollLeft = 0;
-          }
-        }
-        return true;
-      }
-
-      function onScroll(e) {
-        console.log('scroll');
-        document.body.scrollLeft = 0;
-        e.preventDefault();
-        return false;
-      }
-
-      // Called when the page loads.
-      function initAriaPreso() {
-        slides = document.querySelectorAll('section.slides > article');
-
-        for (var i = 0; i < slides.length; i++) {
-          slides[i].setAttribute('tabindex', '-1');
-          slides[i].setAttribute('slideIndex', i);
-          slides[i].setAttribute('title', 'Slide ' + (i + 1));
-        }
-
-        document.addEventListener('slideenter', onSlideEnter, true);
-        document.addEventListener('focus', onFocus, true);
-        document.addEventListener('scroll', onScroll, true);
-      }
-
-      function refreshLiveCoding(basename) {
-        var src = $(basename + '_src');
-        var dst = $(basename + '_embed');
-        var html = src.innerText;
-        dst.innerHTML = html;
-        if (window[basename + '_hook'])
-          window[basename + '_hook']();
-        return false;
-      }
-
-      function addLiveCodingEventListeners(basename, src) {
-        src.addEventListener('keydown', function(e) {
-          if (e.keyCode == 9)  // tab
-            return true;
-          window.setTimeout(function() {
-            refreshLiveCoding(basename);
-          }, 0);
-          e.stopPropagation();
-          return false;
-        }, false);
-        src.addEventListener('blur', function(e) {
-          window.setTimeout(function() {
-            prettyPrint();
-          }, 0);
-        }, false);
-      }
-
-      function generateOutput(basename) {
-        var script = $(basename + '_script');
-        var output = $(basename + '_output');
-        output.innerHTML = '';
-        var js = script.innerText;
-        js = 'function print(str) {\n' +
-             '  var o = document.createElement("xmp");\n' +
-             '  o.innerText = str;\n' +
-             '  $("' + basename + '_output").appendChild(o);' +
-             '}' + js;
-        try {
-          eval(js);
-        } catch (e) {
-          output.innerText += e;
-        }
-        var run = document.createElement('button');
-        run.className = 'run_again';
-        run.style.marginTop = "1em";
-        run.innerText = 'Run again';
-        output.appendChild(run);
-        run.addEventListener('click', function() {
-          refreshLiveCoding(basename);
-          generateOutput(basename);
-        }, false);
-        run.focus();
-      }
-
-      // Sync a contenteditable containing html with a div containing the result.
-      function manageLiveCoding(basename) {
-        var src = $(basename + '_src');
-        src.title = "HTML source";
-        var code = src.innerHTML;
-        if (code[0] == '\n')
-          code = code.substr(1);
-        code = code.replace(/\n\n/g, '\n');
-        code = code.replace(/</g, '&lt;');
-        code = code.replace(/>/g, '&gt;');
-        src.innerHTML = code;
-
-        refreshLiveCoding(basename);
-        addLiveCodingEventListeners(basename, src);
-
-        var output = $(basename + '_output');
-        output.title = "JavaScript output";
-        var run = document.createElement('button');
-        run.className = 'run';
-        run.innerText = 'Run';
-        run.addEventListener('click', function() {
-          generateOutput(basename);
-        }, false);
-        output.appendChild(run);
-
-        $(basename + '_script').title = "JavaScript Source";
-        $(basename + '_embed').title = "HTML Output";
-      }
-
-      // Override keys used by interactive controls so they don't move
-      // to the next slide.
-      function overrideKeys(e) {
-        if (e.keyCode == 32 ||  // space
-            e.keyCode == 13 ||  // return
-            e.keyCode == 8 ||   // tab
-            e.keyCode == 38 ||  // up-arrow
-            e.keyCode == 40) {  // down-arrow
-          e.stopPropagation();
-        }
-        var active = document.activeElement;
-        if ((e.keyCode == 37 || e.keyCode == 39) &&  // left/right arrows
-            active.getAttribute("contentEditable") != "") {
-          e.stopPropagation();
-        }
-        return true;
-      }
-    </script>
-</head>
-
-  <style>
-    article:focus {
-      outline: none;
-    }
-
-    .slides > article {
-      -webkit-transition: -webkit-transform .4s ease-out !important;
-    }
-
-    iframe {
-      height: 800px !important;
-    }
-
-    h3 {
-      margin-bottom: 30px !important;
-    }
-
-    h3 + iframe {
-      height: 740px !important;
-    }
-
-    .parenthetical {
-      margin: 0 0.5em 0 0.5em;
-      color: #aaa;
-    }
-
-    .livecell {
-      margin: 0 20px 20px 0;
-      float: left;
-      width: 594px;
-      height: 340px;
-      line-height: 24px;
-      color: black;
-      border: 1px solid #696969;
-      padding: 5px 10px;
-    }
-
-    .lefthalf_src {
-      font-family: 'Droid Sans Mono', 'Courier New', monospace;
-      font-size: 15px;
-      background: rgb(240, 240, 240);
-      overflow: auto;
-    }
-
-    div.righthalf_embed {
-      overflow: hidden;
-      font-size: 24px;
-      line-height: 36px;
-    }
-    div.righthalf_embed * {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    div.righthalf_embed label {
-      display: block;
-      margin: 0 0 10px 0;
-    }
-    div.righthalf_embed input[type=text],input[type=password] {
-      border: 1px solid #666;
-    }
-    div.righthalf_embed input[type=submit],button {
-      display: block;
-      padding: 10px 20px;
-      border: 1px solid #666;
-      background: #eee;
-      border-radius: 6px;
-    }
-
-    .lefthalf_script {
-      font-family: 'Droid Sans Mono', 'Courier New', monospace;
-      font-size: 15px;
-      background: rgb(240, 240, 240);
-      overflow: auto;
-    }
-
-    div.righthalf_output {
-      font-family: 'Droid Sans Mono', 'Courier New', monospace;
-      font-size: 15px;
-      overflow: auto;
-    }
-
-    .run {
-      font-size: 24pt;
-      padding: 10px 20px;
-      color: #060;
-      font-weight: bold;
-      margin: 20px;
-    }
-
-    .run_again {
-      font-size: 18pt;
-      border: 0;
-      margin: 0;
-      padding: 0;
-      color: #060;
-      background: none !important;
-      margin-top: 20px;
-    }
-
-    button.refresh {
-      cursor: pointer;
-      margin: 0px;
-      padding: 0px;
-      font-size: 12px;
-      background: none;
-      border: 0px;
-      text-decoration: underline;
-      color: #00f;
-    }
-
-    article.title {
-      background-color: #69f;
-    }
-    .twoimages div {
-      margin-top: 30px;
-      float: left;
-      width: 450px;
-      height: 300px;
-      line-height: 300px;
-      text-align: center;
-      position: relative;
-    }
-    .twoimages div img {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      max-width: 470px;
-      max-height: 300px;
-    }
-
-    .medimage {
-      margin-top: 30px;
-      width: 1100px;
-      text-align: center;
-    }
-    .medimage img {
-      max-width: 1100px;
-      max-height: 450px;
-    }
-
-    .largeimage {
-      margin-top: 30px;
-      width: 1100px;
-      text-align: center;
-    }
-    .largeimage img {
-      max-width: 1100px;
-      max-height: 800px;
-    }
-
-    .flushbottom {
-      position: fixed;
-      bottom: 0px;
-      margin: 0;
-      width: 900px;
-      text-align: center;
-    }
-    .flushbottom img {
-      max-width: 900px;
-      max-height: 300px;
-    }
-
-    .bkgnd {
-      width: 900px;
-      text-align: center;
-    }
-    .bkgnd img {
-      opacity: 0.1;
-      max-width: 900px;
-    }
-
-    .largevideo {
-      margin-top: 20px;
-      text-align: center;
-      max-width: 1100px;
-    }
-
-    .largevideo video {
-      max-width: 1100px;
-      height: 650px;
-    }
-
-</style>
-
-<body style='display: none' onload='initAriaPreso()'>
-<section class='slides' onkeydown="return overrideKeys(event)">
+<body style="display: none" onload="initAriaPreso()">
+<section class="slides" onkeydown="return overrideKeys(event)">
 
 <article class="title">
   <h1>
-    JS Accessibility API Demos
+    Accessibility Object Model
   </h1>
   <p>
-    Dominic Mazzoni
+    Alexander Surkov, Mozilla
+    <br>
+    Alice Boxhall, Google
+    <br>
+    Dominic Mazzoni, Google
+    <br>
+    James Craig, Apple
   </p>
 </article>
 
-<article><h3>Example 1: Query role, label</h3>
-<pre id="rolelabel_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<h2>Starfleet academy</h2>
-<label>
-  Username: <input id="username" type="text">
-</label>
-<label>
-  Password: <input type="password">
-</label>
-<input id="sign_in" type="submit">
-</pre>
-<div id="rolelabel_embed" class="livecell righthalf_embed"></div>
-<pre id="rolelabel_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-var axUsername = $("username").accessibleElement;
-print("Username field role: " + axUsername.role);
-print("Username field label: " + axUsername.label);
-
-var axSignIn = $("sign_in").accessibleElement;
-print("Sign in role: " + axSignIn.role);
-print("Sign in label: " + axSignIn.label);
-</pre>
-<div id="rolelabel_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('rolelabel');</script>
+<article>
+  <h3>
+    Presentation Check
+  </h3>
+  <div style="padding-right: 30%;">
+    <div class="aom_enabled">
+      <p class="unicode_background" style="color: #99ee99;">
+        &#x2714;
+      </p>
+      <p>
+        Great! The Accessibility Object Model is enabled in this browser.
+      </p>
+      <p>
+        Demos should work fine.
+      </p>
+    </div>
+    <div class="aom_disabled">
+      <p class="unicode_background" style="color: #ee9999;">
+        &#x2718;
+      </p>
+      <p>
+        Accessibility Object Model support is not enabled.
+      </p>
+      <p>
+        To enable it in Chrome, use this command-line switch:
+      </p>
+      <pre>
+        --enable-blink-features=AccessibilityObjectModel
+      </pre>
+    </div>
+  </div>
+  <p style="margin-top: 350px">
+    Tip: Arrow keys move between slides, but not when something else has focus.
+  </p>
+  <p>
+    Page Up / Down moves between slides, regardless of focus.
+  </p>
 </article>
 
-<article><h3>Example 2: Explore tree</h3>
-<pre id="exploretree_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<ol id="list1">
-  <li>The Original Series</li>
-  <li>The Next Generation</li>
-  <li>Deep Space Nine</li>
-  <li>Voyager</li>
-  <li>Enterprise</li>
-</ul>
-</pre>
-<div id="exploretree_embed" class="livecell righthalf_embed"></div>
-<pre id="exploretree_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-var axList = $("list1").accessibleElement;
-print("List role: " + axList.role);
-
-var axItem1 = axList.firstChild;
-print("Item 1 role: " + axItem1.role);
-print("Item 1 label: " + axItem1.label);
-
-var axItem2 = axItem1.nextSibling;
-print("Item 2 role: " + axItem2.role);
-print("Item 2 label: " + axItem2.label);
-
-print("axItem1.parent == axList: " + (axItem1.parent == axList));
-</pre>
-<div id="exploretree_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('exploretree');</script>
+<article>
+  <h3>
+    Overview
+  </h3>
+  <ul>
+    <li>Background</li>
+    <li>Gaps</li>
+    <li>Phase 1: Properties</li>
+    <li>Phase 2: Actions / Input Events</li>
+    <li>Phase 3: Virtual Nodes</li>
+    <li>Phase 4: Introspection</li>
+    <li>Q&amp;A</li>
+  </ul>
 </article>
 
-<article><h3>Example 3: Modify role, label</h3>
-<pre id="modify_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<button id="bridge">Bridge</button>
-<button id="engineering">Engineering</button>
-<button id="sick_bay">Sick Bay</button>
-</pre>
-<div id="modify_embed" class="livecell righthalf_embed"></div>
-<pre id="modify_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-$("engineering").accessibleElement.role = "link";
-$("sick_bay").accessibleElement.label = "Ten forward";
-print("Done.");
-</pre>
-<div id="modify_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('modify');</script>
+<article class="medimage">
+  <h3>
+    Background
+  </h3>
+  <p>
+    Assistive technology (AT) augments or replaces the existing UI for
+    an application. Examples include:
+    <ul>
+      <li>Screen reader
+      <li>Voice Control
+      <li>Switch Access
+    </ul>
+  </p>
+  <img src="../images/a11y-tree.png"
+       alt="Image showing 4 layers of 2-way communication - from the application, to the accessibility tree, to assistive technology, to the user.">
 </article>
 
-<article><h3>Example 4: Feature detection</h3>
-<pre id="feature_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<label>
-  <input type="checkbox" id="stun">Phasers on stun
-</label>
-</pre>
-<div id="feature_embed" class="livecell righthalf_embed"></div>
-<pre id="feature_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-var axStun = $("stun").accessibleElement;
-print("Original role: " + axStun.role);
-
-axStun.role = "switch";
-print("Trying to set role to switch: " + axStun.role);
-
-axStun.role = "quantum-checkbox";
-print("Trying to set role to quantum-checkbox: " + axStun.role);
-</pre>
-<div id="feature_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('feature');</script>
+<article>
+  <h3>
+    Accessibility APIs
+  </h3>
+  <p>
+    Each operating system has its own accessibility APIs for
+    native applications.
+  </p>
+  <ul>
+    <li><b>Windows</b>: MSAA, IAccessible2, UI Automation
+    <li><b>macOS</b>: NSAccessibility
+    <li><b>iOS</b>: UIAccessibility
+    <li>etc.
+  </ul>
+  <p>
+    Besides assistive technology, these APIs are also often
+    used for <em>automation</em>, for example for password
+    managers or for single-sign-on.
+  </p>
 </article>
 
-<article><h3>Example 5: Modify position</h3>
-<pre id="position_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<h2>Landing party checklist</h2>
-<label><input type="checkbox" id="phaser">Phaser</label>
-<label><input type="checkbox" id="tricorder">Tricorder</label>
-<label><input type="checkbox" id="communicator">Communicator</label>
-</pre>
-<div id="position_embed" class="livecell righthalf_embed"></div>
-<pre id="position_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-$("tricorder").accessibleElement.offsetLeft += 50;
-$("communicator").accessibleElement.offsetTop += 25;
-print("Done.");
-</pre>
-<div id="position_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('position');</script>
+<article class="medimage">
+  <h3>
+    Accessibility Tree
+  </h3>
+  <p>
+    Native applications expose an <em>accessibility tree</em> via
+    accessibility APIs. Each <em>accessibility node</em> has properties
+    such as a <b>role</b>, <b>name</b>, <b>state</b>, and
+    <b>actions</b>.
+  </p>
+  <img src="../images/a11y-node.png"
+       alt="Visualization of an accessibility tree. The root has role main, the child has role form, then it has three children, a radio button, a slider, and a button, each with role, name, state, and actions pictured.">
 </article>
 
-<article><h3>Example 6: Modify CSS generated text</h3>
-<pre id="cssgen_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<style>
-#gen:before { content: "Before, "; }
-#gen:after { content: ", After"; }
-</style>
-<h2 id="time_heading"><span id="gen">Present</span></h2>
-</div>
-
-</pre>
-<div id="cssgen_embed" class="livecell righthalf_embed"></div>
-<pre id="cssgen_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-var axHeading = $("time_heading").accessibleElement;
-axHeading.firstChild.label = "Past, ";
-axHeading.lastChild.label = ", Future";
-print("Heading label is now: " + axHeading.label);
-</pre>
-<div id="cssgen_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('cssgen');</script>
+<article class="largeimage">
+  <h3>
+    Accessibility on the web
+  </h3>
+  <p>
+    Web browsers automatically map the DOM into the accessibility tree.
+  </p>
+  <img src="../images/DOM-a11y-tree.png"
+       alt="Image showing how the the web browser simultaneously paints the visual UI and also updates the accessibility tree.">
 </article>
 
-<article><h3>Example 7: Accessible click listener</h3>
-<pre id="click_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<button id="kirk">James T Kirk</button>
-<button id="picard">Jean-Luc Picard</button>
-</pre>
-<div id="click_embed" class="livecell righthalf_embed"></div>
-<pre id="click_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-$("kirk").addEventListener("click", function() {
-  print("Clicked on Kirk");
-});
-$("picard").addEventListener("click", function() {
-  print("Clicked on Picard");
-});
-$("picard").accessibleElement.ondefaultaction = function() {
-  print("Accessible click on Picard");
-  return false;
-};
-</pre>
-<div id="click_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('click');</script>
+<article class="largeimage">
+  <h3>
+    Web accessibility APIs
+  </h3>
+  <p>
+    The web has rich support for making applications accessible, but
+    only via a declarative API.
+  </p>
+  <p>
+    There's always a one-to-one correspondence between a DOM node and
+    a node in the accessibility tree.
+  </p>
+  <img src="../images/a11y-node-ARIA.png"
+       alt="Image showing how a div with role=checkbox might simultaneously be drawn as a custom checkbox, while mapping onto a native chcekbox in the accessibility API.">
 </article>
 
-<article><h3>Example 8: Virtual element</h3>
-<pre id="virtual_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-  <img src="enterprise.gif" id="enterprise">
-</pre>
-<div id="virtual_embed" class="livecell righthalf_embed"></div>
-<pre id="virtual_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
-var axEnterprise = $("enterprise").accessibleElement;
-axEnterprise.role = "group";
-
-var axText = new AccessibleElement({
-    "role": function() { return "text"; },
-    "label": function() { return "Space, the final frontier"; },
-    "offsetWidth": function() { return 300; },
-    "offsetHeight": function() { return 100; }});
-axEnterprise.appendChild(axText);
-</pre>
-<div id="virtual_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('virtual');</script>
+<article>
+  <h3>
+    Gaps
+  </h3>
+  <p>
+    There are several key gaps in the web platform and ARIA.
+  </p>
+  <p>
+    Some gaps are about ergnomonics; it's possible to make an app
+    accessible but the APIs are inconvenient or cumbersome, but
+    usable.
+  </p>
+  <p>
+    Others gaps make it impossible for web developers to make
+    apps with the same degree of accessibility as native apps.
+  </p>
+  <p>
+    We're going to focus on <b>five key gaps</b>.
+  </p>
 </article>
 
-<article><h3>Example 9: Canvas slider</h3>
+<article>
+  <h3>
+    Gap 1: Leaky abstractions
+  </h3>
+  <p>
+    Today, a library author creating a custom element is forced to
+    "sprout" ARIA attributes to express semantics which are implicit for
+    native elements.
+  </p>
+
+  <pre>
+    <!-- Page author uses the custom element as they would a native element -->
+    <custom-slider min="0" max="5" value="3"></custom-slider>
+
+    <!-- Custom element is forced to "sprout" extra attributes
+         to express semantics -->
+    <custom-slider min="0" max="5" value="3" role="slider"
+                   tabindex="0"
+                   aria-valuemin="0" aria-valuemax="5"
+                   aria-valuenow="3" aria-valuetext="3"></custom-slider>
+  </pre>
+  <p>
+    This is mostly just an inconvenience. For the most part it's
+    still possible to make custom elements and other widgets
+    accessible.
+  </p>
+</article>
+
+<article>
+  <h3>
+    Gap 2: Limitations of IDREFs
+  </h3>
+  <p>
+    To express an accessible relationship between two elements in the DOM,
+    ARIA attributes let one element refer to the ID of another element.
+  </p>
+  <p><code>aria-labelledby</code> indicates one element labels another:</p>
+  <pre>
+    <div id="firstname">First name:</div>
+    <input aria-labelledby="firstname">
+  </pre>
+  <p>
+  <p><code>aria-activedescendant</code> indicates a descendant that's
+    focused in a composite control like a list box.</p>
+  <pre>
+    <div role="listbox" aria-activedescendant="item1" tabindex="0">
+      <div role="option" id="item1">Item 1</div>
+      <div role="option" id="item2">Item 2</div>
+      <div role="option" id="item3">Item 3</div>
+    </div>
+  </pre>
+</article>
+
+<article>
+  <h3>
+    Gap 2: Limitations of IDREFs (2)
+  </h3>
+  <p>
+    It can be <em>cumbersome</em> and <em>error-prone</em> to
+    maintain unique IDs on all elements that have a relationship
+    with some other element.
+  </p>
+  <p>
+    But if you're using custom elements, it's <em>impossible</em> to
+    establish a relationship between two elements that aren't part
+    of the same <em>tree scope</em>.
+  </p>
+  <p>
+    For example, it's <em>impossible</em> to make an accessible
+    custom listbox using <code>aria-activedescendant</code>:
+  </p>
+  <pre>
+    <custom-listbox>
+      <custom-option id="item1">Item 1</custom-option>
+      <custom-option id="item2">Item 2</custom-option>
+      <custom-option id="item3">Item 3</custom-option>
+    </custom-listbox>
+  </pre>
+</article>
+
+<article>
+  <h3>
+    Gap 3: No way to capture input events from AT
+  </h3>
+  <p>
+    ARIA only helps the web author communicate in one direction: from
+    the web app to the assistive technology.
+  </p>
+  <p>
+    However, AT can also command and control applications, for example
+    issuing commands to activate, focus, or scroll. While native HTML
+    elements already support these commands, web authors can't
+    override this behavior for custom elements.
+  </p>
+  <p>
+    Examples: AT wants to <b>select</b> an item in a list box,
+    <b>increment</b> a slider, or <b>dismiss</b> a dialog.
+</article>
+
+<article>
+  <h3>
+    Gap 4: Every accessible node requires a DOM element.
+  </h3>
+  <p>
+    To make a canvas-based UI accessible requires hacks like
+    fake DOM elements hiding behind the canvas.
+  </p>
+  <p>
+
+  </p>
+</article>
+
+<article>
+  <h3>
+    Gap 5: No introspection
+  </h3>
+  <p>
+    No way to programmatically detect if an accessibility
+    feature is supported by the browser or if you're using it
+    correctly.
+  </p>
+  <pre>
+    <!-- illegal role - how do you know? -->
+    <div role="chef"></div>
+  </pre>
+
+  <pre>
+    <!-- attribute not allowed on that role - how do you know? -->
+    <div role="listbox" aria-setsize="25"></div>
+  </pre>
+</article>
+
+<article>
+  <h1>
+    Accessibility Object Model
+  </h1>
+</article>
+
+<article>
+  <h3>
+    AOM: Brief History
+  </h3>
+  <p>
+    Microsoft and Mozilla independently proposed a JavaScript
+    accessibility API. Apple and Google had similar ideas.
+  </p>
+  <p>
+    This spec takes the best ideas and organizes them into
+    four <em>phases</em>, each with smaller scope, each solving
+    an increasing number of real-world use-cases.
+  </p>
+  <p>
+    AOM is being implemented behind a flag in Google Chrome now
+    (currently partway through phase 3).
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 1: Accessible Properties
+  </h3>
+  <p>
+    Every DOM element has a corresponding <code>AccessibleNode</code>.
+  </p>
+  <p>
+    Every ARIA attribute, such as <code>role</code> and
+    <code>aria-checked</code> here:
+  </p>
+
+  <pre>
+    <div role="checkbox" aria-checked="true">Receive promotional offers</div>
+  </pre>
+
+  <p>
+    ...can be replaced with equivalent JavaScript:
+  </p>
+
+  <pre>
+    el.accessibleNode.role = "checkbox";
+    el.accessibleNode.checked = true;
+  </pre>
+
+</article>
+
+<article>
+  <h3>
+    Phase 1: Accessible Properties (2)
+  </h3>
+  <p>
+    Instead of using an IDREF:
+  </p>
+  <pre>
+    el.setAttribute('aria-activedescendant', 'child' + childIndex);
+  </pre>
+  <p>
+    ...just reference another element directly:
+  </p>
+  <pre>
+    el.accessibleNode.activeDescendant = child.accessibleNode;
+  </pre>
+
+</article>
+
+<article>
+  <h3>
+    IDL of Phase 1
+  </h3>
+  <pre style="width:600px; float: left;">
+    interface AccessibleNode {
+      attribute AccessibleNode? activeDescendant;
+      attribute boolean? atomic;
+      attribute DOMString? autocomplete;
+      attribute boolean? busy;
+      attribute DOMString? checked;
+      attribute long? colCount;
+      attribute unsigned long? colIndex;
+      attribute unsigned long? colSpan;
+      attribute AccessibleNodeList? controls;
+      attribute DOMString? current;
+      attribute AccessibleNodeList? describedBy;
+      attribute AccessibleNode? details;
+      attribute boolean? disabled;
+      attribute AccessibleNode? errorMessage;
+      attribute boolean? expanded;
+      attribute AccessibleNodeList? flowTo;
+      attribute DOMString? hasPopUp;
+      attribute boolean? hidden;
+      attribute DOMString? invalid;
+      attribute DOMString? keyShortcuts;
+      attribute DOMString? label;
+      attribute AccessibleNodeList? labeledBy;
+      attribute unsigned long? level;
+      attribute DOMString? live;
+    ...
+  </pre>
+  <pre style="width:600px; float: left; margin-left: 20px;">
+    ...
+      attribute boolean? modal;
+      attribute boolean? multiline;
+      attribute boolean? multiselectable;
+      attribute DOMString? orientation;
+      attribute AccessibleNodeList? owns;
+      attribute DOMString? placeholder;
+      attribute unsigned long? posInSet;
+      attribute DOMString? pressed;
+      attribute boolean? readOnly;
+      attribute DOMString? relevant;
+      attribute boolean? required;
+      attribute DOMString? role;
+      attribute DOMString? roleDescription;
+      attribute long? rowCount;
+      attribute unsigned long? rowIndex;
+      attribute unsigned long? rowSpan;
+      attribute boolean? selected;
+      attribute long? setSize;
+      attribute DOMString? sort;
+      attribute double? valueMax;
+      attribute double? valueMin;
+      attribute double? valueNow;
+      attribute DOMString? valueText;
+    };
+  </pre>
+</article>
+
+<article>
+  <h3>
+    Phase 1 Demo
+  </h3>
+  <pre id="phase1_src" class="livecell lefthalf_src" tabindex="0"
+       contenteditable="true" spellcheck="false">
+    <button id="bridge">Bridge</button>
+    <button id="engineering">Engineering</button>
+    <p id="sick_bay_label">Sick Bay</p>
+    <button id="sick_bay">&#x1f44d;</button>
+  </pre>
+  <div id="phase1_embed" class="livecell righthalf_embed"></div>
+  <pre id="phase1_script" class="livecell lefthalf_script" tabindex="0"
+       contenteditable="true" spellcheck="false">
+    $("engineering").accessibleNode.role = "link";
+    $("sick_bay").accessibleNode.labeledBy = new AccessibleNodeList();
+    $("sick_bay").accessibleNode.labeledBy.add(
+        $("sick_bay_label").accessibleNode);
+    print("Done.");
+  </pre>
+  <div id="phase1_output" class="livecell righthalf_output"></div>
+  <script>manageLiveCoding("phase1");</script>
+</article>
+
+
+<article>
+  <h3>
+    Phase 1: Accessible Properties
+  </h3>
+  <p>
+    Every ARIA attribute, such as <code>role</code> and
+    <code>aria-checked</code> here:
+  </p>
+
+  <pre>
+    <div role="checkbox" aria-checked="true">Receive promotional offers</div>
+  </pre>
+
+  <p>
+    ...can be replaced with equivalent JavaScript:
+  </p>
+
+  <pre>
+    el.accessibleNode.role = "checkbox";
+    el.accessibleNode.checked = true;
+  </pre>
+
+</article>
+
+<article>
+  <h3>
+    Phase 2: Background on events from AT
+  </h3>
+  <p>
+    As a reminder, AT users are often not generating keyboard, mouse, and
+    touch events.
+  </p>
+  <p>
+    They issue high-level commands (click, focus, select, dismiss, etc.)
+    directly to their AT, and the AT tells the app to take that action
+    via accessibility APIs.
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 2: Accessible Actions / Input Events
+  </h3>
+  <p>
+    Every AccessibleNode is an EventTarget, and you can listen to input
+    events directly from assistive technology.
+  </p>
+  <pre>
+    button.accessibleNode.addEventListener("accessibleclick", function(event) {
+      console.log("Got Click from assistive technology");
+    });
+  </pre>
+  <p>
+    Supported events include:
+  </p>
+  <pre>
+    "accessibleclick"
+    "accessiblecontextmenu"
+    "accessibledecrement"
+    "accessibledismiss"
+    "accessiblefocus"
+    "accessibleincrement"
+    "accessiblescrollintoview"
+    "accessibleselect"
+    "accessiblesetvalue"
+  </pre>
+</article>
+
+<article>
+  <h3>
+    Phase 2 use cases include...
+  </h3>
+  <ul>
+    <li>Focus events in composite controls, e.g. when the AT wants to focus
+      an option or cell, but the web app wants to focus the listbox or grid
+      and use aria-activedescendant.
+    <li>Events that don't have any equivalent on the web now, like
+      <code>"increment"</code>, <code>"decrement"</code>, or
+      <code>"dismiss"</code>.
+    <li>Capturing events on virtual nodes intended entirely for AT
+      (more in Phase 3).
+  </ul>
+</article>
+
+<article>
+  <h3>
+    Phase 2 and privacy
+  </h3>
+  <p>
+    If an AOM event listener is ever called, the web page
+    *definitively knows* that the user is running AT.
+  </p>
+  <p>
+    Some users may not be comfortable revealing this, due to
+    concerns of discrimination, or of being offered an
+    undesired alternate interface.
+  </p>
+  <p>
+    So triggering an AOM event listeners brings up a new
+    <b>user permission</b> dialog before the web page can capture
+    the event.
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 2 and feature detection
+  </h3>
+  <p>
+    If the user <em>does</em> grant permission, this is great
+    because the app can now enable any extra features needed
+    by AT.
+  </p>
+  <p>
+    If the user does not grant permission, they can be confident
+    they're getting the same experience as everyone else.
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 2 demo: Feature detection
+  </h3>
+  <p>
+    This button has an AOM click listener on it:
+  </p>
+  <button id="at_detect" class="bigbutton">
+    Click here using AT
+  </button>
+  <div id="at_status" class="bigresult" aria-live="true">
+    Status: I don't know if you're using AT.
+  </div>
+  <script>
+    $("at_detect").accessibleNode.addEventListener("accessibleclick", function() {
+      $("at_status").textContent = "Status: You are using AT!";
+    });
+  </script>
+</article>
+
+<article><h3>Phase 2 demo: Canvas slider</h3>
 <script>
 window['canvas_slider_hook'] = function() {
     var canvas = document.getElementById('slider');
-    canvas.addEventListener('keydown', function(event) {
+    window.updateSlider = function(delta) {
         var min = parseInt(canvas.getAttribute('min'), 10);
         var max = parseInt(canvas.getAttribute('max'), 10);
         var value = parseInt(canvas.getAttribute('value'), 10);
-        if (event.keyIdentifier == 'Left')
-            value--;
-        if (event.keyIdentifier == 'Right')
-            value++;
+        value += delta;
         if (value > max)
             value = max;
         if (value < min)
             value = min;
+        canvas.accessibleNode.valueText = "" + value;
+        canvas.accessibleNode.valueNow = value;
         canvas.setAttribute('value', value);
-        canvas.setAttribute('aria-valuenow', value);
-        canvas.setAttribute('aria-valuetext', value);
+    }
+    canvas.addEventListener('keydown', function(event) {
+        if (event.key == 'ArrowLeft')
+            updateSlider(-1);
+        if (event.key == 'ArrowRight')
+            updateSlider(+1);
     });
 
     window.setInterval(function() {
@@ -696,67 +737,217 @@ window['canvas_slider_hook'] = function() {
 <pre id="canvas_slider_src" class="livecell lefthalf_src" tabindex="0"
      contenteditable="true" spellcheck="false">
 <h3>Warp speed:</h3>
-<canvas id="slider" width="400" height="120" tabIndex=0
-        role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5"
-        value="5" min="1" max="10">
-</canvas>
+  <canvas id="slider" width="400" height="120"
+          value="5" min="1" max="10">
+  </canvas>
 </pre>
 <div id="canvas_slider_embed" class="livecell righthalf_embed"></div>
 <pre id="canvas_slider_script" class="livecell lefthalf_script" tabindex="0"
      contenteditable="true" spellcheck="false">
-var axSlider = $("slider").accessibleElement;
-axSlider.role = "slider";
-axSlider.onaccessiblesetvalue = function(event) {
-    $("slider").setAttribute('value', event.value);
-    $("slider").setAttribute('aria-valuenow', event.value);
-    $("slider").setAttribute('aria-valuetext', event.value);
-}
+  $("slider").tabIndex = 0;
+  $("slider").accessibleNode.role = "slider";
+  $("slider").accessibleNode.valueMin = 1;
+  $("slider").accessibleNode.valueMax = 10;
+  $("slider").accessibleNode.valueNow = 5;
+  $("slider").accessibleNode.addEventListener(
+      "accessibleincrement", function() {
+    updateSlider(1);
+  });
+  $("slider").accessibleNode.addEventListener(
+      "accessibledecrement", function() {
+    updateSlider(-1);
+  });
 </pre>
 <div id="canvas_slider_output" class="livecell righthalf_output"></div>
 <script>manageLiveCoding('canvas_slider');</script>
 </article>
 
-<article><h3>IDL of what's implemented so far</h3>
-<pre style="width:600px; float: left;">
-[ Constructor(AccessibleSource source) ]
-interface AccessibleElement : EventTarget {
-  attribute DOMString role;
-  attribute DOMString label;
+<article>
+  <h3>
+    Phase 3: Virtual Nodes
+  </h3>
+  <p>
+    In addition to the <code>AccessibleNode</code> associated with every
+    DOM element, you can <b>construct</b> an AccessibleNode and set its
+    properties from scratch.
+  </p>
+  <p>
+    We call this a "virtual" AccessibleNode.
+  </p>
+  <pre>
+    var virtualNode = new AccessibleNode();
+    virtualNode.role = "button";
+    virtualNode.label = "Play Game";
+  </pre>
+  <p>
+    Insert an AccessibleNode as the child of another AccessibleNode, like this:
+  </p>
+  <pre>
+    document.body.accessibleNode.appendChild(virtualNode);
+  </pre>
+</article>
 
-  attribute long? offsetLeft;
-  attribute long? offsetTop;
-  attribute long? offsetWidth;
-  attribute long? offsetHeight;
+<article>
+  <h3>
+    Restrictions on virtual nodes
+  </h3>
+  <p>
+    The arguments to <code>AccessibleNode.appendChild</code> and
+    <code>AccessibleNode.insertBefore</code> must be a virtual
+    AccessibleNode.
+  </p>
+  <p>
+    In other words, you can't use these methods to rearrange the
+    accessibility tree corresponding to the DOM.
+  </p>
+  <p>
+    You can only build a "virtual" accessibility tree that
+    "hangs off" of one DOM node.
+  </p>
+</article>
 
-  readonly attribute AccessibleElement parent;
-  readonly attribute AccessibleElement firstChild;
-  readonly attribute AccessibleElement lastChild;
-  readonly attribute AccessibleElement nextSibling;
-  readonly attribute AccessibleElement previousSibling;
+<article>
+  <h3>
+    Bounding boxes
+  </h3>
+  <p>
+    To set the bounding box of a virtual node, provide its left, top,
+    width, and height in pixels, relative to its <code>offsetParent</code>,
+    which can be any ancestor AccessibleNode.
+  </p>
+  <pre>
+    virtualNode.offsetLeft = 30;
+    virtualNode.offsetTop = 20;
+    virtualNode.offsetWidth = 400;
+    virtualNode.offsetHeight = 300;
+    virtualNode.offsetParent = document.body.accessibleNode;
+  </pre>
+  <p>
+    Relative coordinates are important for things like a canvas-based UI,
+    because the canvas element might have CSS transforms applied to it.
+  </p>
+  <p>
+    It's also legal to set <code>offsetLeft</code>,
+    <code>offsetParent</code>, etc. on an AccessibleNode associated with a
+    DOM element, to override its bounding box.
+  </p>
+</article>
 
-  void appendChild(AccessibleElement child);
+<article>
+  <h3>
+    Focus management
+  </h3>
+  <p>
+    To make a node focusable, the <code>focusable</code> attribute can
+    be set. This is similar to setting tabIndex=-1 on a DOM element.
+  </p>
+  <pre>
+    virtualNode.focusable = true;
+  </pre>
+  <p>
+    To focus an accessible node, call its <code>focus()</code> method.
+  </p>
+  <pre>
+    virtualNode.focus();
+  </pre>
+  <p>
+    When a virtual accessible node is focused, input focus in the DOM
+    is unchanged. The focused accessible node is reported to assistive
+    technology and other accessibility API clients, but no DOM events
+    are fired and document.activeElement is unchanged.
+  </p>
+</article>
 
-  attribute EventHandler ondefaultaction;
-  attribute EventHandler onaccessiblesetvalue;
+<article>
+  <h3>
+    Phase 3 Demo
+  </h3>
+  <p>
+    Not yet ready
+  </p>
+</article>
 
-  void setSource(AccessibleSource source);
-};
-</pre>
-<pre style="width:600px; float: left; margin-left: 20px;">
-partial interface Node {
-  readonly attribute AccessibleElement?
-      accessibleElement;
-};
+<article>
+  <h3>
+    Phase 4: Introspection
+  </h3>
+  <p>
+  </p>
+  <p>
 
-dictionary AccessibleSource {
-  Function role;
-  Function label;
-  Function offsetTop;
-  Function offsetLeft;
-  Function offsetWidth;
-  Function offsetHeight;
-};
-</pre>
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 4 (2)
+  </h3>
+  <p>
+  </p>
+  <p>
+
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phase 4 (3)
+  </h3>
+  <p>
+  </p>
+  <p>
+
+  </p>
+</article>
+
+<article>
+  <h3>
+    Q &amp; A
+  </h3>
+  <p>
+  </p>
+  <p>
+
+  </p>
+</article>
+
+<article>
+  <h3>
+    Broken Demo: List Box
+  </h3>
+  <pre id="listbox_src" class="livecell lefthalf_src" tabindex="0"
+       contenteditable="true" spellcheck="false">
+    <h3>Pick from this list:</h3>
+    <div id="listbox" role="listbox" tabindex="0">
+      <div role="option">Item 1</div>
+      <div role="option">Item 2</div>
+      <div role="option">Item 3</div>
+    </div>
+  </pre>
+  <div id="listbox_embed" class="livecell righthalf_embed"></div>
+  <pre id="listbox_script" class="livecell lefthalf_script" tabindex="0"
+       contenteditable="true" spellcheck="false">
+    var items = document.querySelectorAll("#listbox *");
+    var index = 0;
+    function update() {
+      if (index < 0) index = 0;
+      if (index >= items.length) index = items.length - 1;
+      $("listbox").accessibleNode.activeDescendant =
+          items[index].accessibleNode;
+      items[index].classList.add("selected");
+    }
+    $("listbox").addEventListener('keydown', function(e) {
+      items[index].classList.remove("selected");
+      if (e.key == "ArrowUp") { index--; }
+      if (e.key == "ArrowDown") { index++; }
+      update();
+      e.preventDefault();
+    });
+    update();
+    print("Done.");
+  </pre>
+  <div id="listbox_output" class="livecell righthalf_output"></div>
+  <script>manageLiveCoding("listbox");</script>
 </article>
 </section>
 
