@@ -1,0 +1,52 @@
+URL:
+http://www.csun.edu/cod/conference/2018/openconf-general/author/submit_general.php?
+Submission Type: General Track
+Submission Title (75 characters):
+Accessibility Object Model: a new API for improved web accessibility
+000000000011111111110000000000111111111100000000001111111111000000000011111
+
+Field:
+[X] Education
+[ ] Employment & Workplace
+[ ] Entertainment & Leisure
+[ ] Independent Living
+[ ] Law & Policy
+[ ] Transportation
+
+Topics (pick up to 3):
+
+[ ] Aging
+[ ] Augmentative and Alternative Communications (AAC)
+[ ] Blind/Low Vision 
+[ ] Cognitive
+[ ] Deaf and Hard of Hearing
+[ ] Emerging Assistive Technologies
+[ ] Government
+[ ] Hardware
+[ ] Healthcare
+[ ] Higher Education
+[ ] Information & Communications Technology (ICT)
+[ ] K-12 Education
+[ ] Mobility
+[ ] Research & Development
+[X] Software
+[X] Web
+[ ] Other
+
+Speakers
+
+Dominic Mazzoni, Google, Inc.
+Alice Boxhall, Google, Inc.
+James Craig, Apple, Inc.
+???, Mozilla Corporation.
+
+optional Rob Dodson?
+
+Abstract (25 words)
+
+An experimental new web standard from Apple, Google, and Mozilla lets web apps go beyond ARIA to have more advanced accessibility, like native apps.
+
+Extended abstract (500 - 1500 words) - includes title, names of speakers and contact info, summary of paper, references, and endnotes.
+
+
+
