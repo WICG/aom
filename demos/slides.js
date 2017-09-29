@@ -171,7 +171,9 @@ function updateSlides() {
     if (!el) {
       return;
     }
+
     el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('inert', 'true');
 
     switch (i) {
       case curSlide - 2:
@@ -378,11 +380,13 @@ function setupFrames() {
 };
 
 function makeCurrentSlideAccessible() {
+  console.log('makeCurrentSlideAccessible 0');
   var el = getSlideEl(curSlide);
   if (!el) {
     return;
   }
   el.removeAttribute('aria-hidden');
+  el.removeAttribute('inert');
   el.setAttribute('tabIndex', '-1');
   el.focus();
   window.setTimeout(function() {
@@ -391,7 +395,7 @@ function makeCurrentSlideAccessible() {
 }
 
 function handleTransitionEnd(event) {
-  if (event.target.className != 'current') {
+  if (!event.target.classList.contains('current')) {
     return;
   }
 
@@ -401,23 +405,23 @@ function handleTransitionEnd(event) {
 function setupInteraction() {
   /* Clicking and tapping */
 
-  var el = document.createElement('div');
+  var slides = document.querySelector('section.slides');
+
+  var el = document.createElement('button');
+  el.innerHTML = '&#x2190;';
   el.className = 'slide-area';
-  el.setAttribute('role', 'button');
   el.setAttribute('aria-label', 'Previous Slide');
-  el.tabIndex = -1;
   el.id = 'prev-slide-area';
   el.addEventListener('click', prevSlide, false);
-  document.querySelector('section.slides').appendChild(el);
+  slides.insertBefore(el, slides.firstElementChild);
 
-  el = document.createElement('div');
+  el = document.createElement('button');
   el.className = 'slide-area';
-  el.setAttribute('role', 'button');
+  el.innerHTML = '&#x2192;';
   el.setAttribute('aria-label', 'Next Slide');
-  el.tabIndex = -1;
   el.id = 'next-slide-area';
   el.addEventListener('click', nextSlide, false);
-  document.querySelector('section.slides').appendChild(el);
+  slides.appendChild(el);
 
   /* Swiping */
 
@@ -484,6 +488,41 @@ function addEventListeners() {
 function addPrettify() {
   var els = document.querySelectorAll('pre');
   for (var i = 0, el; el = els[i]; i++) {
+    var text = el.innerHTML;
+
+    // Remove leading and trailing whitespace of any kind.
+    text = text.replace(/^\s+|\s+$/g, '');
+
+    // Figure out how many spaces of indentation are at the
+    // beginning of every line (ignoring lines with 0 indentation).
+    var lines = text.split('\n');
+    var prefix_len = 999;
+    for (var j = 0; j < lines.length; j++) {
+      var match = lines[j].match(/^\s+/);
+      if (match) {
+        var pre = match[0].length;
+        if (pre > 0 && pre < prefix_len)
+          prefix_len = pre;
+      }
+    }
+
+    if (prefix_len > 0 && prefix_len < 999) {
+      // Remove that many spaces from the beginning of every line.
+      var prefix = '';
+      for (var j = 0; j < prefix_len; j++) {
+        prefix += ' ';
+      }
+      var prefixPattern = new RegExp('\n' + prefix, 'g');
+      text = text.replace(prefixPattern, '\n');
+    }
+
+    // Escape < and > characters.
+    text = text.replace(/</g, '&lt;');
+    text = text.replace(/>/g, '&gt;');
+
+    // Rewrite the <pre> element.
+    el.innerHTML = text;
+
     if (!el.classList.contains('noprettyprint')) {
       el.classList.add('prettyprint');
     }

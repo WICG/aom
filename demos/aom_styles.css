@@ -1,0 +1,218 @@
+article:focus {
+  outline: none;
+}
+
+.slides > article {
+  -webkit-transition: -webkit-transform .4s ease-out !important;
+}
+
+iframe {
+  height: 800px !important;
+}
+
+h3 {
+  margin-bottom: 30px !important;
+}
+
+h3 + iframe {
+  height: 740px !important;
+}
+
+.parenthetical {
+  margin: 0 0.5em 0 0.5em;
+  color: #aaa;
+}
+
+.livecell {
+  margin: 0 20px 20px 0;
+  float: left;
+  width: 594px;
+  height: 340px;
+  line-height: 24px;
+  color: black;
+  border: 1px solid #696969;
+  padding: 5px 10px;
+}
+
+.lefthalf_src {
+  font-family: 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 15px;
+  background: rgb(240, 240, 240);
+  overflow: auto;
+}
+
+div.righthalf_embed {
+  overflow: hidden;
+  font-size: 24px;
+  line-height: 36px;
+}
+div.righthalf_embed * {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+div.righthalf_embed label {
+  display: block;
+  margin: 0 0 10px 0;
+}
+div.righthalf_embed input[type=text],input[type=password] {
+  border: 1px solid #666;
+}
+div.righthalf_embed input[type=submit],button {
+  display: block;
+  padding: 10px 20px;
+  border: 1px solid #666;
+  background: #eee;
+  border-radius: 6px;
+}
+
+.lefthalf_script {
+  font-family: 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 15px;
+  background: rgb(240, 240, 240);
+  overflow: auto;
+}
+
+div.righthalf_output {
+  font-family: 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 15px;
+  overflow: auto;
+}
+
+.run, .run_again {
+  font-size: 24pt;
+  padding: 10px 20px;
+  color: #060;
+  font-weight: bold;
+  margin: 20px;
+}
+
+.run_again {
+  font-size: 18pt;
+}
+
+#listbox {
+  margin-top: 4px;
+  border: 2px solid #888;
+  width: 400px;
+}
+
+#listbox div {
+  border: 1px solid #888;
+  padding: 2px 6px;
+  margin: -1px 0 0 0 !important;
+}
+
+#listbox div.selected {
+  background: #eef;
+}
+
+button.refresh {
+  cursor: pointer;
+  margin: 0px;
+  padding: 0px;
+  font-size: 12px;
+  background: none;
+  border: 0px;
+  text-decoration: underline;
+  color: #00f;
+}
+
+article.title {
+  background-color: #69f;
+}
+.twoimages div {
+  margin-top: 30px;
+  float: left;
+  width: 450px;
+  height: 300px;
+  line-height: 300px;
+  text-align: center;
+  position: relative;
+}
+.twoimages div img {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  max-width: 470px;
+  max-height: 300px;
+}
+
+.medimage {
+  margin-top: 30px;
+  width: 1100px;
+}
+.medimage img {
+  max-width: 1100px;
+  max-height: 450px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.largeimage {
+  margin-top: 30px;
+  width: 1100px;
+}
+.largeimage img {
+  max-width: 1100px;
+  max-height: 800px;
+}
+
+.flushbottom {
+  position: fixed;
+  bottom: 0px;
+  margin: 0;
+  width: 900px;
+  text-align: center;
+}
+.flushbottom img {
+  max-width: 900px;
+  max-height: 300px;
+}
+
+.bkgnd {
+  width: 900px;
+  text-align: center;
+}
+.bkgnd img {
+  opacity: 0.1;
+  max-width: 900px;
+}
+
+.largevideo {
+  margin-top: 20px;
+  text-align: center;
+  max-width: 1100px;
+}
+
+.largevideo video {
+  max-width: 1100px;
+  height: 650px;
+}
+
+.unicode_background {
+  font-size: 300px;
+  position: absolute;
+  left: 40%;
+  top: 50%;
+}
+
+.bigbutton {
+  display: block;
+  margin: 30px auto;
+  padding: 20px 40px;
+  font-size: 40px;
+  color: #090;
+}
+
+.bigresult {
+  border: 1px solid #060;
+  display: block;
+  margin: 30px 0;
+  padding: 12px 24px;
+  font-size: 30px;
+  color: #090;
+}

@@ -106,44 +106,21 @@ body {
 /* Clickable/tappable areas */
 
 .slide-area {
-  z-index: 1000;
-
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 450px;
-  height: 900px;
-
-  left: 50%;
-  top: 50%;
-
-  cursor: pointer;
-  margin-top: -450px;
-  outline: none;
-
-  tap-highlight-color: transparent;
-  -o-tap-highlight-color: transparent;
-  -moz-tap-highlight-color: transparent;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.slide-area:hover {
-    background-color: rgba(128, 128, 255, 0.05);
+  font-size: 30px;
+  padding: 0;
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  z-index: 999;
 }
 
 #prev-slide-area {
-  margin-left: -1100px;
+  left: 20px;
+  bottom: 20px;
 }
 #next-slide-area {
-  margin-left: 650px;
-}
-.slides.layout-widescreen #prev-slide-area,
-.slides.layout-faux-widescreen #prev-slide-area {
-  margin-left: -650px;
-}
-.slides.layout-widescreen #next-slide-area,
-.slides.layout-faux-widescreen #next-slide-area {
-  margin-left: 500px;
+  right: 20px;
+  bottom: 20px;
 }
 
 /* Slides */
