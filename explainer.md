@@ -386,7 +386,7 @@ even though its ARIA role is of `"button"`.
 
 ##### Reasoning
 
-The reasons for these decisions are discussed in #60, but in summary
+The reasons for these decisions are discussed in [#60](https://github.com/WICG/aom/issues/60), but in summary
 AOM is meant to be a superset of ARIA in terms of its capabilities, so
 it makes sense for AOM Accessible Properties to always supercede ARIA.
 Authors who wish to use AOM due to its greater expressiveness or
