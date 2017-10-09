@@ -687,15 +687,15 @@ that represent several major browser vendors.
 
 An early draft of the spec for Accessible Properties is available here:
 
-https://wicg.github.io/aom/spec/
+[https://wicg.github.io/aom/spec/](https://wicg.github.io/aom/spec/)
 
-The spec has several rough edges. Please refer to this explainer to understand
+The spec has several rough edges. Please refer to this [explainer](https://wicg.github.io/aom/explainer) to understand
 the motivation, reasoning, and design tradeoffs. The spec will continue to
 evolve as we clarify the ideas and work out corner cases.
 
 Issues can be filed on GitHub:
 
-https://github.com/WICG/aom/issues
+[https://github.com/WICG/aom/issues](https://github.com/WICG/aom/issues)
 
 ### Incubation
 
