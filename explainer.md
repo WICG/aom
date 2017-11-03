@@ -549,7 +549,7 @@ document.body.accessibleNode.removeChild(virtualNode);
 
 In addition, calling appendChild on a node that's already inserted somewhere else
 in the accessibility tree will implicitly remove it from its old location and
-append it to the
+append it to the new parent.
 
 Finally, the AOM also provides `insertChild` that's analogous to the DOM Node
 insertChild method, taking a zero-based index and then a child.
