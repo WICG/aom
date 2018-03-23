@@ -210,8 +210,7 @@
 
     <article>
       <h3>
-        Use Case 1: Setting non-reflected (“default”) accessibility properties for [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
-        which can be overridden by page authors
+        Use Case 1: Setting non-reflected (“default”) accessibility properties for <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a>
       </h3>
       <p>
         Today, a library author creating a custom element is forced to "sprout" ARIA attributes to express semantics which are implicit
@@ -434,10 +433,42 @@
   </pre>
 
     </article>
+    <article>
+      <h3>Phase 1: Accessible Properties (2)</h3>
+      <p>
+          These properties will also be available on the <a href="https://dom.spec.whatwg.org/#interface-shadowroot"><code>ShadowRoot</code> interface</a>.
+          This will allow Custom Elements to express their intrinsic semantics:
+      </p>
+      <pre>
+          class CustomCheckbox extends HTMLElement {
+            constructor() {
+              super();
+              this.attachShadow({mode: 'open'});  // mode may also be "closed".
+            }
+          
+            connectedCallback() {
+              this.shadowRoot.role = "checkbox";  // Set the default semantics.
+            }
+          
+            static get observedAttributes() { return ["checked"]; }
+
+            // When the custom "checked" attribute changes, keep the accessible checked state in sync.
+            attributeChangedCallback(name, oldValue, newValue) {
+              switch(name) {
+              case "checked":
+                this.shadowRoot.ariaChecked = (newValue !== null);
+              }
+            }
+          }
+          // Authors may use ARIA as usual: <custom-checkbox role="radio"></custom-checkbox>
+          customElements.define("custom-checkbox", CustomCheckbox);
+      </pre>
+
+    </article>
 
     <article>
       <h3>
-        Phase 1: Accessible Properties (2)
+        Phase 1: Accessible Properties (3)
       </h3>
       <p>
         Instead of using an IDREF:
@@ -774,7 +805,7 @@
     virtualNode.offsetTop = 20;
     virtualNode.offsetWidth = 400;
     virtualNode.offsetHeight = 300;
-    virtualNode.offsetParent = document.body.accessibleNode;
+    virtualNode.offsetParent = document.body.accessibleRoot.firstChild;
   </pre>
       <p>
         Relative coordinates are important for things like a canvas-based UI, because the canvas element might have CSS transforms
