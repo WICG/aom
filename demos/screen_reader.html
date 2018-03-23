@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <title>AOM Screen Reader</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript code prettifier -->
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+    <style>
+      body {
+        width: 1000px;
+        margin: 20px auto;
+      }
+      div, p, h1 {
+        font-family: arial;
+      }
+      h1 {
+        text-align: center;
+      }
+      p {
+        width: 800px;
+      }
+      section {
+        padding: 12px 36px;
+      }
+      .sxs {
+        display: flex;
+        align-items: stretch;
+      }
+      .sxs *[aria-live] {
+        margin-left: 24px;
+        padding: 20px;
+        border: 1px solid #666;
+        width: 300px;
+        line-height: 1.5;
+        font-size: 14pt;
+      }
+      label {
+        display: block;
+      }
+      xmp {
+        border: 1px solid #ddd;
+        padding: 1em;
+      }
+      input[type=range] {
+        width: 12em;
+      }
+      form {
+        border: 1px solid #ddd;
+        padding: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AOM Screen Reader</h1>
+    <section>
+      <div class="aom_enabled">
+        <p>
+          Great! The Accessibility Object Model is enabled in this browser.
+        </p>
+      </div>
+      <div class="aom_disabled">
+        <p>
+          Accessibility Object Model support is not enabled.
+        </p>
+        <p>
+          To enable it in Chrome, use this command-line switch:
+        </p>
+        <pre>--enable-blink-features=AccessibilityObjectModel</pre>
+      </div>
+      <p>
+        This demonstrates how the Accessibility Object Model
+        phase 4 can be used to create a screen reader.
+      </p>
+    </section>
+    <h3>Example content</h3>
+    <form>
+      <h4 tabindex=0>CSUN Registration</h4>
+      <ul>
+        <li tabindex=0>Fill out this form
+        <li tabindex=0>Click submit
+        <li tabindex=0>Pick up your badge
+      </ul>
+      <label>
+        Name
+        <input value="Stevie Wonder">
+      </label>
+      <label>
+        Occupation
+        <input value="Musician">
+      </label>
+      <label>
+        Number of times you've been to CSUN:
+        <input type=range min=0 max=10 value=3>
+      </label>
+      <label>
+        <input type=checkbox>
+        Braille program
+      </label>
+      <div><a href="#">More info</a></div>
+      <input type="submit">
+    </form>
+
+<h3>Source code</h3>
+<xmp class="prettyprint">  async function speak() {
+    let c = await getComputedAccessibleNode(document.activeElement);
+    let str = c.valueText + ' ' +
+              c.name + ', ' +
+              c.role +
+              (c.checked != 'none' ? ' checked=' + c.checked : '') +
+              (c.posInSet > 0 ? ' ' + c.posInSet + ' of ' + c.setSize : '');
+    speechSynthesis.speak(new SpeechSynthesisUtterance(str));
+  }
+  document.addEventListener('focusin', speak);
+  document.addEventListener('keyup', speak);
+</xmp>
+
+    <script src="screen_reader.js"></script>
+  </body>
+</html>

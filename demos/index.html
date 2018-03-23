@@ -39,6 +39,8 @@
     Accessibility Object Model
   </h1>
   <p>
+    <b>Specification Editors:</b>
+    <br>
     Alexander Surkov, Mozilla
     <br>
     Alice Boxhall, Google
@@ -55,7 +57,8 @@
   </h3>
   <div style="padding-right: 30%;">
     <div class="aom_enabled">
-      <p class="unicode_background" style="color: #99ee99;">
+      <p class="unicode_background" style="color: #99ee99;"
+         title="Check mark indicates AOM is enabled in this browser">
         &#x2714;
       </p>
       <p>
@@ -66,11 +69,13 @@
       </p>
     </div>
     <div class="aom_disabled">
-      <p class="unicode_background" style="color: #ee9999;">
+      <p class="unicode_background" style="color: #ee9999;"
+         title="Red X indicates AOM is not enabled and some slides won't work">
         &#x2718;
       </p>
       <p>
         Accessibility Object Model support is not enabled.
+        Interactive features of these slides won't work.
       </p>
       <p>
         To enable it in Chrome, use this command-line switch:
@@ -78,9 +83,16 @@
       <pre>
         --enable-blink-features=AccessibilityObjectModel
       </pre>
+      <p>
+        To enable it in Safari Technology Preview, select
+        <br>
+        <a href="safari-aom.png">
+          Develop > Experimental Features > Accessibility Object Model.
+        </a>
+      </p>
     </div>
   </div>
-  <p style="margin-top: 350px">
+  <p style="width:60%">
     Tip: Arrow keys move between slides, but not when something else has focus.
   </p>
   <p>
@@ -94,7 +106,7 @@
   </h3>
   <ul>
     <li>Background</li>
-    <li>Gaps</li>
+    <li>Motivating Use Cases</li>
     <li>Phase 1: Properties</li>
     <li>Phase 2: Actions / Input Events</li>
     <li>Phase 3: Virtual Nodes</li>
@@ -184,56 +196,28 @@
 
 <article>
   <h3>
-    Gaps
+    Other platform accessibility APIs
   </h3>
   <p>
-    There are several key gaps in the web platform and ARIA.
+    Typically, most platforms allow developers to use a <strong>programmatic API</strong>
+    to create virtual accessibility trees to implement accessibility for custom views.
   </p>
   <p>
-    Some gaps are about ergnomonics; it's possible to make an app
-    accessible but the APIs are inconvenient or cumbersome, but
-    usable.
-  </p>
-  <p>
-    Others gaps make it impossible for web developers to make
-    apps with the same degree of accessibility as native apps.
-  </p>
-  <p>
-    We're going to focus on <b>five key gaps</b>.
+    The web platform requires <em>everything</em> to do with accessibility to be specified
+    declaratively, even as many parts of the web platform are moving to more dynamic,
+    imperative style APIs.
   </p>
 </article>
 
 <article>
-  <h3>
-    Gap 1: Leaky abstractions
-  </h3>
-  <p>
-    Today, a library author creating a custom element is forced to
-    "sprout" ARIA attributes to express semantics which are implicit for
-    native elements.
-  </p>
-
-  <pre>
-    <!-- Page author uses the custom element as they would a native element -->
-    <custom-slider min="0" max="5" value="3"></custom-slider>
-
-    <!-- Custom element is forced to "sprout" extra attributes
-         to express semantics -->
-    <custom-slider min="0" max="5" value="3" role="slider"
-                   tabindex="0"
-                   aria-valuemin="0" aria-valuemax="5"
-                   aria-valuenow="3" aria-valuetext="3"></custom-slider>
-  </pre>
-  <p>
-    This is mostly just an inconvenience. For the most part it's
-    still possible to make custom elements and other widgets
-    accessible.
-  </p>
+  <h1>
+    Motivating Use Cases
+  </h1>
 </article>
 
 <article>
   <h3>
-    Gap 2: Limitations of IDREFs
+    Use Case 1: Setting relationships without IDREFs
   </h3>
   <p>
     To express an accessible relationship between two elements in the DOM,
@@ -258,7 +242,7 @@
 
 <article>
   <h3>
-    Gap 2: Limitations of IDREFs (2)
+    Use Case 1: Setting relationships without IDREFs (2)
   </h3>
   <p>
     It can be <em>cumbersome</em> and <em>error-prone</em> to
@@ -272,7 +256,8 @@
   </p>
   <p>
     For example, it's <em>impossible</em> to make an accessible
-    custom listbox using <code>aria-activedescendant</code>:
+    listbox using <code>aria-activedescendant</code> if you use
+    custom elements for both the listbox and option:
   </p>
   <pre>
     <custom-listbox>
@@ -285,7 +270,7 @@
 
 <article>
   <h3>
-    Gap 3: No way to capture input events from AT
+    Use Case 2: Capturing input events from AT
   </h3>
   <p>
     ARIA only helps the web author communicate in one direction: from
@@ -300,27 +285,34 @@
   <p>
     Examples: AT wants to <b>select</b> an item in a list box,
     <b>increment</b> a slider, or <b>dismiss</b> a dialog.
+  </p>
+  <p>
+    Another example: AT user performs a gesture to explicitly
+    <b>scroll to the left</b> on a map widget.
+  </p>
 </article>
 
 <article>
   <h3>
-    Gap 4: Every accessible node requires a DOM element.
+    Use Case 3: Making custom-drawn UI accessible.
   </h3>
   <p>
     To make a canvas-based UI accessible requires hacks like
     fake DOM elements hiding behind the canvas.
   </p>
   <p>
-
+    Even worse, for all other types of custom painted UI, such as
+    WebGL, there is currently no mechanism at all for associating
+    semantics with the custom UI.
   </p>
 </article>
 
 <article>
   <h3>
-    Gap 5: No introspection
+    Use Case 4: Introspection
   </h3>
   <p>
-    No way to programmatically detect if an accessibility
+    There's no way to programmatically detect if an accessibility
     feature is supported by the browser or if you're using it
     correctly.
   </p>
@@ -333,6 +325,37 @@
     <!-- attribute not allowed on that role - how do you know? -->
     <div role="listbox" aria-setsize="25"></div>
   </pre>
+</article>
+
+<article>
+  <h3>
+    Use Case 5: Default semantics for custom elements
+  </h3>
+  <p>
+    Today, a library author creating a custom element is forced to
+    "sprout" ARIA attributes to express semantics which are implicit for
+    native elements.
+  </p>
+
+  <pre>
+    <!-- Page author uses the custom element as they would a native element -->
+    <custom-slider min="0" max="5" value="3"></custom-slider>
+
+    <!-- Custom element is forced to "sprout" extra attributes
+         to express semantics -->
+    <custom-slider min="0" max="5" value="3" role="slider"
+                   tabindex="0"
+                   aria-valuemin="0" aria-valuemax="5"
+                   aria-valuenow="3" aria-valuetext="3"></custom-slider>
+  </pre>
+  <p>
+    This is mostly just an inconvenience. For the most part it's
+    still possible to make custom elements and other widgets
+    accessible.
+  </p>
+  <p>
+    But we'd like to avoid these <i>"leaky abstractions"</i>.
+  </p>
 </article>
 
 <article>
@@ -350,14 +373,45 @@
     accessibility API. Apple and Google had similar ideas.
   </p>
   <p>
-    This spec takes the best ideas and organizes them into
-    four <em>phases</em>, each with smaller scope, each solving
-    an increasing number of real-world use-cases.
+    AOM is a collaboration between Apple, Google, and Mozilla,
+    part of the Web Incubator Community Group.  It takes the best
+    ideas from previous proposals and organizes them into
+    four <em>phases</em>, each with smaller scope, each solving an
+    increasing number of real-world use-cases.
   </p>
   <p>
-    AOM is being implemented behind a flag in Google Chrome now
-    (currently partway through phase 3).
+    Both Safari and Google Chrome have implemented some of the spec
+    experimentally.
   </p>
+</article>
+
+<article>
+  <h3>
+    Warning!
+  </h3>
+  <p>
+    All syntax shown on these slides is subject to change.
+  </p>
+  <p>
+    We are committed to <em>solving these problems</em>,
+    but the solution may not be exactly what you see here.
+  </p>
+</article>
+
+<article>
+  <h3>
+    Phases 1-3 overview
+  </h3>
+  <p>
+    Phases 1 through three, taken together,
+    should bring the capabilities of accessibility on the web closer to what is possible on
+    native platorms.
+  </p>
+  <ul>
+    <li>Programmatic API
+    <li>Virtual tree for custom UI
+    <li>Listen to events from assistive technology
+  </ul>
 </article>
 
 <article>
@@ -365,7 +419,7 @@
     Phase 1: Accessible Properties
   </h3>
   <p>
-    Every DOM element has a corresponding <code>AccessibleNode</code>.
+    Basically, reflect ARIA into JavaScript.
   </p>
   <p>
     Every ARIA attribute, such as <code>role</code> and
@@ -377,7 +431,7 @@
   </pre>
 
   <p>
-    ...can be replaced with equivalent JavaScript:
+    ...can be set directly from JavaScript:
   </p>
 
   <pre>
@@ -401,119 +455,24 @@
     ...just reference another element directly:
   </p>
   <pre>
-    el.accessibleNode.activeDescendant = child.accessibleNode;
+    el.accessibleNode.activeDescendant = child;
   </pre>
 
 </article>
 
 <article>
   <h3>
-    IDL of Phase 1
-  </h3>
-  <pre style="width:600px; float: left;">
-    interface AccessibleNode {
-      attribute AccessibleNode? activeDescendant;
-      attribute boolean? atomic;
-      attribute DOMString? autocomplete;
-      attribute boolean? busy;
-      attribute DOMString? checked;
-      attribute long? colCount;
-      attribute unsigned long? colIndex;
-      attribute unsigned long? colSpan;
-      attribute AccessibleNodeList? controls;
-      attribute DOMString? current;
-      attribute AccessibleNodeList? describedBy;
-      attribute AccessibleNode? details;
-      attribute boolean? disabled;
-      attribute AccessibleNode? errorMessage;
-      attribute boolean? expanded;
-      attribute AccessibleNodeList? flowTo;
-      attribute DOMString? hasPopUp;
-      attribute boolean? hidden;
-      attribute DOMString? invalid;
-      attribute DOMString? keyShortcuts;
-      attribute DOMString? label;
-      attribute AccessibleNodeList? labeledBy;
-      attribute unsigned long? level;
-      attribute DOMString? live;
-    ...
-  </pre>
-  <pre style="width:600px; float: left; margin-left: 20px;">
-    ...
-      attribute boolean? modal;
-      attribute boolean? multiline;
-      attribute boolean? multiselectable;
-      attribute DOMString? orientation;
-      attribute AccessibleNodeList? owns;
-      attribute DOMString? placeholder;
-      attribute unsigned long? posInSet;
-      attribute DOMString? pressed;
-      attribute boolean? readOnly;
-      attribute DOMString? relevant;
-      attribute boolean? required;
-      attribute DOMString? role;
-      attribute DOMString? roleDescription;
-      attribute long? rowCount;
-      attribute unsigned long? rowIndex;
-      attribute unsigned long? rowSpan;
-      attribute boolean? selected;
-      attribute long? setSize;
-      attribute DOMString? sort;
-      attribute double? valueMax;
-      attribute double? valueMin;
-      attribute double? valueNow;
-      attribute DOMString? valueText;
-    };
-  </pre>
-</article>
-
-<article>
-  <h3>
-    Phase 1 Demo
-  </h3>
-  <pre id="phase1_src" class="livecell lefthalf_src" tabindex="0"
-       contenteditable="true" spellcheck="false">
-    <button id="bridge">Bridge</button>
-    <button id="engineering">Engineering</button>
-    <p id="sick_bay_label">Sick Bay</p>
-    <button id="sick_bay">&#x1f44d;</button>
-  </pre>
-  <div id="phase1_embed" class="livecell righthalf_embed"></div>
-  <pre id="phase1_script" class="livecell lefthalf_script" tabindex="0"
-       contenteditable="true" spellcheck="false">
-    $("engineering").accessibleNode.role = "link";
-    $("sick_bay").accessibleNode.labeledBy = new AccessibleNodeList();
-    $("sick_bay").accessibleNode.labeledBy.add(
-        $("sick_bay_label").accessibleNode);
-    print("Done.");
-  </pre>
-  <div id="phase1_output" class="livecell righthalf_output"></div>
-  <script>manageLiveCoding("phase1");</script>
-</article>
-
-
-<article>
-  <h3>
-    Phase 1: Accessible Properties
+    Phase 2: Background on events from AT
   </h3>
   <p>
-    Every ARIA attribute, such as <code>role</code> and
-    <code>aria-checked</code> here:
+    Problem: if you create an accessible element with <code>role=slider</code>,
+    then interact with that element via a screen reader on a mobile device,
+    you will hear instructions to increment or decrement the slider.
   </p>
-
-  <pre>
-    <div role="checkbox" aria-checked="true">Receive promotional offers</div>
-  </pre>
-
   <p>
-    ...can be replaced with equivalent JavaScript:
+    However, there is no way for a web developer to implement the slider such that
+    following those instructions will have the desired effect.
   </p>
-
-  <pre>
-    el.accessibleNode.role = "checkbox";
-    el.accessibleNode.checked = true;
-  </pre>
-
 </article>
 
 <article>
@@ -536,16 +495,15 @@
     Phase 2: Accessible Actions / Input Events
   </h3>
   <p>
-    Every AccessibleNode is an EventTarget, and you can listen to input
-    events directly from assistive technology.
+    Listen to input events directly from assistive technology.
   </p>
   <pre>
-    button.accessibleNode.addEventListener("accessibleclick", function(event) {
-      console.log("Got Click from assistive technology");
+    slider.addEventListener("accessibleincrement", function(event) {
+      console.log("Got Increment from assistive technology");
     });
   </pre>
   <p>
-    Supported events include:
+    Possible events include:
   </p>
   <pre>
     "accessibleclick"
@@ -562,7 +520,7 @@
 
 <article>
   <h3>
-    Phase 2 use cases include...
+    Phase 2 Use cases include...
   </h3>
   <ul>
     <li>Focus events in composite controls, e.g. when the AT wants to focus
@@ -590,7 +548,7 @@
     undesired alternate interface.
   </p>
   <p>
-    So triggering an AOM event listeners brings up a new
+    So triggering an AOM event listener brings up a new
     <b>user permission</b> dialog before the web page can capture
     the event.
   </p>
@@ -606,11 +564,13 @@
     by AT.
   </p>
   <p>
-    If the user does not grant permission, they can be confident
-    they're getting the same experience as everyone else.
+    If the user does not grant permission, they can have more confidence
+    they're getting the same experience as everyone else and
+    that they haven't revealed to the site that they're an AT user.
   </p>
 </article>
 
+<!--
 <article>
   <h3>
     Phase 2 demo: Feature detection
@@ -630,10 +590,26 @@
     });
   </script>
 </article>
+-->
 
 <article><h3>Phase 2 demo: Canvas slider</h3>
+<style>
+  canvas {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 400px;
+    height: 120px;
+  }
+</style>
+  <p>
+    Using VoiceOver, try <i>Interacting with</i> this slider
+    and using VoiceOver commands to increment and decrement it.
+  </p>
+  <canvas id="slider" width="400" height="120"
+          value="5" min="1" max="10">
+  </canvas>
 <script>
-window['canvas_slider_hook'] = function() {
     var canvas = document.getElementById('slider');
     window.updateSlider = function(delta) {
         var min = parseInt(canvas.getAttribute('min'), 10);
@@ -723,27 +699,26 @@ window['canvas_slider_hook'] = function() {
         context.globalAlpha = 0.5;
         context.stroke();
     }, 50);
-}
+
+  $("slider").tabIndex = 0;
+  $("slider").accessibleNode.role = "slider";
+  $("slider").accessibleNode.valueMin = 1;
+  $("slider").accessibleNode.valueMax = 10;
+  $("slider").accessibleNode.valueNow = 5;
+  $("slider").accessibleNode.addEventListener(
+      "accessibleincrement", function() {
+    updateSlider(1);
+  });
+  $("slider").accessibleNode.addEventListener(
+      "accessibledecrement", function() {
+    updateSlider(-1);
+  });
+
 </script>
-<style>
-  canvas {
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    width: 400px;
-    height: 120px;
-  }
-</style>
-<pre id="canvas_slider_src" class="livecell lefthalf_src" tabindex="0"
-     contenteditable="true" spellcheck="false">
-<h3>Warp speed:</h3>
-  <canvas id="slider" width="400" height="120"
-          value="5" min="1" max="10">
-  </canvas>
-</pre>
-<div id="canvas_slider_embed" class="livecell righthalf_embed"></div>
-<pre id="canvas_slider_script" class="livecell lefthalf_script" tabindex="0"
-     contenteditable="true" spellcheck="false">
+  <p>
+    Code skeleton:
+  </p>
+<pre>
   $("slider").tabIndex = 0;
   $("slider").accessibleNode.role = "slider";
   $("slider").accessibleNode.valueMin = 1;
@@ -758,8 +733,6 @@ window['canvas_slider_hook'] = function() {
     updateSlider(-1);
   });
 </pre>
-<div id="canvas_slider_output" class="livecell righthalf_output"></div>
-<script>manageLiveCoding('canvas_slider');</script>
 </article>
 
 <article>
@@ -767,12 +740,8 @@ window['canvas_slider_hook'] = function() {
     Phase 3: Virtual Nodes
   </h3>
   <p>
-    In addition to the <code>AccessibleNode</code> associated with every
-    DOM element, you can <b>construct</b> an AccessibleNode and set its
-    properties from scratch.
-  </p>
-  <p>
-    We call this a "virtual" AccessibleNode.
+    You can <b>construct</b> a "virtual" AccessibleNode that isn't associated
+    with any DOM element.
   </p>
   <pre>
     var virtualNode = new AccessibleNode();
@@ -780,7 +749,8 @@ window['canvas_slider_hook'] = function() {
     virtualNode.label = "Play Game";
   </pre>
   <p>
-    Insert an AccessibleNode as the child of another AccessibleNode, like this:
+    Insert an AccessibleNode as the child of a DOM element or
+    another AccessibleNode:
   </p>
   <pre>
     document.body.accessibleNode.appendChild(virtualNode);
@@ -792,12 +762,7 @@ window['canvas_slider_hook'] = function() {
     Restrictions on virtual nodes
   </h3>
   <p>
-    The arguments to <code>AccessibleNode.appendChild</code> and
-    <code>AccessibleNode.insertBefore</code> must be a virtual
-    AccessibleNode.
-  </p>
-  <p>
-    In other words, you can't use these methods to rearrange the
+    You can't use these methods to rearrange the
     accessibility tree corresponding to the DOM.
   </p>
   <p>
@@ -835,6 +800,16 @@ window['canvas_slider_hook'] = function() {
 
 <article>
   <h3>
+    Virtual AccessibleNode demo
+  </h3>
+  <div style="width: 200px; margin: 200px auto;">
+    <a href="tictactoe.html" target="_blank">Tic-tac-toe</a>
+  </div>
+</article>
+
+<!--
+<article>
+  <h3>
     Focus management
   </h3>
   <p>
@@ -860,94 +835,103 @@ window['canvas_slider_hook'] = function() {
 
 <article>
   <h3>
-    Phase 3 Demo
+    Selection management
   </h3>
   <p>
-    Not yet ready
+    To select text in an accessible node, call its <code>select()</code> method.
+  </p>
+  <pre>
+    virtualNode.select(5, 10);
+  </pre>
+  <p>
+    When a virtual accessible node has a selection set in it,
+    selection in the DOMis unchanged. The accessible selection is
+    reported to assistive technology and other accessibility API
+    clients, but no DOM events are fired and window.selection is
+    unchanged.
   </p>
 </article>
+-->
 
 <article>
   <h3>
     Phase 4: Introspection
   </h3>
   <p>
+    Every AccessibleNode has a corresponding <code>ComputedAccessibleNode</code>.
   </p>
   <p>
-
+    Accessing it is asynchronous (via a Promise),
+    and it gives you full access to that node, and the accessibility tree.
   </p>
-</article>
-
-<article>
-  <h3>
-    Phase 4 (2)
-  </h3>
-  <p>
-  </p>
-  <p>
-
-  </p>
-</article>
-
-<article>
-  <h3>
-    Phase 4 (3)
-  </h3>
-  <p>
-  </p>
-  <p>
-
-  </p>
-</article>
-
-<article>
-  <h3>
-    Q &amp; A
-  </h3>
-  <p>
-  </p>
-  <p>
-
-  </p>
-</article>
-
-<article>
-  <h3>
-    Broken Demo: List Box
-  </h3>
-  <pre id="listbox_src" class="livecell lefthalf_src" tabindex="0"
-       contenteditable="true" spellcheck="false">
-    <h3>Pick from this list:</h3>
-    <div id="listbox" role="listbox" tabindex="0">
-      <div role="option">Item 1</div>
-      <div role="option">Item 2</div>
-      <div role="option">Item 3</div>
-    </div>
+  <pre>
+    let computed = await getComputedAccessibleNode(myListItem);
+    computed.role;             // "listitem"
+    computed.name;             // "Picard"
+    computed.parent.role;      // "list"
+    computed.children.length;  // 0
   </pre>
-  <div id="listbox_embed" class="livecell righthalf_embed"></div>
-  <pre id="listbox_script" class="livecell lefthalf_script" tabindex="0"
-       contenteditable="true" spellcheck="false">
-    var items = document.querySelectorAll("#listbox *");
-    var index = 0;
-    function update() {
-      if (index < 0) index = 0;
-      if (index >= items.length) index = items.length - 1;
-      $("listbox").accessibleNode.activeDescendant =
-          items[index].accessibleNode;
-      items[index].classList.add("selected");
+</article>
+
+<article>
+  <h3>
+    Phase 4: Feature detection
+  </h3>
+  <p>
+    The <code>ComputedAccessibleNode</code> enables you to determine if a
+    role, or any other accessibility feature, is supported.
+  </p>
+  <pre>
+    var button = document.createElement("button");
+    button.accessibleNode.role = "hammer";
+    let computed = await getComputedAccessibleNode(button);
+    computed.role;             // "button" (not "hammer")
+  </pre>
+</article>
+
+<article>
+  <h3>
+    Phase 4: Walking the tree
+  </h3>
+  <p>
+    Walk the accessibility tree for testing or debugging.
+  </p>
+  <pre>
+    function printAccessibilityTree(computed, indent) {
+      print(spaces(indent) + 'Role: ' + computed.role + ', Name: ' + computed.name);
+      for (var i = 0; i < computed.children.length; i++) {
+        printAccessibilityTree(computed.children[i], indent + 1);
+      }
     }
-    $("listbox").addEventListener('keydown', function(e) {
-      items[index].classList.remove("selected");
-      if (e.key == "ArrowUp") { index--; }
-      if (e.key == "ArrowDown") { index++; }
-      update();
-      e.preventDefault();
-    });
-    update();
-    print("Done.");
+
+    let computed = await getComputedAccessibleNode(document.body);
+    printAccessibilityTree(computed, 0);
   </pre>
-  <div id="listbox_output" class="livecell righthalf_output"></div>
-  <script>manageLiveCoding("listbox");</script>
+</article>
+
+<article>
+  <h3>
+    Phase 4: Writing in-browser AT
+  </h3>
+  <p>
+    Write a screen reader or other AT
+  </p>
+  <div style="width: 200px; margin: 200px auto;">
+    <a href="screen_reader.html" target="_blank">AOM Screen Reader</a>
+  </div>
+</article>
+
+<article>
+  <h1>
+    For more information:
+    <br>
+    <a href="http://github.com/WICG/aom">github.com/WICG/aom</a>
+  </h1>
+
+  <h3 style="margin-top: 100px">
+    Questions?
+  </h3>
+  <p>
 </article>
 </section>
 

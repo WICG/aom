@@ -196,8 +196,8 @@ article.title {
 .unicode_background {
   font-size: 300px;
   position: absolute;
-  left: 40%;
-  top: 50%;
+  right: 10%;
+  top: 30%;
 }
 
 .bigbutton {
