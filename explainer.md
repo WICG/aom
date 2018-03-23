@@ -83,6 +83,7 @@ in particular, they are much less expressive than the native APIs that the brows
 5. Introspecting the computed accessibility tree
    - Developers currently have no way to probe or test how ARIA and other accessible properties are applied.
 
+
 ## The Accessibility Object Model
 
 The Accessibility Object Model (AOM) is a set of changes to HTML and related standards
