@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>Tic tac toe</title>
+    <style>
+      body {
+        width: 1000px;
+        margin: 20px auto;
+      }
+      div, p, h1 {
+        font-family: arial;
+      }
+      h1 {
+        text-align: center;
+      }
+      p {
+        width: 800px;
+      }
+      section {
+        padding: 12px 36px;
+      }
+      .sxs {
+        display: flex;
+        align-items: stretch;
+      }
+      .sxs *[aria-live] {
+        margin-left: 24px;
+        padding: 20px;
+        border: 1px solid #666;
+        width: 300px;
+        line-height: 1.5;
+        font-size: 14pt;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tic-tac-toe</h1>
+    <section>
+      <div class="aom_enabled">
+        <p>
+          Great! The Accessibility Object Model is enabled in this browser.
+        </p>
+      </div>
+      <div class="aom_disabled">
+        <p>
+          Accessibility Object Model support is not enabled.
+        </p>
+        <p>
+          To enable it in Chrome, use this command-line switch:
+        </p>
+        <pre>
+          --enable-blink-features=AccessibilityObjectModel
+        </pre>
+      </div>
+      <p>
+        This is an accessible Tic-tac-toe game. It can be
+        played using assistive technology, like a screen reader.
+      </p>
+      <p>
+        The board is drawn using canvas, and the accessibility
+        tree and event listeners are all implemented using the Accessibility
+        Object Model.
+      </p>
+    </section>
+    <div class="sxs">
+      <canvas id="board" width=600 height=600></canvas>
+      <div id="status" aria-live="true"></div>
+    </div>
+    <script src="tictactoe.js"></script>
+  </body>
+</html>

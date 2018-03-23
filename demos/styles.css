@@ -21,7 +21,7 @@ body {
 
   display: block !important;
 
-  height: 100%;
+  height: calc(100% - 50px);
   min-height: 740px;
 
   overflow-x: hidden;
@@ -55,10 +55,10 @@ body {
   height: 900px;
 
   left: 50%;
-  top: 50%;
+  top: 0;
 
   margin-left: -700px;
-  margin-top: -450px;
+  margin-top: 10px;
 
   padding: 40px 60px;
 
