@@ -428,8 +428,8 @@
       </p>
 
       <pre>
-    el.accessibleNode.role = "checkbox";
-    el.accessibleNode.checked = true;
+    el.role = "checkbox";
+    el.ariaChecked = true;
   </pre>
 
     </article>
@@ -480,7 +480,7 @@
         ...just reference another element directly:
       </p>
       <pre>
-    el.accessibleNode.activeDescendant = child;
+    el.ariaActiveDescendant = child;
   </pre>
 
     </article>
@@ -740,16 +740,16 @@
         Code skeleton:
       </p>
       <pre>
-  $("slider").tabIndex = 0;
-  $("slider").accessibleNode.role = "slider";
-  $("slider").accessibleNode.valueMin = 1;
-  $("slider").accessibleNode.valueMax = 10;
-  $("slider").accessibleNode.valueNow = 5;
-  $("slider").accessibleNode.addEventListener(
+  slider.tabIndex = 0;
+  slider.role = "slider";
+  slider.ariaValueMin = 1;
+  slider.ariaValueMax = 10;
+  slider.ariaValueNow = 5;
+  slider.addEventListener(
       "accessibleincrement", function() {
     updateSlider(1);
   });
-  $("slider").accessibleNode.addEventListener(
+  slider.addEventListener(
       "accessibledecrement", function() {
     updateSlider(-1);
   });
@@ -898,7 +898,7 @@
       </p>
       <pre>
     let button = document.createElement("button");
-    button.accessibleNode.role = "hammer";
+    button.role = "hammer";
     let computed = await getComputedAccessibleNode(button);
     computed.role;             // "button" (not "hammer")
   </pre>
