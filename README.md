@@ -15,6 +15,10 @@ page.
 
 Read the [Explainer](./explainer.md)
 
-Read the [Spec](https://wicg.github.io/aom/spec/)
+Read the [Spec](https://wicg.github.io/aom/spec/) - note, not up-to-date
 
-Look at some [Demos](http://wicg.github.io/aom/demos/) (interactive slide deck)
+[Can I Use](./caniuse.md) AOM in Chrome, Safari, or Firefox today?
+
+[Interactive Slide Deck](http://wicg.github.io/aom/demos/) (for Chrome)
+
+[Tic-tac-toe demo](http://wicg.github.io/aom/demos/tictactoe.html) (for Chrome)
