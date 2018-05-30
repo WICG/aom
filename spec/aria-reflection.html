@@ -94,10 +94,8 @@
       This specification describes the additions to existing specifications which will make it possible for web authors to programmatically
       express Element semantics in two ways:
       <ul>
-        <li>
-          <em>reflected</em> as DOM attributes on Elements</li>
-        <li>
-          <em>non-reflected</em>, via a ShadowRoot.</li>
+        <li>as reflected IDL attributes on Elements, or</li>
+        <li>as non-reflected IDL attributes on an attached ShadowRoot.</li>
       </ul>
     </p>
   </section>
@@ -669,12 +667,12 @@ el.getAttribute("aria-label"); // Returns "Publish"</pre>
         <code>ShadowRoot</code>, or both.
       </p>
       <p>
-        If a
-        <code>role</code> or ARIA attribute property is set on
-        <em>either</em> the
-        <code>Element</code>
-        <em>or</em> its associated
-        <code>ShadowRoot</code>, that property should be
+        If an IDL property from either the
+        <code>AccessibilityRole</code> mixin or the
+        <code>AriaAttributes</code> mixin
+        is set on <em>either</em> the <code>Element</code>
+        <em>or</em> its associated <code>ShadowRoot</code>,
+        that IDL attribute should be
         <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
         to the
         <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
@@ -683,7 +681,7 @@ el.getAttribute("aria-label"); // Returns "Publish"</pre>
         <code>Element</code>.
       </p>
       <p>
-        If a property is set on
+        If a property is set to a non-<code>null</code> value on
         <em>both</em> the
         <code>ShadowRoot</code>
         and the host

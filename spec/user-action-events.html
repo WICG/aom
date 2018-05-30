@@ -3,7 +3,7 @@
 
 <head>
   <title>
-    Accessibility Object Model, Phase 3
+    Accessibility Object Model, Phase 2
   </title>
   <meta charset='utf-8'>
   <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'>
@@ -92,52 +92,14 @@
 
 <body>
   <section id="abstract">
-        <p>
-      This document is a placeholder for the spec for "Virtual Accessibility Nodes", a part of the AOM project. For background, please refer to the
-      <a href="https://github.com/WICG/aom/blob/master/explainer.md">Accessibility Object Model Explainer</a> for the background and motivation.
+    <p>
+      This document is a placeholder for
+      the spec for "User Action Events",
+      a part of the AOM project.
+      For background, please refer to the
+      <a href="https://github.com/WICG/aom/blob/master/explainer.md">Accessibility Object Model Explainer</a>.
     </p>
   </section>
-  <section class="virtual">
-    <h2>
-      Virtual Accessibility Nodes
-    </h2>
-    <p>
-      Virtual Accessibility Nodes will allow authors to expose "virtual" accessibility nodes, which are not associated directly
-      with any particular DOM node, to assistive technology.
-    </p>
-    <p>
-      This mechanism is often present in native accessibility APIs, in order to allow authors more granular control over the accessibility
-      of custom-drawn APIs.
-    </p>
-    <p>
-      On the web, this would allow:
-      <ul>
-        <li>creating an accessible alternative to canvas-based UI which does not rely on fallback or visually-hidden DOM content.</li>
-        <li>adding semantic information to other types of non-DOM based UI, such as a remote desktop implementation using a
-          <code>&lt;video&gt;</code> element, or another novel form of UI presentation.</li>
-      </ul>
-    </p>
-  </section>
-  <section>
-    <!--
-Look at:
-- https://html.spec.whatwg.org/multipage/media.html#texttrack
-- https://developer.mozilla.org/en-US/docs/Web/API/AudioNode
-
-Do we need to have three+ AccessibleNode types?
-
-interface AccessibleNode : EventTarget {
-  // Virtual type, tree walking only (cf. DOM node)
-}
-
-interface AccessibleRoot : AccessibleNode {
-  // bridge between DOM and AccessibleNode tree
-}
-
-interface VirtualAccessibleNode : AccessibleNode {
-  // All the properties
-}
-      -->
 </body>
 
 </html>
