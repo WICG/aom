@@ -1,0 +1,759 @@
+<!--?xml version='1.0' encoding='UTF-8'?-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+
+<head>
+  <title>AOM Phase 1 - ARIA reflection</title>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'>
+  </script>
+  <script class='remove'>
+    /*Make tidy happy*/
+    var respecConfig = {
+      // specification status (e.g. WD, LCWD, WG-NOTE, etc.). If in doubt use ED.
+      specStatus: "unofficial",
+      // the specification's short name, as in http://www.w3.org/TR/short-name/
+      shortName: "aom",
+
+      // if your specification has a subtitle that goes below the main
+      // formal title, define it here
+      // subtitle   :  "an excellent document",
+
+      // if you wish the publication date to be other than the last modification, set this
+      // publishDate:  "2009-08-06",
+
+      // if the specification's copyright date is a range of years, specify
+      // the start date here:
+      // copyrightStart: "2005"
+
+      // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+      // and its maturity status
+      // previousPublishDate:  "1977-03-15",
+      // previousMaturity:  "WD",
+
+      // if there a publicly available Editor's Draft, this is the link
+      // edDraftURI:           "http://berjon.com/",
+
+      // if this is a LCWD, uncomment and set the end of its review period
+      // lcEnd: "2009-08-05",
+
+      // editors, add as many as you like
+      // only "name" is required
+      editors: [{
+          name: "Alice Boxhall",
+          url: "http://google.com",
+          mailto: "aboxhall@google.com",
+          company: "Google",
+          companyURL: "http://google.com/"
+        },
+        {
+          name: "James Craig",
+          url: "http://apple.com",
+          mailto: "jcraig@apple.com",
+          company: "Apple",
+          companyURL: "http://apple.com/"
+        },
+        {
+          name: "Dominic Mazzoni",
+          url: "http://google.com",
+          mailto: "dmazzoni@google.com",
+          company: "Google",
+          companyURL: "http://google.com/"
+        },
+        {
+          name: "Alexander Surkov",
+          url: "http://mozilla.org/",
+          mailto: "surkov.alexander@gmail.com",
+          company: "Mozilla",
+          companyURL: "http://mozilla.org/"
+        },
+      ],
+      // name of the WG
+      //         wg:           "None",
+
+      // URI of the public WG page
+      //         wgURI:        "http://example.org/really-cool-wg",
+
+      // name (without the @w3c.org) of the public mailing to which comments are due
+      //          wgPublicList: "spec-writers-anonymous",
+
+      // URI of the patent status for this WG, for Rec-track documents
+      // !!!! IMPORTANT !!!!
+      // This is important for Rec-track documents, do not copy a patent URI from a random
+      // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+      // Team Contact.
+      //        wgPatentURI:  "",
+      // !!!! IMPORTANT !!!! MAKE THE ABOVE BLINK IN YOUR HEAD
+    };
+  </script>
+</head>
+
+<body>
+  <section id="abstract">
+    <p>
+      This specification describes the additions to existing specifications which will make it possible for web authors to programmatically
+      express Element semantics in two ways:
+      <ul>
+        <li>as reflected IDL attributes on Elements, or</li>
+        <li>as non-reflected IDL attributes on an attached ShadowRoot.</li>
+      </ul>
+    </p>
+  </section>
+  <section id="idl-interface" class="normative">
+    <h2>IDL Interface</h2>
+    <p class="note">This section is part of the
+      <a href="https://w3c.github.io/aria/#idl-interface">ARIA 1.2 Specification</a>, and is included here for informative purposes only.</p>
+
+    <p>Conforming user agents MUST implement the following IDL interfaces.</p>
+    <section id="AccessibilityRole" class="normative" data-dfn-for="AccessibilityRole" data-link-for="AccessibilityRole">
+      <h2>Interface Mixin
+        <dfn>AccessibilityRole</dfn>
+      </h2>
+      <pre class="idl">
+    interface mixin AccessibilityRole {
+    attribute DOMString? role;
+    };
+    Element includes AccessibilityRole;
+          ShadowRoot includes AccessibilityRole;
+  </pre>
+      <section id="role-reflection" class="normative">
+        <h2>ARIA Role Reflection</h2>
+        <p>User agents MUST
+          <a href="https://www.w3.org/TR/html52/infrastructure.html#reflecting-content-attributes-in-idl-attributes">reflect</a> the
+          <code>
+            <dfn>role</dfn>
+          </code> content attribute as the
+          <code>role</code> IDL attribute on
+          <code>Element</code> instances.</p>
+      </section>
+    </section>
+    <section id="AriaAttributes" class="normative" data-dfn-for="AriaAttributes" data-link-for="AriaAttributes">
+      <h2>Interface Mixin
+        <dfn>AriaAttributes</dfn>
+      </h2>
+      <pre class="idl">
+    interface mixin AriaAttributes {
+    attribute DOMString? ariaActiveDescendant;
+    attribute DOMString? ariaAtomic;
+    attribute DOMString? ariaAutoComplete;
+    attribute DOMString? ariaBusy;
+    attribute DOMString? ariaChecked;
+    attribute DOMString? ariaColCount;
+    attribute DOMString? ariaColIndex;
+    attribute DOMString? ariaColSpan;
+    attribute DOMString? ariaControls;
+    attribute DOMString? ariaCurrent;
+    attribute DOMString? ariaDescribedBy;
+    attribute DOMString? ariaDetails;
+    attribute DOMString? ariaDisabled;
+    attribute DOMString? ariaErrorMessage;
+    attribute DOMString? ariaExpanded;
+    attribute DOMString? ariaFlowTo;
+    attribute DOMString? ariaHasPopup;
+    attribute DOMString? ariaHidden;
+    attribute DOMString? ariaInvalid;
+    attribute DOMString? ariaKeyShortcuts;
+    attribute DOMString? ariaLabel;
+    attribute DOMString? ariaLabelledBy;
+    attribute DOMString? ariaLevel;
+    attribute DOMString? ariaLive;
+    attribute DOMString? ariaModal;
+    attribute DOMString? ariaMultiLine;
+    attribute DOMString? ariaMultiSelectable;
+    attribute DOMString? ariaOrientation;
+    attribute DOMString? ariaOwns;
+    attribute DOMString? ariaPlaceholder;
+    attribute DOMString? ariaPosInSet;
+    attribute DOMString? ariaPressed;
+    attribute DOMString? ariaReadOnly;
+    attribute DOMString? ariaRelevant;
+    attribute DOMString? ariaRequired;
+    attribute DOMString? ariaRoleDescription;
+    attribute DOMString? ariaRowCount;
+    attribute DOMString? ariaRowIndex;
+    attribute DOMString? ariaRowSpan;
+    attribute DOMString? ariaSelected;
+    attribute DOMString? ariaSetSize;
+    attribute DOMString? ariaSort;
+    attribute DOMString? ariaValueMax;
+    attribute DOMString? ariaValueMin;
+    attribute DOMString? ariaValueNow;
+    attribute DOMString? ariaValueText;
+    };
+    Element includes AriaAttributes;
+          ShadowRoot includes AriaAttributes;
+  </pre>
+      <section id="attribute-reflection" class="normative">
+        <h2>ARIA Attribute Reflection</h2>
+        <p>User agents MUST
+          <a href="https://www.w3.org/TR/html52/infrastructure.html#reflecting-content-attributes-in-idl-attributes">reflect</a> the following content attributes to each of the corresponding IDL attributes on
+          <code>Element</code> instances.</p>
+        <table>
+          <tr>
+            <th>IDL Attribute</th>
+            <th>Reflected ARIA Content Attribute</th>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaActiveDescendant</dfn>
+            </td>
+            <td>
+              <pref>aria-activedescendant</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaAtomic</dfn>
+            </td>
+            <td>
+              <pref>aria-atomic</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaAutoComplete</dfn>
+            </td>
+            <td>
+              <pref>aria-autocomplete</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaBusy</dfn>
+            </td>
+            <td>
+              <sref>aria-busy</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaChecked</dfn>
+            </td>
+            <td>
+              <sref>aria-checked</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaColCount</dfn>
+            </td>
+            <td>
+              <pref>aria-colcount</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaColIndex</dfn>
+            </td>
+            <td>
+              <pref>aria-colindex</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaColSpan</dfn>
+            </td>
+            <td>
+              <pref>aria-colspan</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaControls</dfn>
+            </td>
+            <td>
+              <pref>aria-controls</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaCurrent</dfn>
+            </td>
+            <td>
+              <sref>aria-current</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaDescribedBy</dfn>
+            </td>
+            <td>
+              <pref>aria-describedby</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaDetails</dfn>
+            </td>
+            <td>
+              <pref>aria-details</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaDisabled</dfn>
+            </td>
+            <td>
+              <sref>aria-disabled</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaErrorMessage</dfn>
+            </td>
+            <td>
+              <pref>aria-errormessage</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaExpanded</dfn>
+            </td>
+            <td>
+              <sref>aria-expanded</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaFlowTo</dfn>
+            </td>
+            <td>
+              <pref>aria-flowto</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaHasPopup</dfn>
+            </td>
+            <td>
+              <pref>aria-haspopup</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaHidden</dfn>
+            </td>
+            <td>
+              <sref>aria-hidden</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaInvalid</dfn>
+            </td>
+            <td>
+              <sref>aria-invalid</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaKeyShortcuts</dfn>
+            </td>
+            <td>
+              <pref>aria-keyshortcuts</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaLabel</dfn>
+            </td>
+            <td>
+              <pref>aria-label</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaLabelledBy</dfn>
+            </td>
+            <td>
+              <pref>aria-labelledby</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaLevel</dfn>
+            </td>
+            <td>
+              <pref>aria-level</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaLive</dfn>
+            </td>
+            <td>
+              <pref>aria-live</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaModal</dfn>
+            </td>
+            <td>
+              <pref>aria-modal</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaMultiLine</dfn>
+            </td>
+            <td>
+              <pref>aria-multiline</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaMultiSelectable</dfn>
+            </td>
+            <td>
+              <pref>aria-multiselectable</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaOrientation</dfn>
+            </td>
+            <td>
+              <pref>aria-orientation</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaOwns</dfn>
+            </td>
+            <td>
+              <pref>aria-owns</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaPlaceholder</dfn>
+            </td>
+            <td>
+              <pref>aria-placeholder</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaPosInSet</dfn>
+            </td>
+            <td>
+              <pref>aria-posinset</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaPressed</dfn>
+            </td>
+            <td>
+              <sref>aria-pressed</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaReadOnly</dfn>
+            </td>
+            <td>
+              <pref>aria-readonly</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRelevant</dfn>
+            </td>
+            <td>
+              <pref>aria-relevant</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRequired</dfn>
+            </td>
+            <td>
+              <pref>aria-required</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRoleDescription</dfn>
+            </td>
+            <td>
+              <pref>aria-roledescription</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRowCount</dfn>
+            </td>
+            <td>
+              <pref>aria-rowcount</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRowIndex</dfn>
+            </td>
+            <td>
+              <pref>aria-rowindex</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaRowSpan</dfn>
+            </td>
+            <td>
+              <pref>aria-rowspan</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaSelected</dfn>
+            </td>
+            <td>
+              <sref>aria-selected</sref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaSetSize</dfn>
+            </td>
+            <td>
+              <pref>aria-setsize</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaSort</dfn>
+            </td>
+            <td>
+              <pref>aria-sort</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaValueMax</dfn>
+            </td>
+            <td>
+              <pref>aria-valuemax</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaValueMin</dfn>
+            </td>
+            <td>
+              <pref>aria-valuemin</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaValueNow</dfn>
+            </td>
+            <td>
+              <pref>aria-valuenow</pref>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <dfn>ariaValueText</dfn>
+            </td>
+            <td>
+              <pref>aria-valuetext</pref>
+            </td>
+          </tr>
+        </table>
+        <p class="note">Note: Attributes
+          <pref>aria-dropeffect</pref> and
+          <sref>aria-grabbed</sref> were deprecated in ARIA 1.1 and do not have corresponding IDL attributes.</p>
+      </section>
+      <section class="informative" id="idl_attr_disambiguation">
+        <h3>Disambiguation Pattern</h3>
+        <p>Though specification authors may make exceptions to this pattern, the following rules were used to disambiguate names
+          and case of the IDL attributes listed above.</p>
+        <ul>
+          <li>Any attribute name referencing concepts that are combinations of two or more words (such as "described by") becomes
+            a camel-cased IDL attribute capitalizing each word boundary. For example,
+            <pref>aria-describedby</pref> becomes
+            <code>ariaDescribedBy</code> with both the D and B capitalized.</li>
+          <li>Likewise, any attribute name referencing concepts that can be hyphenated (such as "multi-selectable") becomes a camel-cased
+            IDL attribute capitalizing each hyphenation boundary. For example, the only valid spelling for "multi-selectable" is
+            hyphenated, so
+            <pref>aria-multiselectable</pref> becomes
+            <code>ariaMultiSelectable</code> with both the M and S capitalized.</li>
+          <li>When trusted dictionary sources list both hyphenated or non-hyphenated spellings (e.g. "multi-line" and "multiline"
+            are both valid spellings) use the hyphenated version and apply the hyphenation rule above. For example,
+            <pref>aria-multiline</pref> becomes
+            <code>ariaMultiLine</code> with both the M and L capitalized.</li>
+          <li>If all trusted dictionary sources list a single spelling of a compound word with no spaces or hyphens, only the first
+            letter of the term is capitalized. For example, neither “place-holder” nor “place holder” are considered valid spellings
+            of the term “placeholder,” so
+            <pref>aria-placeholder</pref> becomes
+            <code>ariaPlaceholder</code> with only the P capitalized.</li>
+          <li>There are currently no acronym-based ARIA attributes, but if future attributes include acronym usage, attempt to match
+            existing DOM conventions (e.g. ID becomes Id).</li>
+        </ul>
+      </section>
+      <section class="informative" id="idl_attr_exceptions">
+        <h3>IDL Attribute Name Notes or Exceptions</h3>
+        <p>Any notes or exceptions for specific attribute names will be listed here.</p>
+        <ul>
+          <li>
+            <code>ariaPosInSet</code>: The
+            <pref>aria-posinset</pref> attribute refers to an item's position in a set (two words: "in set") rather than the "inset"
+            of an item from the beginning of the collection. Therefore the IDL attribute name is
+            <code>ariaPosInSet</code> with the P, I, and second S capitalized,
+            <em>not</em>
+            <code>ariaPosInset</code>.</li>
+        </ul>
+        <p class="ednote">Editor's Note: Should we make an exception on the spelling of "placeholder" and capitalize the H anyway? Some developers
+          will expect this to be
+          <code>ariaPlaceHolder</code> despite the fact that it's not a hyphenated word.</p>
+      </section>
+    </section>
+
+    <section class="informative" id="idl_example_usage">
+      <h2>Example IDL Attribute Usage</h2>
+      <p>The primary purpose of ARIA IDL attribute reflection is to ease JavaScript-based manipulation of values. The following
+        examples demonstrate its usage.</p>
+      <aside class="example">
+
+        <!-- ReSpec needs these examples to be unindented. -->
+        <pre>&lt;div id="inaccessibleButton"&gt;
+    &lt;!-- Use semantic markup instead. This is just a retrofit example. --&gt;
+&lt;/div&gt;</pre>
+        <pre>// Get a reference to the element.
+let el = document.getElementById('inaccessibleButton'); 
+el.tabIndex = 0; // Make it focusable.
+
+// Set the role and label.
+el.role = "button";
+el.ariaLabel = "Edit";
+
+// Get the role and label.
+el.role; // Returns "button"
+el.ariaLabel; // Returns "Edit"
+
+// These are interchangeable with the more verbose setAttribute and getAttribute methods.
+el.setAttribute("role", "button");
+el.setAttribute("aria-label", "Edit");
+el.getAttribute("role"); // Returns "button"
+el.getAttribute("aria-label"); // Returns "Edit"
+
+// Changes via either interface are reflected by the other.
+el.setAttribute("aria-label", "Delete");
+el.ariaLabel; // Returns "Delete"
+el.ariaLabel = "Publish";
+el.getAttribute("aria-label"); // Returns "Publish"</pre>
+
+      </aside>
+    </section>
+
+    <section class="normative" id="shadowroot_interaction">
+      <h2>Interaction between
+        <code>ShadowRoot</code> and
+        <code>host</code>
+      </h2>
+      <p>If an
+        <code>Element</code> has an attached
+        <code>ShadowRoot</code>, and the author has access to the
+        <code>ShadowRoot</code>, authors may set a
+        <code>role</code> or ARIA attribute, such as
+        <a href="#dom-ariaattributes-ariaactivedescendant">
+          <code>ariaActivedescendant</code>
+        </a>, on
+        <em>either</em> the
+        <code>Element</code>,
+        <em>or</em> the
+        <code>ShadowRoot</code>, or both.
+      </p>
+      <p>
+        If an IDL property from either the
+        <code>AccessibilityRole</code> mixin or the
+        <code>AriaAttributes</code> mixin
+        is set on <em>either</em> the <code>Element</code>
+        <em>or</em> its associated <code>ShadowRoot</code>,
+        that IDL attribute should be
+        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
+        to the
+        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
+        <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
+        with the host
+        <code>Element</code>.
+      </p>
+      <p>
+        If a property is set to a non-<code>null</code> value on
+        <em>both</em> the
+        <code>ShadowRoot</code>
+        and the host
+        <code>Element</code>, the reflected value on the host
+        <code>Element</code> takes precedence,
+        i.e. the reflected <code>role</code> value on the host <code>Element</code>
+        is used to compute the
+        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a>
+        in the
+        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>,
+        regardless of the value of the <code>role</code> value on the associated
+        <code>ShadowRoot</code>,
+        and similarly for all ARIA attribute properties.
+      </p>
+      <aside class="example">
+        <p>
+          For example, an author creating a
+          <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
+          may use a
+          <code>ShadowRoot</code> to encapsulate implementation details for the element.
+        </p>
+        <p>
+          They may use the
+          <code>ShadowRoot</code> to encode certain "default" values for the ARIA
+          <code>role</code> and properties for the element, which an author using the Custom Element may choose to override using reflected
+          ARIA properties.
+        </p>
+        <pre>
+class CustomCheckbox extends HTMLElement {
+
+  // ...
+
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});  // mode may also be "closed".
+
+    // ... any other set-up
+  }
+
+  connectedCallback() {
+    // Set the default semantics for the custom element
+    // when it is inserted in the page.
+    this.shadowRoot.role = "checkbox";
+  }
+
+  // Observe the custom "checked" attribute
+  static get observedAttributes() { return ["checked"]; }
+
+  // ... setters/getters for properties which reflect to attributes
+
+  // When the custom "checked" attribute changes,
+  // keep the accessible checked state in sync.
+  attributeChangedCallback(name, oldValue, newValue) {
+  switch(name) {
+    case "checked":
+      this.shadowRoot.ariaChecked = (newValue !== null);
+    }
+  }
+}
+
+customElements.define("custom-checkbox", CustomCheckbox);
+</pre>
+        <p>An author using the Custom Element could then use
+          the reflected ARIA properties/content attributes to override the default values,
+          just as they would when using a native element:</p>
+<pre>
+&lt;!-- ARIA role overrides Shadow DOM role --&gt;
+&lt;custom-checkbox role="radio"&gt;
+</pre>
+      </aside>
+    </section>
+  </section>
+</body>
+
+</html>

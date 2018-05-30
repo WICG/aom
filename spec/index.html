@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>
-      Accessibility Object Model, Phase 1
+      Accessibility Object Model
     </title>
     <meta charset='utf-8'>
     <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
@@ -123,16 +123,44 @@
   <body>
     <section id='abstract'>
       <p>
-        This specification provides a way for authors to make web apps
-        accessible using scripting, rather than the only option being
-        declarative accessibility features of HTML markup. In the
-        first phase, the author is able to programmatically
-        modify the accessible representation of an existing DOM
-        element. In future phases, the author is able to respond to
-        additional input events from assistive technology,
-        create new virtual accessible objects on the page that don't
-        correspond to an HTML element at all, and explore the computed
-        accessibility tree.
+        The Accessibility Object Model project aims to improve
+        certain aspects of the user and developer experiences
+        concerning the interaction between web pages and
+        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-assistive-technology">assistive technology</a>.
+      </p>
+      <p>
+        In particular, this project is concerned wtih improving the developer experience around:
+        <ul>
+          <li>building <a href="https://www.webcomponents.org/introduction">Web Components</a>
+            which are as accessible as a
+            <a href="https://html.spec.whatwg.org/#semantics">built-in element</a>;
+          </li>
+          <li>expressing and modifying the
+            <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-semantics">semantics</a>
+            of any <code>Element</code> using DOM APIs;
+          </li>
+          <li>expressing
+            <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-relationship">semantic relationships</a>
+            between <code>Element</code>s;
+          </li>
+          <li>expressing <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-semantics">semantics</a>
+            for visual user interfaces which are not composed of <code>Element</code>s,
+            such as <a href="https://html.spec.whatwg.org/multipage/scripting.html#the-canvas-element"><code>canvas</code></a>-based user interfaces;
+          </li>
+          <li>understanding and testing the process by which
+            <a href="https://w3c.github.io/html-aam/#mapping-html-to-accessibility-apis">HTML</a>
+            and
+            <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_conflicts">ARIA</a>
+            contribute to the computation of the
+            <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>.
+          </li>
+        </ul>
+      </p>
+      <p>
+        By reducing the friction experienced by developers in creating accessible web pages,
+        and filling in gaps in what semantics may be expressed via DOM APIs,
+        the APIs proposed in the Accessibility Objet Model aim to improve
+        the user experience of users interacting with web pages via assistive technology.
       </p>
     </section>
     <section id="introduction" class="informative">
@@ -149,502 +177,67 @@
           <a href="https://github.com/WICG/aom/issues">file an issue</a> on GitHub.
         </p>
       </section>
+      <section id="structure">
+        <h2>Structure of Accessibility Object Model Specs</h2>
+        <p>
+          The specifications which comprise the Accessibility Object Model
+          are split into loose "phases",
+          each of which may take the form of a modification to an existing spec,
+          or a new API.
+        </p>
+        <p>
+          While the term "phases" indicates a rough ordering,
+          based on expected time to completion
+          and relative urgency of work,
+          it should not be expected that one phase must be complete
+          before work begins on the next,
+          nor that phases will be completed in strict order.
+        </p>
+        <p>
+          See the <a href="#phases">project phases</a> section for links to each phase.
+        </p>
+      </section>
       <section id="scope">
         <h2>Document Scope</h2>
-        <p>The Accessibility Object Model spec is narrowly focused on the goal of creating a scripting API for web accessibility. It's intended to complement existing web accessibility APIs such as [[!WAI-ARIA]], not replace them. In particular, this spec attempts to avoid proposing new roles, states, and properties an of accessible objects except where necessary.</p>
+        <p>The Accessibility Object Model specs are narrowly focused on the goals described in the Abstract.
+          They are intended to complement existing web accessibility APIs
+          such as [[!WAI-ARIA]],
+          not replace them.
+          In particular, this spec attempts to avoid proposing
+          new roles, states, and properties of accessible objects except where necessary.</p>
       </section>
       <section id="inclusion">
         <h2>Criteria for Inclusion</h2>
-        <p>This specification is not intended to solve all accessibility problems on the Web. It is currently impossible to make some web features accessible, so the primary goal is to resolve immediate needs quickly for existing, inaccessible web interfaces. The specification editors are purposefully deferring many useful ideas in order to maintain a realistic timeline for highest priority features.</p>
+        <p>This specification is not intended to solve all accessibility problems on the Web.
+          It is currently impossible to make some web features accessible,
+          so the primary goal is to resolve immediate needs quickly for existing,
+          inaccessible web interfaces.
+          The specification editors are intentionally deferring many useful ideas
+          in order to maintain a realistic timeline for highest priority features.</p>
         <p>
           We have defined <a href="criteria.html">Inclusion/Exclusion Criteria</a>
           in order to clarify exactly what will be considered in-scope.
         </p>
       </section>
     </section>
-    <section id="properties">
-      <h2>
-        Phase 1: Accessible Properties
-      </h2>
-      <section>
-        <h3>
-          Extensions to the <code>Element</code> interface
-        </h3>
-        <p>
-          The author can request an <i>accessible node</i> from any valid [[!DOM]]
-          <code>Element</code>.
-        </p>
-        <pre class="idl">
-          partial interface Element {
-            readonly attribute AccessibleNode accessibleNode;
-          };
-        </pre>
-        <p data-dfn-for="Element">
-          The <dfn>accessibleNode</dfn> attribute returns the <i>accessible
-          node</i> associated with this <code>DOM element</code>. It always returns
-          a valid object if the browser supports the AOM.
-        </p>
+    <section id="phases">
+      <h2>Phases</h2>
+      <section id="aria-reflection">
+        <h2>Phase 1: ARIA Reflection</h2>
+        <p>See the <a href="aria-reflection.html">ARIA Reflection</a> document.</p>
       </section>
-      <section id="accessiblenode">
-        <h3>
-          <code>AccessibleNode</code> interface
-        </h3>
-        <pre class="idl">
-        interface AccessibleNode {
-          attribute DOMString? role;
-          attribute DOMString? roleDescription;
-
-          // Accessible label and description.
-          attribute DOMString? label;
-          attribute AccessibleNodeList? labeledBy;
-          attribute AccessibleNodeList? describedBy;
-
-          // Global states and properties.
-          attribute DOMString? current;
-
-          // Widget properties.
-          attribute DOMString? autocomplete;
-          attribute boolean? hidden;
-          attribute DOMString? keyShortcuts;
-          attribute boolean? modal;
-          attribute boolean? multiline;
-          attribute boolean? multiselectable;
-          attribute DOMString? orientation;
-          attribute boolean? readOnly;
-          attribute boolean? required;
-          attribute boolean? selected;
-          attribute DOMString? sort;
-
-          // Widget states.
-          attribute DOMString? checked;
-          attribute boolean? expanded;
-          attribute boolean? disabled;
-          attribute DOMString? invalid;
-          attribute DOMString? hasPopUp;
-          attribute DOMString? pressed;
-
-          // Control values.
-          attribute DOMString? valueText;
-          attribute DOMString? placeholder;
-          attribute double? valueNow;
-          attribute double? valueMin;
-          attribute double? valueMax;
-
-          // Live regions.
-          attribute boolean? atomic;
-          attribute boolean? busy;
-          attribute DOMString? live;
-          attribute DOMString? relevant;
-
-          // Other relationships.
-          attribute AccessibleNode? activeDescendant;
-          attribute AccessibleNodeList? controls;
-          attribute AccessibleNode? details;
-          attribute AccessibleNode? errorMessage;
-          attribute AccessibleNodeList? flowTo;
-          attribute AccessibleNodeList? owns;
-
-          // Collections.
-          attribute long? colCount;
-          attribute unsigned long? colIndex;
-          attribute unsigned long? colSpan;
-          attribute unsigned long? posInSet;
-          attribute long? rowCount;
-          attribute unsigned long? rowIndex;
-          attribute unsigned long? rowSpan;
-          attribute long? setSize;
-          attribute unsigned long? level;
-        };
-        </pre>
-        <p>
-          Initially all AccessibleNode properties must return null.
-        </p>
-        <p>
-          All AccessibleNode properties, on setting, store the provided value.
-          On getting, they return the user-provided value if present and valid,
-          and null otherwise. The validity of a property valid is specified in
-          greater detail below.
-        </p>
-        <p>
-          Values set on a DOM element's AccessibleNode are used
-          for the browser's implementation of native accessibility APIs for
-          that accessibility property.
-          When both an AccessibleNode property and its equivalent ARIA attribute
-          are both present, the ARIA attribute overrides the AccessibleNode
-          property.
-        </p>
-        <p>
-          If a property of AccessibleNode is set to an invalid value, it is ignored.
-        </p>
+      <section id="user-action-events">
+        <h2>Phase 2: User Action Events</h2>
+        <p>See the <a href="user-action-events.html">User Action Events</a> document.</p>
       </section>
-      <section>
-        <h3>
-          <code>AccessibleNodeList</code> interface
-        </h3>
-        <p>
-          An <code>AccessibleNodeList</code> represents an ordered
-          list of AccessibleNodes.
-          It's used to represent relationships between one
-          <code>AccessibleNode</code> and other
-          <code>AccessibleNodes</code> in the accessibility tree.
-          Unlike <code>AccessibleNode</code>, <code>AccessibleNodeList</code>
-          has a constructor.
-        </p>
-        <pre class="idl">
-        [
-          Constructor(optional sequence&lt;AccessibleNode&gt; nodes = [])
-        ]
-        interface AccessibleNodeList {
-          attribute unsigned long length;
-          getter AccessibleNode? item(unsigned long index);
-          setter void (unsigned long index, AccessibleNode node);
-          void add(AccessibleNode node, optional AccessibleNode? before = null);
-          void remove(long index);
-        };
-        </pre>
+      <section id="virtual-accessibility-nodes">
+        <h2>Phase 3: Virtual Accessibility Nodes</h2>
+        <p>See the <a href="virtual-accessibility-nodes.html">Virtual Accessibility Nodes</a> document.</p>
       </section>
-      <section id="mapping">
-        <h3>
-          Mapping to ARIA attributes
-        </h3>
-        <p>
-          In Phase 1, there's a 1:1 correspondence between the set of
-          properties on AccessibleNode and the list of valid ARIA
-          attributes from the [[!WAI-ARIA]] 1.1 spec.
-          This table shows the mappings and also includes deprecated
-          ARIA attributes that are not mapped into AccessibleNode
-          properties.
-        </p>
-        <p>
-          The Accessibility Object Model does not define new semantics.
-          The semantic meaning of each AccessibleNode property
-          is identical to the meaning of the ARIA attribute.
-        </p>
-      <table>
-        <caption>
-          <dfn>Accessibility property table</dfn>
-        </caption>
-        <thead>
-          <tr>
-            <th>Attribute name</th>
-            <th>Type</th>
-            <th>Equivalent ARIA attribute</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>activeDescendant</code></td>
-            <td><code>AccessibleNode?</code></td>
-            <td><code>aria-activedescendant</code></td>
-          </tr>
-          <tr>
-            <td><code>atomic</code></td>
-            <td><code>boolean?</code></td>
-            <td><code>aria-atomic</code></td>
-          </tr>
-          <tr>
-            <td><code>autocomplete</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-autocomplete</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>busy</code></td>
-            <td><code>boolean?</code></td>
-            <td><code>aria-busy</code></td>
-          </tr>
-          <tr>
-            <td><code>checked</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-checked</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>colCount</code></td>
-            <td><code>long?</code></td>
-            <td><code><nobr>aria-colcount</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>colIndex</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-colindex</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>colSpan</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-colSpan</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>controls</code></td>
-            <td><code>AccessibleNodeList?</code></td>
-            <td><code>aria-controls</code></td>
-          </tr>
-          <tr>
-            <td><code>current</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-current</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>describedBy</code></td>
-            <td><code>AccessibleNodeList?</code></td>
-            <td><code>aria-describedby</code></td>
-          </tr>
-          <tr>
-            <td><code>details</code></td>
-            <td><code>AccessibleNode?</code></td>
-            <td><code>aria-details</code></td>
-          </tr>
-          <tr>
-            <td><code>disabled</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-disabled</nobr></code></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td><code><nobr>aria-dropeffect</nobr></code>
-              (deprecated)
-            </td>
-          </tr>
-          <tr>
-            <td><code>errorMessage</code></td>
-            <td><code>AccessibleNode?</code></td>
-            <td><code>aria-errormessage</code></td>
-          </tr>
-          <tr>
-            <td><code>expanded</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-expanded</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>flowTo</code></td>
-            <td><code>AccessibleNodeList?</code></td>
-            <td><code>aria-flowto</code></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td><code><nobr>aria-grabbed</nobr></code>
-              (deprecated)
-            </td>
-          </tr>
-          <tr>
-            <td><code>hasPopUp</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-haspopup</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>hidden</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-hidden</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>invalid</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-invalid</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>keyShortcuts</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-keyshortcuts</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>label</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-label</nobr><code></td>
-          </tr>
-          <tr>
-            <td><code>labeledBy</code></td>
-            <td><code>AccessibleNodeList?</code></td>
-            <td><code>aria-labeledby,<br>aria-labelledby</code></td>
-          </tr>
-          <tr>
-            <td><code>level</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-level</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>live</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-live</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>modal</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-modal</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>multiline</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-multiline</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>multiselectable</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-multiselectable</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>orientation</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-orientation</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>owns</code></td>
-            <td><code>AccessibleNodeList?</code></td>
-            <td><code>aria-owns</code></td>
-          </tr>
-          <tr>
-            <td><code>placeholder</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-placeholder</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>posInSet</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-posinset</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>pressed</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-pressed</nobr></code></td>
-          </tr>
-          </tr>
-            <td><code>readOnly</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-readonly</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>relevant</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-relevant</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>required</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-required</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>roleDescription</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-roledescription</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>rowCount</code></td>
-            <td><code>long?</code></td>
-            <td><code><nobr>aria-rowcount</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>rowIndex</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-rowindex</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>rowSpan</code></td>
-            <td><code>unsigned long?</code></td>
-            <td><code><nobr>aria-rowspan</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>selected</code></td>
-            <td><code>boolean?</code></td>
-            <td><code><nobr>aria-selected</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>setSize</code></td>
-            <td><code>long?</code></td>
-            <td><code><nobr>aria-setsize</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>sort</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-sort</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>valueMax</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuemax</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>valueMin</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuemin</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>valueNow</code></td>
-            <td><code>double?</code></td>
-            <td><code><nobr>aria-valuenow</nobr></code></td>
-          </tr>
-          <tr>
-            <td><code>valueText</code></td>
-            <td><code>DOMString?</code></td>
-            <td><code><nobr>aria-valuetext</nobr></code></td>
-          </tr>
-        </tbody>
-      </table>
+      <section id="computed-accessibility-tree">
+        <h2>Phase 4: Computed Accessibility Tree</h2>
+        <p>See the <a href="computed-accessibility-tree.html">Computed Accessibility Tree</a> document.</p>
       </section>
-      <section id="Types">
-        <h3>
-          Types
-        </h3>
-        <p>
-          While ARIA attributes are all strings, AccessibleNode properties
-          can have many different types. Most of these are straightforward,
-          for example <code>valueNow</code>, <code>valueMin</code>, and
-          <code>valueMax</code> are of type <code>double</code>, while
-          <code>rowCount</code> is of type <code>long</code>.
-        </p>
-        <p>
-          The primary difference is with ARIA attributes that take one
-          or more IDREFs. In AccessibleNode, they take references to
-          one or more AccessibleNodes directly. This makes it possible
-          to establish relationships between nodes that aren't in the
-          same <i>tree scope</i>, such as in different frames (with the
-          same origin), or in the shadow DOM of a custom element.
-        </p>
-        <p>
-          In particular,
-          <code>activeDescendant</code>,
-          <code>details</code>, and
-          <code>errorMessage</code>
-          are set with another AccessibleNode, while
-          <code>controls</code>,
-          <code>flowTo</code>,
-          <code>labeledBy</code>,
-          <code>describedBy</code>, and
-          <code>owns</code>
-          all take an AccessibleNodeList.
-        </p>
-      </section>
-      <section id="validation">
-        <h3>
-          Validation
-        </h3>
-        <p>
-          Upon setting a property of AccessibleNode, no validation is
-          done. The user-provided value is simply stored, converted to the
-          appropriate type via the standard rules for JavaScript types.
-          This is to
-          ensure that backwards compatibility is maintained; when a new
-          property is added or a new value is recognized as valid, authors
-          do not have to worry that browsers who have not yet added support
-          will break or throw an exception upon encountering this code.
-        </p>
-      </section>
-    </section>
-    <section id="actions">
-      <h2>
-        Phase 2: Accessible Actions
-      </h2>
-      <p>See <a href="phase2.html">Phase 2</a></p>
-    </section>
-    <section id="actions">
-      <h2>
-        Phase 3: Virtual Accessibility Nodes
-      </h2>
-      <p>See <a href="phase3.html">Phase 3</a></p>
-    </section>
-    <section id="actions">
-      <h2>
-        Phase 4: Computed Accessibility Tree
-      </h2>
-      <p>See <a href="phase4.html">Phase 4</a></p>
     </section>
     <section class="appendix">
       <h2>

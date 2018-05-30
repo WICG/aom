@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>
-      Accessibility Object Model, Phase 3
+      Accessibility Object Model, Phase 4
     </title>
     <meta charset='utf-8'>
     <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async
@@ -89,57 +89,45 @@
       };
     </script>
   </head>
-    <section id="abstract">
-      <p class="warning">
-        This spec has been deprecated,
-        please see the
-        <a href="https://github.com/WICG/aom/blob/master/explainer.md">Accessibility Object Model Explainer</a>
-        and
-        <a href="index.html">index to specs</a>
-        for up to date information.
-      </p>
-    </section>
   <body>
-    <section id="introduction">
-      <h1>Introduction</h1>
-      <p>
-        This document is the spec for Phase 3 of the Accessibility Object
-        Model spec. For background, please refer to the
-        <a href="https://github.com/WICG/aom/blob/master/explainer.md">
-          Accessibility Object Model Explainer</a> for the background and
-        motivation, and then
-        <a href="index.html">Phase 1</a> and
-        <a href="phase2.html">Phase 2</a>.
-      </p>
+    <section id="abstract">
+    <p>
+      This document is a placeholder for
+      the spec for "Accessibility Tree Introspection",
+      a part of the AOM project.
+      For background, please refer to the
+      <a href="https://github.com/WICG/aom/blob/master/explainer.md">Accessibility Object Model Explainer</a>.
+    </p>
     </section>
-    <section class="virtual">
-      <h2>
-        Phase 3: Virtual Accessibility Nodes
-      </h2>
-      <p>
-        Virtual Accessibility Nodes will allow authors to expose
-        "virtual" accessibility nodes, which are not associated directly
-        with any particular DOM node, to assistive technology.
-      </p>
-      <p>
-        This mechanism is often present in native accessibility APIs,
-        in order to allow authors more granular control over the
-        accessibility of custom-drawn APIs.
-      </p>
-      <p>
-        On the web, this would allow creating an accessible solution
-        to canvas-based UI which does not rely on fallback or
-        visually-hidden DOM content.
-      </p>
-      <p>
-        The API for Virtual Accessibility Nodes will be specified at a later date.
-      </p>
-    </section>
-    <section id="actions">
+    <section id="computedtree">
       <h2>
         Phase 4: Computed Accessibility Tree
       </h2>
-      <p>See <a href="phase4.html">Phase 4</a></p>
+      <p>
+        The Computed Accessibility Tree API will allow authors to
+        access the full computed accessibility tree - all computed
+        properties for the accessibility node associated with each
+        DOM node, plus the ability to walk the computed tree
+        structure including virtual nodes.
+      </p>
+      <p>
+        This will make it possible to:
+      </p>
+      <ul>
+        <li>write any programmatic test which asserts anything about the semantic properties of an element or a page.
+        <li>build a reliable browser-based assistive technology - for example, a browser extension which uses the accessibility tree to implement a screen reader, screen magnifier, or other assistive functionality; or an in-page tool.
+        <li>detect whether an accessibility property has been successfully applied (via ARIA or otherwise) to an element - for example, to detect whether a browser has implemented a particular version of ARIA.
+        <li>do any kind of console-based debugging/checking of accessibility tree issues.
+          react to accessibility tree state, for example, detecting the exposed role of an element and modifying the accessible help text to suit.
+      </ul>
+      <p>
+        One implication of implementing this phase is that all browsers must agree on
+        exposing the *same* accessibility tree for the same given webpage, otherwise
+        differences will invariably lead to authored pages that work in some browsers
+        but not others. Care must be taken to define this phase in such a way that
+        maintains a high degree of compatibility between browsers, without exposing any
+        internal details and nuances.
+      </p>
     </section>
   </body>
 </html>
