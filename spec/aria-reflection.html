@@ -92,15 +92,26 @@
   <section id="abstract">
     <p>
       This specification describes the additions to existing specifications which will make it possible for web authors to programmatically
-      express Element semantics in two ways:
+      express Element semantics in three ways:
       <ul>
-        <li>as reflected IDL attributes on Elements, or</li>
-        <li>as non-reflected IDL attributes on an attached ShadowRoot.</li>
+        <li>
+          <em>reflected</em> and
+          <em>mutable</em> as DOM attributes on Elements;</li>
+        <li>
+          <em>non-reflected</em> and
+          <em>immutable</em>, as optional arguments to
+          <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry">
+            <code>CustomElementRegistry.define()</code>
+          </a>
+        </li>
+        <li>
+          <em>non-reflected</em> and
+          <em>mutable</em>, via a ShadowRoot.</li>
       </ul>
     </p>
   </section>
   <section id="idl-interface" class="normative">
-    <h2>IDL Interface</h2>
+    <h2>IDL Interfaces</h2>
     <p class="note">This section is part of the
       <a href="https://w3c.github.io/aria/#idl-interface">ARIA 1.2 Specification</a>, and is included here for informative purposes only.</p>
 
@@ -110,12 +121,11 @@
         <dfn>AccessibilityRole</dfn>
       </h2>
       <pre class="idl">
-    interface mixin AccessibilityRole {
-    attribute DOMString? role;
-    };
-    Element includes AccessibilityRole;
-          ShadowRoot includes AccessibilityRole;
-  </pre>
+interface mixin AccessibilityRole {
+attribute DOMString? role;
+};
+Element implements AccessibilityRole;
+</pre>
       <section id="role-reflection" class="normative">
         <h2>ARIA Role Reflection</h2>
         <p>User agents MUST
@@ -128,11 +138,11 @@
       </section>
     </section>
     <section id="AriaAttributes" class="normative" data-dfn-for="AriaAttributes" data-link-for="AriaAttributes">
-      <h2>Interface Mixin
-        <dfn>AriaAttributes</dfn>
-      </h2>
-      <pre class="idl">
-    interface mixin AriaAttributes {
+    <h2>Interface Mixin
+      <dfn>AriaAttributes</dfn>
+    </h2>
+    <pre class="idl">
+  interface mixin AriaAttributes {
     attribute DOMString? ariaActiveDescendant;
     attribute DOMString? ariaAtomic;
     attribute DOMString? ariaAutoComplete;
@@ -179,10 +189,9 @@
     attribute DOMString? ariaValueMin;
     attribute DOMString? ariaValueNow;
     attribute DOMString? ariaValueText;
-    };
-    Element includes AriaAttributes;
-          ShadowRoot includes AriaAttributes;
-  </pre>
+  };
+  Element implements AriaAttributes;
+</pre>
       <section id="attribute-reflection" class="normative">
         <h2>ARIA Attribute Reflection</h2>
         <p>User agents MUST
@@ -610,18 +619,125 @@
           <code>ariaPlaceHolder</code> despite the fact that it's not a hyphenated word.</p>
       </section>
     </section>
+  </section
+  </section>
+  <section>
+    <h2><code>AccessibilityRole</code> and <code>AriaAttributes</code> in Web Components</h2>
+    <p>
+      This section discusses how 
+      the <code>AccessibilityRole</code> and <code>AriaAttributes</code> interfaces 
+      are used with <a href="https://www.webcomponents.org/introduction">Web Components</a>.
+    </p>
+    <section id="attributes-on-shadowroot-interface">
+      <h2><code>AriaAttributes</code> on <code>ShadowRoot</code> and interface</h2>
+      <p>
+        <pre class="idl">
+ShadowRoot implements AriaAttributes;
+</pre>
+      </p>      
+    </section>
+    <section class="normative" id="shadowroot_interaction">
+        <h2>Interaction between
+          <code>ShadowRoot</code> and
+          <code>host</code>
+        </h2>
+        <p>If an
+          <code>Element</code> has an attached
+          <code>ShadowRoot</code>, and the author has access to the
+          <code>ShadowRoot</code>, authors may set a
+          <code>role</code> or ARIA attribute, such as
+          <a href="#dom-ariaattributes-ariaactivedescendant">
+            <code>ariaActivedescendant</code>
+          </a>, on
+          <em>either</em> the
+          <code>Element</code>,
+          <em>or</em> the
+          <code>ShadowRoot</code>, or both.
+        </p>
+        <p>
+          If a
+          <code>role</code> or ARIA attribute property is set on
+          <em>either</em> the
+          <code>Element</code>
+          <em>or</em> its associated
+          <code>ShadowRoot</code>, that property should be
+          <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
+          to the
+          <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
+          <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
+          with the host
+          <code>Element</code>.
+        </p>
+        <p>
+          If a property is set on
+          <em>both</em> the
+          <code>ShadowRoot</code>
+          and the host
+          <code>Element</code>, the reflected value on the host
+          <code>Element</code> takes precedence.
+        </p>
+        <aside class="example">
+          <p>
+            For example, an author creating a
+            <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
+            may use a
+            <code>ShadowRoot</code> to encapsulate implementation details for the element.
+          </p>
+          <p>
+            They may use the
+            <code>ShadowRoot</code> to encode certain "default" values for the ARIA
+            <code>role</code> and properties for the element, which an author using the Custom Element may choose to override using reflected
+            ARIA properties.
+          </p>
+          <pre>
+                  class CustomCheckbox extends HTMLElement {
+    
+                    // ...
+                  
+                    constructor() {
+                      super();
+                      this.attachShadow({mode: 'open'});  // mode may also be "closed".
+                  
+                      // ... any other set-up
+                    }
+                  
+                    connectedCallback() {
+                      // Set the default semantics for the custom element
+                      // when it is inserted in the page.
+                      this.shadowRoot.role = "checkbox";
+                    }
+                  
+                    // Observe the custom "checked" attribute
+                    static get observedAttributes() { return ["checked"]; }
+                  
+                    // ... setters/getters for properties which reflect to attributes
+                  
+                    // When the custom "checked" attribute changes,
+                    // keep the accessible checked state in sync.
+                    attributeChangedCallback(name, oldValue, newValue) {
+                      switch(name) {
+                      case "checked":
+                        this.shadowRoot.ariaChecked = (newValue !== null);
+                      }
+                    }
+                  }
+                  
+                  customElements.define("custom-checkbox", CustomCheckbox);
+        </pre>
+        </aside>
+      </section>
+</section>
+  <section class="informative" id="idl_example_usage">
+    <h2>Example IDL Attribute Usage</h2>
+    <p>The primary purpose of ARIA IDL attribute reflection is to ease JavaScript-based manipulation of values. The following
+      examples demonstrate its usage.</p>
+    <aside class="example">
 
-    <section class="informative" id="idl_example_usage">
-      <h2>Example IDL Attribute Usage</h2>
-      <p>The primary purpose of ARIA IDL attribute reflection is to ease JavaScript-based manipulation of values. The following
-        examples demonstrate its usage.</p>
-      <aside class="example">
-
-        <!-- ReSpec needs these examples to be unindented. -->
-        <pre>&lt;div id="inaccessibleButton"&gt;
-    &lt;!-- Use semantic markup instead. This is just a retrofit example. --&gt;
+      <!-- ReSpec needs these examples to be unindented. -->
+      <pre>&lt;div id="inaccessibleButton"&gt;
+  &lt;!-- Use semantic markup instead. This is just a retrofit example. --&gt;
 &lt;/div&gt;</pre>
-        <pre>// Get a reference to the element.
+      <pre>// Get a reference to the element.
 let el = document.getElementById('inaccessibleButton'); 
 el.tabIndex = 0; // Make it focusable.
 
@@ -645,114 +761,7 @@ el.ariaLabel; // Returns "Delete"
 el.ariaLabel = "Publish";
 el.getAttribute("aria-label"); // Returns "Publish"</pre>
 
-      </aside>
-    </section>
-
-    <section class="normative" id="shadowroot_interaction">
-      <h2>Interaction between
-        <code>ShadowRoot</code> and
-        <code>host</code>
-      </h2>
-      <p>If an
-        <code>Element</code> has an attached
-        <code>ShadowRoot</code>, and the author has access to the
-        <code>ShadowRoot</code>, authors may set a
-        <code>role</code> or ARIA attribute, such as
-        <a href="#dom-ariaattributes-ariaactivedescendant">
-          <code>ariaActivedescendant</code>
-        </a>, on
-        <em>either</em> the
-        <code>Element</code>,
-        <em>or</em> the
-        <code>ShadowRoot</code>, or both.
-      </p>
-      <p>
-        If an IDL property from either the
-        <code>AccessibilityRole</code> mixin or the
-        <code>AriaAttributes</code> mixin
-        is set on <em>either</em> the <code>Element</code>
-        <em>or</em> its associated <code>ShadowRoot</code>,
-        that IDL attribute should be
-        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
-        to the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
-        <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
-        with the host
-        <code>Element</code>.
-      </p>
-      <p>
-        If a property is set to a non-<code>null</code> value on
-        <em>both</em> the
-        <code>ShadowRoot</code>
-        and the host
-        <code>Element</code>, the reflected value on the host
-        <code>Element</code> takes precedence,
-        i.e. the reflected <code>role</code> value on the host <code>Element</code>
-        is used to compute the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a>
-        in the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>,
-        regardless of the value of the <code>role</code> value on the associated
-        <code>ShadowRoot</code>,
-        and similarly for all ARIA attribute properties.
-      </p>
-      <aside class="example">
-        <p>
-          For example, an author creating a
-          <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
-          may use a
-          <code>ShadowRoot</code> to encapsulate implementation details for the element.
-        </p>
-        <p>
-          They may use the
-          <code>ShadowRoot</code> to encode certain "default" values for the ARIA
-          <code>role</code> and properties for the element, which an author using the Custom Element may choose to override using reflected
-          ARIA properties.
-        </p>
-        <pre>
-class CustomCheckbox extends HTMLElement {
-
-  // ...
-
-  constructor() {
-    super();
-    this.attachShadow({mode: 'open'});  // mode may also be "closed".
-
-    // ... any other set-up
-  }
-
-  connectedCallback() {
-    // Set the default semantics for the custom element
-    // when it is inserted in the page.
-    this.shadowRoot.role = "checkbox";
-  }
-
-  // Observe the custom "checked" attribute
-  static get observedAttributes() { return ["checked"]; }
-
-  // ... setters/getters for properties which reflect to attributes
-
-  // When the custom "checked" attribute changes,
-  // keep the accessible checked state in sync.
-  attributeChangedCallback(name, oldValue, newValue) {
-  switch(name) {
-    case "checked":
-      this.shadowRoot.ariaChecked = (newValue !== null);
-    }
-  }
-}
-
-customElements.define("custom-checkbox", CustomCheckbox);
-</pre>
-        <p>An author using the Custom Element could then use
-          the reflected ARIA properties/content attributes to override the default values,
-          just as they would when using a native element:</p>
-<pre>
-&lt;!-- ARIA role overrides Shadow DOM role --&gt;
-&lt;custom-checkbox role="radio"&gt;
-</pre>
-      </aside>
-    </section>
+    </aside>
   </section>
 </body>
 
