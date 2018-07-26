@@ -1,0 +1,163 @@
+<pre class=metadata>
+Title: ARIA reflection and Web Components
+Shortname: aom-aria
+Level: 1
+Status: UD
+URL: https://wicg.github.io/aom
+Group: WICG
+Editor: Alice Boxhall, Google, aboxhall@google.com
+Editor: James Craig, Apple, jcraig@apple.com
+Editor: Dominic Mazzoni, Google, dmazzoni@google.com
+Editor: Alexander Surkov, Mozilla, surkov.alexander@gmail.com
+Abstract: This specification describes the additions to existing 
+Abstract: specifications which will make it possible for web authors 
+Abstract: to programmatically express semantics for Web Components.
+Markup Shorthands: markdown yes
+</pre>
+
+# Introduction # {#introduction}
+
+# Additions to {{ShadowRoot}} and {{ElementDefinitionOptions}} # {#additions}
+## Interface Mixin {{AccessibilityRole}} ## {#role-mixin}
+<pre class="idl">
+ShadowRoot includes AccessibilityRole;
+ElementDefinitionOptions includes AccessibilityRole;
+</pre>
+
+## Interface Mixin {{AriaAttributes}}  ## {#AriaAttributes}
+<pre class="idl">
+ShadowRoot includes AriaAttributes;
+</pre>
+
+# Providing default <a>Custom Element</a> semantics via {{CustomElemenRegistry.define()}}
+
+Authors may provide default semantics for a Custom Element by setting properties via the 
+{{ElementDefinitionOptions}} object passed in to {{CustomElementRegistry.define()}} method.
+
+<aside class="example">
+For example, an author creating a custom tab control may define three custom elements for the individual tabs, the tab list and the tab panel:
+```js
+class TabElement extends HTMLElement { ... }
+customElements.define("custom-tab", TabElement, { role: "tab", ariaSelected: false });
+
+class TabListElement extends HTMLElement { ... }
+customElements.define("custom-tablist", TabListElement,
+                      { role: "tablist", ariaMultiSelectable: false });
+
+class TabPanelElement extends HTMLElement { ... }
+customElements.define("custom-tabpanel", TabPanelElement, { role: "tabpanel" });
+```
+
+A web page author using these custom elements may override any or all of these semantics as usual:
+
+```html
+<custom-tablist role="presentation">
+  <custom-tab role="heading" aria-level="3">
+    <button aria-expanded="false" aria-controls="section-1">Section 1</button>
+  </custom-tab>
+</custom-tablist>
+<custom-tabpanel id="section-1" role="presentation" style="display: none;">
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit...
+</custom-tabpanel>
+```
+</aside>
+
+# Interaction between {{ShadowRoot}} and {{host}} ## {#shadowroot_interaction}
+
+If an
+{{Element}} has an attached
+{{ShadowRoot}}, and the author has access to the
+{{ShadowRoot}}, authors may set a
+{{role}} or ARIA attribute, such as
+{{ariaActivedescendant}}, on
+<em>either</em> the
+{{Element}},
+<em>or</em> the
+{{ShadowRoot}}, or both.
+
+If an IDL property from either the
+{{AccessibilityRole}} mixin or the
+{{AriaAttributes}} mixin is set on
+<em>either</em> the
+{{Element}}
+<em>or</em> its associated
+{{ShadowRoot}}, that IDL attribute should be
+<a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
+to the
+<a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
+<a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
+with the host
+{{Element}}.
+
+If a property is set to a non-
+{{null}} value on
+<em>both</em> the
+{{ShadowRoot}}
+and the host
+{{Element}}, the reflected value on the host
+{{Element}} takes precedence, i.e. the reflected
+{{role}} value on the host
+{{Element}}
+is used to compute the
+<a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a>
+in the
+<a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>, regardless of the value of the
+{{role}} value on the associated
+{{ShadowRoot}}, and similarly for all ARIA attribute properties.
+
+<aside class="example">
+For example, an author creating a
+<a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
+may use a
+{{ShadowRoot}} to encapsulate implementation details for the element.
+
+They may use the
+{{ShadowRoot}} to encode certain "default" values for the ARIA
+{{role}} and properties for the element, which an author using the Custom Element may choose to override using
+reflected ARIA properties.
+
+```js
+class CustomCheckbox extends HTMLElement {
+
+  // ...
+
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});  // mode may also be "closed".
+
+    // ... any other set-up
+  }
+
+  connectedCallback() {
+    // Set the default semantics for the custom element
+    // when it is inserted in the page.
+    this.shadowRoot.role = "checkbox";
+  }
+
+  // Observe the custom "checked" attribute
+  static get observedAttributes() { return ["checked"]; }
+
+  // ... setters/getters for properties which reflect to attributes
+
+  // When the custom "checked" attribute changes,
+  // keep the accessible checked state in sync.
+  attributeChangedCallback(name, oldValue, newValue) {
+  switch(name) {
+    case "checked":
+      this.shadowRoot.ariaChecked = (newValue !== null);
+    }
+  }
+}
+
+customElements.define("custom-checkbox", CustomCheckbox);
+```
+
+An author using the Custom Element could then use the reflected ARIA properties/content attributes to override the
+default values, just as they would when using a native element:</p>
+
+```html
+<!-- ARIA role overrides Shadow DOM role -->
+<custom-checkbox role="radio">
+```
+
+</aside>
