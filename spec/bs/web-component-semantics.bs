@@ -9,16 +9,47 @@ Editor: Alice Boxhall, Google, aboxhall@google.com
 Editor: James Craig, Apple, jcraig@apple.com
 Editor: Dominic Mazzoni, Google, dmazzoni@google.com
 Editor: Alexander Surkov, Mozilla, surkov.alexander@gmail.com
-Abstract: This specification describes the additions to existing 
-Abstract: specifications which will make it possible for web authors 
+Abstract: This specification describes the additions to existing
+Abstract: specifications which will make it possible for web authors
 Abstract: to programmatically express semantics for Web Components.
 Markup Shorthands: markdown yes
+Markup Shorthands: dfn yes
+Markup Shorthands: idl yes
 </pre>
 
-# Introduction # {#introduction}
+<pre class=link-defaults>
+  spec: dom; type: attribute; text: host
+</pre>
+
+<pre class=anchors>
+urlPrefix: https://www.w3.org/TR/core-aam-1.1/; spec: core-aam
+    type: dfn;
+        text: accessible object; url: dfn-accessible-object
+        text: accessibility tree; url: dfn-accessibility-tree
+        text: associated; url: include_elements
+        text: mapped; url: mapping_general
+        text: mapped role; url: mapping_role
+
+
+urlPrefix: https://www.w3.org/TR/wai-aria-1.2/; spec: aria
+    type: interface
+        text: AccessibilityRole; url: idl-def-accessibilityrole
+        text: AriaAttributes; url: idl-def-ariaattributes
+    type: attribute
+        text: role; url: idl-def-accessibilityrole-role
+        text: ariaActiveDescendant; url: idl-def-ariaattributes-ariaactivedescendant
+
+urlPrefix: https://html.spec.whatwg.org/multipage/custom-elements.html; spec: html
+    type: interface
+        text: ElementDefinitionOptions
+</pre>
 
 # Additions to {{ShadowRoot}} and {{ElementDefinitionOptions}} # {#additions}
-## Interface Mixin {{AccessibilityRole}} ## {#AriaRole}
+
+{{ShadowRoot}} and {{ElementDefinitionOptions}}
+simply need to include {{AccessibilityRole}}</code>.
+
+## Interface Mixin {{AccessibilityRole}} ## {#AccessibilityRole}
 <pre class="idl">
 ShadowRoot includes AccessibilityRole;
 ElementDefinitionOptions includes AccessibilityRole;
@@ -30,15 +61,18 @@ ShadowRoot includes AriaAttributes;
 ElementDefinitionOptions includes AriaAttributes;
 </pre>
 
-# Providing default <a>Custom Element</a> semantics via {{CustomElemenRegistry.define()}} # {#default-semantics}
+# Providing default <a>Custom Element</a> semantics via {{define()|CustomElementRegistry.define()}} # {#default-semantics}
 
 Authors may provide immutable default semantics for a Custom Element
-by setting properties via the {{ElementDefinitionOptions}} object 
-passed in to {{CustomElementRegistry.define()}} method.
+by setting properties via the {{ElementDefinitionOptions}} object
+passed in to the {{define()|CustomElementRegistry.define()}} method.
+
+The properties set on the {{ElementDefinitionOptions}} object
+become the default values to be used
 
 <aside class="example">
-For example, an author creating a custom tab control 
-may define three custom elements for the individual tabs, 
+For example, an author creating a custom tab control
+may define three custom elements for the individual tabs,
 the tab list and the tab panel:
 ```js
 class TabElement extends HTMLElement { ... }
@@ -52,7 +86,7 @@ class TabPanelElement extends HTMLElement { ... }
 customElements.define("custom-tabpanel", TabPanelElement, { role: "tabpanel" });
 ```
 
-A web page author using these custom elements 
+A web page author using these custom elements
 may override any or all of these semantics as usual:
 
 ```html
@@ -67,53 +101,50 @@ may override any or all of these semantics as usual:
 ```
 </aside>
 
+# Providing encapsulated <a>Custom Element</a> semantics via {{ShadowRoot}} # {#shadowroot-semantics}
+
 # ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} # {#semantics_precedence}
 
 In general, the precedence of semantic properties is that
-any ARIA property set directly on the {{Element}} 
-(either via setting an attribute or via the associated property) 
+any ARIA property set directly on the {{Element}}
+(either via setting an attribute or via the associated property)
 overrides a value for the same property on the `Element`'s attached {{ShadowRoot}},
 and any ARIA property set either on the `Element` or the `ShadowRoot`
-will override a value set via the {{CustomElementRegistry.define()}} method.
+will override a value set via the {{define()|CustomElementRegistry.define()}} method.
 
-If an {{Element}} has an attached {{ShadowRoot}}, 
-and the author has access to the {{ShadowRoot}}, 
+If an {{Element}} has an attached {{ShadowRoot}},
+and the author has access to the {{ShadowRoot}},
 authors may set a {{role}} or ARIA attribute,
-such as {{ariaActivedescendant}}, 
+such as {{ariaActiveDescendant}},
 on <em>either</em> the {{Element}},
 <em>or</em> the {{ShadowRoot}}, or both.
 
-If an IDL property from either the {{AccessibilityRole}} mixin 
-or the {{AriaAttributes}} mixin 
-is set on <em>either</em> the {{Element}} <em>or</em> its associated {{ShadowRoot}}, 
-that IDL attribute should be
-<a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
-to the
-<a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
-<a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
-with the host {{Element}}.
+If an IDL property from either the {{AccessibilityRole}} mixin
+or the {{AriaAttributes}} mixin
+is set on <em>either</em> the {{Element}} <em>or</em> its associated {{ShadowRoot}},
+that IDL attribute should be <a>mapped</a>to the
+<a>accessible object</a> <a>associated</a> with the host {{Element}}.
 
 If a property is set to a non-<code>null</code> value on
-<em>both</em> the {{ShadowRoot}} and the host {{Element}}, 
-the reflected value on the host {{Element}} takes precedence, 
+<em>both</em> the {{ShadowRoot}} and the host {{Element}},
+the reflected value on the host {{Element}} takes precedence,
 i.e. the reflected {{role}} value on the host {{Element}}
 is used to compute the
-<a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a>
-in the
-<a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>, regardless of the value of the
+<a>mapped role</a> in the <a>accessibility tree</a>,
+regardless of the value of the
 {{role}} value on the associated
 {{ShadowRoot}}, and similarly for all ARIA attribute properties.
 
 <aside class="example">
-For example, an author creating a
-<a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
-may use a
-{{ShadowRoot}} to encapsulate implementation details for the element.
+For example,
+an author creating a [=Custom Element=] may use a {{ShadowRoot}}
+to encapsulate implementation details for the element.
 
 They may use the
 {{ShadowRoot}} to encode certain "default" values for the ARIA
-{{role}} and properties for the element, which an author using the Custom Element may choose to override using
-reflected ARIA properties.
+{{role}} and properties for the element,
+which an author using the [=Custom Element=] may choose
+to override using reflected ARIA properties.
 
 ```js
 class CustomCheckbox extends HTMLElement {
