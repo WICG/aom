@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3678d496235a6f1964fc14f56861db11f24476c4" name="generator">
   <link href="https://wicg.github.io/aom" rel="canonical">
-  <meta content="9efa767efc9f596c6f6f270e05e948be3b1fb376" name="document-revision">
+  <meta content="6121c9874bbb996b8b75e02b10e53069675e5a9d" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1506,11 +1506,11 @@ to programmatically express semantics for Web Components.</p>
     <li>
      <a href="#additions"><span class="secno">2</span> <span class="content">Additions to <code class="idl"><span>ShadowRoot</span></code> and <code class="idl"><span>ElementDefinitionOptions</span></code></span></a>
      <ol class="toc">
-      <li><a href="#role-mixin"><span class="secno">2.1</span> <span class="content">Interface Mixin <code class="idl"><span>AccessibilityRole</span></code></span></a>
+      <li><a href="#AriaRole"><span class="secno">2.1</span> <span class="content">Interface Mixin <code class="idl"><span>AccessibilityRole</span></code></span></a>
       <li><a href="#AriaAttributes"><span class="secno">2.2</span> <span class="content">Interface Mixin <code class="idl"><span>AriaAttributes</span></code></span></a>
      </ol>
-    <li><a href="#providing-default-custom-element-semantics-via-customelemenregistrydefine"><span class="secno">3</span> <span class="content">Providing default <span>Custom Element</span> semantics via <code class="idl"><span>CustomElemenRegistry.define()</span></code></span></a>
-    <li><a href="#shadowroot_interaction"><span class="secno">4</span> <span class="content">Interaction between <code class="idl"><span>ShadowRoot</span></code> and <code class="idl"><span>host</span></code> #</span></a>
+    <li><a href="#default-semantics"><span class="secno">3</span> <span class="content">Providing default <span>Custom Element</span> semantics via <code class="idl"><span>CustomElemenRegistry.define()</span></code></span></a>
+    <li><a href="#semantics_precedence"><span class="secno">4</span> <span class="content">ARIA semantic precedence between <code class="idl"><span>ElementDefinitionOptions</span></code>, <code class="idl"><span>ShadowRoot</span></code> and <code class="idl"><span>host</span></code></span></a>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -1528,17 +1528,22 @@ to programmatically express semantics for Web Components.</p>
   <main>
    <h2 class="heading settled" data-level="1" id="introduction"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <h2 class="heading settled" data-level="2" id="additions"><span class="secno">2. </span><span class="content">Additions to <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot">ShadowRoot</a></code> and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions">ElementDefinitionOptions</a></code></span><a class="self-link" href="#additions"></a></h2>
-   <h3 class="heading settled" data-level="2.1" id="role-mixin"><span class="secno">2.1. </span><span class="content">Interface Mixin <code class="idl"><a data-link-type="idl">AccessibilityRole</a></code></span><a class="self-link" href="#role-mixin"></a></h3>
+   <h3 class="heading settled" data-level="2.1" id="AriaRole"><span class="secno">2.1. </span><span class="content">Interface Mixin <code class="idl"><a data-link-type="idl">AccessibilityRole</a></code></span><a class="self-link" href="#AriaRole"></a></h3>
 <pre class="idl highlight def"><a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①">ShadowRoot</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AccessibilityRole</a>;
 <a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions①">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AccessibilityRole</a>;
 </pre>
    <h3 class="heading settled" data-level="2.2" id="AriaAttributes"><span class="secno">2.2. </span><span class="content">Interface Mixin <code class="idl"><a data-link-type="idl">AriaAttributes</a></code></span><a class="self-link" href="#AriaAttributes"></a></h3>
 <pre class="idl highlight def"><a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot②">ShadowRoot</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AriaAttributes</a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AriaAttributes</a>;
 </pre>
-   <h2 class="heading settled" data-level="3" id="providing-default-custom-element-semantics-via-customelemenregistrydefine"><span class="secno">3. </span><span class="content">Providing default <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element">Custom Element</a> semantics via <code class="idl"><a data-link-type="idl">CustomElemenRegistry.define()</a></code></span><a class="self-link" href="#providing-default-custom-element-semantics-via-customelemenregistrydefine"></a></h2>
-   <p>Authors may provide default semantics for a Custom Element by setting properties via the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②">ElementDefinitionOptions</a></code> object passed in to <code class="idl"><a data-link-type="idl">CustomElementRegistry.define()</a></code> method.</p>
+   <h2 class="heading settled" data-level="3" id="default-semantics"><span class="secno">3. </span><span class="content">Providing default <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element">Custom Element</a> semantics via <code class="idl"><a data-link-type="idl">CustomElemenRegistry.define()</a></code></span><a class="self-link" href="#default-semantics"></a></h2>
+   <p>Authors may provide immutable default semantics for a Custom Element
+by setting properties via the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions③">ElementDefinitionOptions</a></code> object 
+passed in to <code class="idl"><a data-link-type="idl">CustomElementRegistry.define()</a></code> method.</p>
    <aside class="example" id="example-e96a2bdf">
-    <a class="self-link" href="#example-e96a2bdf"></a> For example, an author creating a custom tab control may define three custom elements for the individual tabs, the tab list and the tab panel: 
+    <a class="self-link" href="#example-e96a2bdf"></a> For example, an author creating a custom tab control 
+may define three custom elements for the individual tabs, 
+the tab list and the tab panel: 
 <pre class="language-js highlight"><span class="kr">class</span> TabElement <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tab"</span><span class="p">,</span> TabElement<span class="p">,</span> <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tab"</span><span class="p">,</span> ariaSelected<span class="o">:</span> <span class="kc">false</span> <span class="p">});</span>
 
@@ -1549,7 +1554,8 @@ customElements<span class="p">.</span>define<span class="p">(</span><span class=
 <span class="kr">class</span> TabPanelElement <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tabpanel"</span><span class="p">,</span> TabPanelElement<span class="p">,</span> <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tabpanel"</span> <span class="p">});</span>
 </pre>
-    <p>A web page author using these custom elements may override any or all of these semantics as usual:</p>
+    <p>A web page author using these custom elements
+may override any or all of these semantics as usual:</p>
 <pre class="language-html highlight"><span class="p">&lt;</span><span class="nt">custom-tablist</span> <span class="na">role</span><span class="o">=</span><span class="s">"presentation"</span><span class="p">></span>
   <span class="p">&lt;</span><span class="nt">custom-tab</span> <span class="na">role</span><span class="o">=</span><span class="s">"heading"</span> <span class="na">aria-level</span><span class="o">=</span><span class="s">"3"</span><span class="p">></span>
     <span class="p">&lt;</span><span class="nt">button</span> <span class="na">aria-expanded</span><span class="o">=</span><span class="s">"false"</span> <span class="na">aria-controls</span><span class="o">=</span><span class="s">"section-1"</span><span class="p">></span>Section 1<span class="p">&lt;/</span><span class="nt">button</span><span class="p">></span>
@@ -1560,13 +1566,26 @@ customElements<span class="p">.</span>define<span class="p">(</span><span class=
 <span class="p">&lt;/</span><span class="nt">custom-tabpanel</span><span class="p">></span>
 </pre>
    </aside>
-   <h2 class="heading settled" data-level="4" id="shadowroot_interaction"><span class="secno">4. </span><span class="content">Interaction between <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot③">ShadowRoot</a></code> and <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host">host</a></code> #</span><a class="self-link" href="#shadowroot_interaction"></a></h2>
-   <p>If an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element">Element</a></code> has an attached <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot④">ShadowRoot</a></code>, and the author has access to the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑤">ShadowRoot</a></code>, authors may set a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute">role</a></code> or ARIA attribute, such as <code class="idl"><a data-link-type="idl">ariaActivedescendant</a></code>, on <em>either</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code>, <em>or</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑥">ShadowRoot</a></code>, or both.</p>
-   <p>If an IDL property from either the <code class="idl"><a data-link-type="idl">AccessibilityRole</a></code> mixin or the <code class="idl"><a data-link-type="idl">AriaAttributes</a></code> mixin is set on <em>either</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element②">Element</a></code> <em>or</em> its associated <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑦">ShadowRoot</a></code>, that IDL attribute should be <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a> to the <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a> <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a> with the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element③">Element</a></code>.</p>
-   <p>If a property is set to a non- <code class="idl"><a data-link-type="idl">null</a></code> value on <em>both</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑧">ShadowRoot</a></code> and the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element④">Element</a></code>, the reflected value on the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑤">Element</a></code> takes precedence, i.e. the reflected <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute①">role</a></code> value on the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑥">Element</a></code> is used to compute the <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a> in the <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>, regardless of the value of the <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute②">role</a></code> value on the associated <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑨">ShadowRoot</a></code>, and similarly for all ARIA attribute properties.</p>
+   <h2 class="heading settled" data-level="4" id="semantics_precedence"><span class="secno">4. </span><span class="content">ARIA semantic precedence between <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions④">ElementDefinitionOptions</a></code>, <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot③">ShadowRoot</a></code> and <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host">host</a></code></span><a class="self-link" href="#semantics_precedence"></a></h2>
+   <p>In general, the precedence of semantic properties is that
+any ARIA property set directly on the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element">Element</a></code> (either via setting an attribute or via the associated property) 
+overrides a value for the same property on the <code>Element</code>'s attached <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot④">ShadowRoot</a></code>,
+and any ARIA property set either on the <code>Element</code> or the <code>ShadowRoot</code> will override a value set via the <code class="idl"><a data-link-type="idl">CustomElementRegistry.define()</a></code> method.</p>
+   <p>If an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code> has an attached <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑤">ShadowRoot</a></code>,
+and the author has access to the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑥">ShadowRoot</a></code>, 
+authors may set a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute">role</a></code> or ARIA attribute,
+such as <code class="idl"><a data-link-type="idl">ariaActivedescendant</a></code>, 
+on <em>either</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element②">Element</a></code>, <em>or</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑦">ShadowRoot</a></code>, or both.</p>
+   <p>If an IDL property from either the <code class="idl"><a data-link-type="idl">AccessibilityRole</a></code> mixin
+or the <code class="idl"><a data-link-type="idl">AriaAttributes</a></code> mixin 
+is set on <em>either</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element③">Element</a></code> <em>or</em> its associated <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑧">ShadowRoot</a></code>, 
+that IDL attribute should be <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a> to the <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a> <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a> with the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element④">Element</a></code>.</p>
+   <p>If a property is set to a non-<code>null</code> value on <em>both</em> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑨">ShadowRoot</a></code> and the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑤">Element</a></code>, 
+the reflected value on the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑥">Element</a></code> takes precedence, 
+i.e. the reflected <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute①">role</a></code> value on the host <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑦">Element</a></code> is used to compute the <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a> in the <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>, regardless of the value of the <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute②">role</a></code> value on the associated <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①⓪">ShadowRoot</a></code>, and similarly for all ARIA attribute properties.</p>
    <aside class="example" id="example-626cb06c">
-    <a class="self-link" href="#example-626cb06c"></a> For example, an author creating a <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a> may use a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①⓪">ShadowRoot</a></code> to encapsulate implementation details for the element. 
-    <p>They may use the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①①">ShadowRoot</a></code> to encode certain "default" values for the ARIA <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute③">role</a></code> and properties for the element, which an author using the Custom Element may choose to override using
+    <a class="self-link" href="#example-626cb06c"></a> For example, an author creating a <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a> may use a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①①">ShadowRoot</a></code> to encapsulate implementation details for the element. 
+    <p>They may use the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①②">ShadowRoot</a></code> to encode certain "default" values for the ARIA <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute" id="ref-for-RoleAttribute③">role</a></code> and properties for the element, which an author using the Custom Element may choose to override using
 reflected ARIA properties.</p>
 <pre class="language-js highlight"><span class="kr">class</span> CustomCheckbox <span class="kr">extends</span> HTMLElement <span class="p">{</span>
 
@@ -1759,7 +1778,7 @@ default values, just as they would when using a native element:</p>
   <aside class="dfn-panel" data-for="term-for-element">
    <a href="https://dom.spec.whatwg.org/#element">https://dom.spec.whatwg.org/#element</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-element">4. Interaction between ShadowRoot and host #</a> <a href="#ref-for-element①">(2)</a> <a href="#ref-for-element②">(3)</a> <a href="#ref-for-element③">(4)</a> <a href="#ref-for-element④">(5)</a> <a href="#ref-for-element⑤">(6)</a> <a href="#ref-for-element⑥">(7)</a>
+    <li><a href="#ref-for-element">4. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a> <a href="#ref-for-element①">(2)</a> <a href="#ref-for-element②">(3)</a> <a href="#ref-for-element③">(4)</a> <a href="#ref-for-element④">(5)</a> <a href="#ref-for-element⑤">(6)</a> <a href="#ref-for-element⑥">(7)</a> <a href="#ref-for-element⑦">(8)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-shadowroot">
@@ -1768,7 +1787,7 @@ default values, just as they would when using a native element:</p>
     <li><a href="#ref-for-shadowroot">2. Additions to ShadowRoot and ElementDefinitionOptions</a>
     <li><a href="#ref-for-shadowroot①">2.1. Interface Mixin AccessibilityRole</a>
     <li><a href="#ref-for-shadowroot②">2.2. Interface Mixin AriaAttributes</a>
-    <li><a href="#ref-for-shadowroot③">4. Interaction between ShadowRoot and host #</a> <a href="#ref-for-shadowroot④">(2)</a> <a href="#ref-for-shadowroot⑤">(3)</a> <a href="#ref-for-shadowroot⑥">(4)</a> <a href="#ref-for-shadowroot⑦">(5)</a> <a href="#ref-for-shadowroot⑧">(6)</a> <a href="#ref-for-shadowroot⑨">(7)</a> <a href="#ref-for-shadowroot①⓪">(8)</a> <a href="#ref-for-shadowroot①①">(9)</a>
+    <li><a href="#ref-for-shadowroot③">4. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a> <a href="#ref-for-shadowroot④">(2)</a> <a href="#ref-for-shadowroot⑤">(3)</a> <a href="#ref-for-shadowroot⑥">(4)</a> <a href="#ref-for-shadowroot⑦">(5)</a> <a href="#ref-for-shadowroot⑧">(6)</a> <a href="#ref-for-shadowroot⑨">(7)</a> <a href="#ref-for-shadowroot①⓪">(8)</a> <a href="#ref-for-shadowroot①①">(9)</a> <a href="#ref-for-shadowroot①②">(10)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-elementdefinitionoptions">
@@ -1776,7 +1795,9 @@ default values, just as they would when using a native element:</p>
    <ul>
     <li><a href="#ref-for-elementdefinitionoptions">2. Additions to ShadowRoot and ElementDefinitionOptions</a>
     <li><a href="#ref-for-elementdefinitionoptions①">2.1. Interface Mixin AccessibilityRole</a>
-    <li><a href="#ref-for-elementdefinitionoptions②">3. Providing default Custom Element semantics via CustomElemenRegistry.define()</a>
+    <li><a href="#ref-for-elementdefinitionoptions②">2.2. Interface Mixin AriaAttributes</a>
+    <li><a href="#ref-for-elementdefinitionoptions③">3. Providing default Custom Element semantics via CustomElemenRegistry.define()</a>
+    <li><a href="#ref-for-elementdefinitionoptions④">4. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-custom-element">
@@ -1788,13 +1809,13 @@ default values, just as they would when using a native element:</p>
   <aside class="dfn-panel" data-for="term-for-RoleAttribute">
    <a href="https://www.w3.org/TR/svg2/struct.html#RoleAttribute">https://www.w3.org/TR/svg2/struct.html#RoleAttribute</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-RoleAttribute">4. Interaction between ShadowRoot and host #</a> <a href="#ref-for-RoleAttribute①">(2)</a> <a href="#ref-for-RoleAttribute②">(3)</a> <a href="#ref-for-RoleAttribute③">(4)</a>
+    <li><a href="#ref-for-RoleAttribute">4. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a> <a href="#ref-for-RoleAttribute①">(2)</a> <a href="#ref-for-RoleAttribute②">(3)</a> <a href="#ref-for-RoleAttribute③">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-url-host">
    <a href="https://url.spec.whatwg.org/#dom-url-host">https://url.spec.whatwg.org/#dom-url-host</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-url-host">4. Interaction between ShadowRoot and host #</a>
+    <li><a href="#ref-for-dom-url-host">4. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -1837,10 +1858,11 @@ default values, just as they would when using a native element:</p>
    <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
-<pre class="idl highlight def"><a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①②">ShadowRoot</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AccessibilityRole</a>;
+<pre class="idl highlight def"><a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①③">ShadowRoot</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AccessibilityRole</a>;
 <a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions①①">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AccessibilityRole</a>;
 
 <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot②①">ShadowRoot</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AriaAttributes</a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②①">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name">AriaAttributes</a>;
 
 </pre>
 <script>/* script-dfn-panel */

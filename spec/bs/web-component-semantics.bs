@@ -18,7 +18,7 @@ Markup Shorthands: markdown yes
 # Introduction # {#introduction}
 
 # Additions to {{ShadowRoot}} and {{ElementDefinitionOptions}} # {#additions}
-## Interface Mixin {{AccessibilityRole}} ## {#role-mixin}
+## Interface Mixin {{AccessibilityRole}} ## {#AriaRole}
 <pre class="idl">
 ShadowRoot includes AccessibilityRole;
 ElementDefinitionOptions includes AccessibilityRole;
@@ -30,7 +30,7 @@ ShadowRoot includes AriaAttributes;
 ElementDefinitionOptions includes AriaAttributes;
 </pre>
 
-# Providing default <a>Custom Element</a> semantics via {{CustomElemenRegistry.define()}}
+# Providing default <a>Custom Element</a> semantics via {{CustomElemenRegistry.define()}} # {#default-semantics}
 
 Authors may provide immutable default semantics for a Custom Element
 by setting properties via the {{ElementDefinitionOptions}} object 
@@ -67,7 +67,7 @@ may override any or all of these semantics as usual:
 ```
 </aside>
 
-# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} ## {#semantics_precedence}
+# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} # {#semantics_precedence}
 
 In general, the precedence of semantic properties is that
 any ARIA property set directly on the {{Element}} 
@@ -93,7 +93,7 @@ to the
 <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
 with the host {{Element}}.
 
-If a property is set to a non-`null` value on
+If a property is set to a non-<code>null</code> value on
 <em>both</em> the {{ShadowRoot}} and the host {{Element}}, 
 the reflected value on the host {{Element}} takes precedence, 
 i.e. the reflected {{role}} value on the host {{Element}}
