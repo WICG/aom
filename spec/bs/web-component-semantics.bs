@@ -19,6 +19,7 @@ Markup Shorthands: idl yes
 
 <pre class=link-defaults>
   spec: dom; type: attribute; text: host
+  spec:dom; type:dfn; text:host
 </pre>
 
 <pre class=anchors>
@@ -92,16 +93,58 @@ by default it will have a <a>mapped role</a> of `tab`.
 This is analogous to how a `<button>` element is, by default,
 mapped to an <a>accessible object</a> with a <a>role of `button`</a>.
 
-The custom element's implementation may write out ARIA attributes
+Since an element's semantics may change with the element's state and properties,
+the custom element's implementation may write out ARIA attributes
 to express the semantics for each instance of the element,
-at each point in time:
+at each point in time.
+
+For example, in the above example,
+the implementation for the `<custom-tab>` prototype might look something like this:
+
+```js
+class TabElement extends HTMLElement {
+  constructor() { /* ... */ }
+
+  static get observedAttributes() { return ["selected"]; }
+
+  connectedCallback() {
+    this._tablist = this.parentElement;
+  }
+
+  setTabPanel(tabpanel) {
+    if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
+      return;  // fail silently
+
+    this._tabpanel = tabpanel;
+    this.ariaControls = tabPanel.id;          // reflects to "aria-controls" attribute
+  }
+
+  // ... setters/getters for custom properties which reflect to attributes
+
+  // When the custom "selected" attribute changes,
+  // keep the accessible checked state in sync.
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch(name) {
+      case "selected":
+        let selected = (newValue != null);
+        this._tabpanel.shown = selected;      // the tabpanel handles its own show/hide logic
+        this.ariaSelected = selected;         // reflects to "aria-selected" attribute
+        if (selected)
+          this._tablist.setSelectedTab(this); // ensure no other tab has `selected` set
+        break;
+    }
+  }
+}
+```
+
+So the resulting DOM might look something like this:
 
 ```html
 <custom-tablist>
-  <custom-tab aria-controls="section-1" aria-selected="true">
+  <custom-tab selected aria-controls="section-1" aria-selected="true">
     Section 1
   </custom-tab>
-  <custom-tab aria-controls="section-2">
+  <custom-tab aria-controls="section-2" aria-selected="false">
     Section 2
   </custom-tab>
 </custom-tablist>
@@ -113,12 +156,29 @@ at each point in time:
 </custom-tabpanel>
 ```
 
-Or they may optionally use a {{ShadowRoot}} to encapsulate those semantics -
+Or, they may optionally use a {{ShadowRoot}} to encapsulate those semantics -
 see [[#shadowroot-semantics]].
 
 Finally, authors using these elements may override the default semantics
 using ARIA attributes as normal -
 see [[#semantics-precedence]].
+
+For example, an author may wish to use the tab list
+as as type of horizontal list box widget.
+They could omit the tabpanel and add appropriate ARIA roles
+such that each tab acts as an option,
+while the tablist acts as a list box.
+
+```html
+<custom-tablist role=listbox>
+  <custom-tab role=option>Option 1</custom-tab>
+  <custom-tab role=option>Option 2</custom-tab>
+  <custom-tab role=option>Option 3</custom-tab>
+</custom-tablist>
+```
+
+Because the author-provided role overrides the default role,
+the <a>mapped</a> role will be based on the author-provided role in each case.
 </aside>
 </section>
 
@@ -187,55 +247,34 @@ When invoked, the {{define(name, constructor, options)}} method must run these s
 </ol>
 [...]
 
-## Exposing semantics from custom element definitions to Accessibility APIs ## {#custom-elements-semantics-mapping}
-
-If
-
-
 # Providing encapsulated <a>custom element</a> semantics via {{ShadowRoot}} # {#shadowroot-semantics}
 
-
-
-# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} # {#semantics-precedence}
-
-In general, the precedence of semantic properties is that
-any ARIA property set directly on the {{Element}}
-(either via setting an attribute or via the associated property)
-overrides a value for the same property on the `Element`'s attached {{ShadowRoot}},
-and any ARIA property set either on the `Element` or the `ShadowRoot`
-will override a value set via the {{define()|CustomElementRegistry.define()}} method.
-
 If an {{Element}} has an attached {{ShadowRoot}},
-and the author has access to the {{ShadowRoot}},
+and the author has access to the {{ShadowRoot}}
+(for example, if the author is creating a
+<a>custom element</a> definition,
+and attaches the {{ShadowRoot}} in the element constructor),
 authors may set a {{role}} or ARIA attribute,
 such as {{ariaActiveDescendant}},
-on <em>either</em> the {{Element}},
-<em>or</em> the {{ShadowRoot}}, or both.
+on the {{ShadowRoot}}.
 
-If an IDL property from either the {{AccessibilityRole}} mixin
-or the {{AriaAttributes}} mixin
-is set on <em>either</em> the {{Element}} <em>or</em> its associated {{ShadowRoot}},
-that IDL attribute should be <a>mapped</a>to the
-<a>accessible object</a> <a>associated</a> with the host {{Element}}.
+The properties set on the {{ShadowRoot}} object
+are used when <a>mapping</a> the <a>host</a> element
+to an <a>accessible object</a>.
 
-If a property is set to a non-<code>null</code> value on
-<em>both</em> the {{ShadowRoot}} and the host {{Element}},
-the reflected value on the host {{Element}} takes precedence,
-i.e. the reflected {{role}} value on the host {{Element}}
-is used to compute the
-<a>mapped role</a> in the <a>accessibility tree</a>,
-regardless of the value of the
-{{role}} value on the associated
-{{ShadowRoot}}, and similarly for all ARIA attribute properties.
+This allows authors to encapsulate semantics,
+in particular <em>dynamic</em> semantics
+(i.e. semantics like {{ariaSelected}} which are inherently likely to change),
+within the {{ShadowRoot}}.
 
 <aside class="example">
 For example,
 an author creating a [=custom element=] may use a {{ShadowRoot}}
 to encapsulate implementation details for the element.
 
-They may use the
-{{ShadowRoot}} to encode certain "default" values for the ARIA
-{{role}} and properties for the element,
+They may use the custom element definition to specify the role,
+and the {{ShadowRoot}} to encapsulate dynamic semantic properties
+for the element,
 which an author using the [=custom element=] may choose
 to override using reflected ARIA properties.
 
@@ -249,12 +288,6 @@ class CustomCheckbox extends HTMLElement {
     this.attachShadow({mode: 'open'});  // mode may also be "closed".
 
     // ... any other set-up
-  }
-
-  connectedCallback() {
-    // Set the default semantics for the custom element
-    // when it is inserted in the page.
-    this.shadowRoot.role = "checkbox";
   }
 
   // Observe the custom "checked" attribute
@@ -272,8 +305,23 @@ class CustomCheckbox extends HTMLElement {
   }
 }
 
-customElements.define("custom-checkbox", CustomCheckbox);
+customElements.define("custom-checkbox", CustomCheckbox, { role: "checkbox" });
 ```
+</aside>
+
+# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} # {#semantics-precedence}
+
+<section class=non-normative>
+## Introduction
+
+<em>This section is non-normative</em>
+
+In general, the precedence of semantic properties is that
+any ARIA property set directly on the {{Element}}
+(either via setting an attribute or via the associated property)
+overrides a value for the same property on the `Element`'s attached {{ShadowRoot}},
+and any ARIA property set either on the `Element` or the `ShadowRoot`
+will override a value set via the {{define()|CustomElementRegistry.define()}} method.
 
 An author using the custom element could then use the reflected ARIA properties/content attributes to override the
 default values, just as they would when using a native element:</p>
@@ -282,5 +330,8 @@ default values, just as they would when using a native element:</p>
 <!-- ARIA role overrides Shadow DOM role -->
 <custom-checkbox role="radio">
 ```
+</section>
 
-</aside>
+## Mapping semantics to the accessibility tree ## {#custom-elements-semantics-mapping}
+
+Advisement: This section represents changes which should be made to [[html-aam-1.0#mapping-html-to-accessibility-apis]].
