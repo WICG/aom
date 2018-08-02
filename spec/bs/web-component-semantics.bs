@@ -358,13 +358,13 @@ An author using the <a href="#checkbox-example">`<custom-checkbox>`</a> element
 could use the reflected ARIA properties/content attributes to override the
 default values, just as they would when using a native element:</p>
 
-```html
+<xmp highlight="html">
 <!-- ARIA role overrides implicit role -->
 <input type="checkbox" role="radio">
 
 <!-- ARIA role overrides custom element role -->
 <custom-checkbox role="radio">
-```
+</xmp>
 </aside>
 
 <aside class="example">
@@ -406,8 +406,10 @@ class TabElement extends HTMLElement {
         let selected = (newValue != null);
         this._tabpanel.shown = selected;
         this.shadowRoot.ariaSelected = selected;  // no longer reflects
+
+        // ensure no other tab has "selected" set
         if (selected)
-          this._tablist.setSelectedTab(this);     // ensure no other tab has `selected` set
+          this._tablist.setSelectedTab(this);
         break;
     }
   }
@@ -426,10 +428,30 @@ but no semantic implementation details would leak out:
   <custom-tab role=option>Option 3</custom-tab>
 </custom-tablist>
 ```
-
-
+</aside>
 </section>
 
 ## Mapping semantics to the accessibility tree ## {#custom-elements-semantics-mapping}
 
 Advisement: This section represents changes which should be made to [[html-aam-1.0#mapping-html-to-accessibility-apis]].
+
+### Rules for exposing semantics of elements with a <a>shadow root</a> ### {#shadow-root-semantics}
+
+If an element has a <a>shadow root</a>,
+any ARIA semantic properties set on the associated <a>shadow root</a>
+via the {{AccessibilityRole}} or {{AriaAttributes}} mixin,
+these semantic properties must be <a>mapped</a> to accessibility APIs
+as if they were set on the element,
+unless there is a conflicting value for the same property
+set on the element.
+
+
+### Rules for exposing semantics of <a>custom elements</a> ### {#custom-eleent-semantics}
+
+If an element is <a>custom</a>,
+and the element's <a>custom element definition</a> includes <var>semantics</var>,
+the value of each property in <var>semantics</var>
+must be <a>mapped</a> to accessibility APIs as if they were set on the element,
+unless there is a conflicting value for the same property set on the element,
+or on the element's <a>shadow root</a>,
+if it exists.

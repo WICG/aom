@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 9c7b3c1bf4afcf8eca4fd3a1529a298ee35be006" name="generator">
   <link href="https://wicg.github.io/aom" rel="canonical">
-  <meta content="9c62cfa22b58bb79b3030b84a7396b7bf7cbf278" name="document-revision">
+  <meta content="024604548dcbf170c64f6042a8be4dbd80121059" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1518,7 +1518,12 @@ to programmatically express semantics for Web Components.</p>
      <a href="#semantics-precedence"><span class="secno">3</span> <span class="content">ARIA semantic precedence between <code class="idl"><span>ElementDefinitionOptions</span></code>, <code class="idl"><span>ShadowRoot</span></code> and <code class="idl"><span>host</span></code></span></a>
      <ol class="toc">
       <li><a href="#semantics-precedence-intro"><span class="secno">3.1</span> <span class="content">Introduction</span></a>
-      <li><a href="#custom-elements-semantics-mapping"><span class="secno">3.2</span> <span class="content">Mapping semantics to the accessibility tree</span></a>
+      <li>
+       <a href="#custom-elements-semantics-mapping"><span class="secno">3.2</span> <span class="content">Mapping semantics to the accessibility tree</span></a>
+       <ol class="toc">
+        <li><a href="#shadow-root-semantics"><span class="secno">3.2.1</span> <span class="content">Rules for exposing semantics of elements with a <span>shadow root</span></span></a>
+        <li><a href="#custom-eleent-semantics"><span class="secno">3.2.2</span> <span class="content">Rules for exposing semantics of <span>custom elements</span></span></a>
+       </ol>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -1775,13 +1780,13 @@ and any ARIA property set either on the <code>Element</code> or the <code>Shadow
 could use the reflected ARIA properties/content attributes to override the
 default values, just as they would when using a native element:
      <p></p>
-<pre class="language-html highlight"><c- p>&lt;</c-><c- f>input</c-> <c- e>type</c-><c- o>=</c-><c- s>"checkbox"</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
+<pre class="highlight"><c- p>&lt;</c-><c- f>input</c-> <c- e>type</c-><c- o>=</c-><c- s>"checkbox"</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
 
 <c- p>&lt;</c-><c- f>custom-checkbox</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
 </pre>
     </aside>
-    <aside class="example" id="example-feb7b3fd">
-     <a class="self-link" href="#example-feb7b3fd"></a> The implementation of the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> element
+    <aside class="example" id="example-140f127d">
+     <a class="self-link" href="#example-140f127d"></a> The implementation of the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> element
 could use a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①⑤">ShadowRoot</a></code> to encapsulate the dynamic semantic properties
 of the <code>&lt;custom-tab></code>, instead of writing ARIA attributes to the DOM: 
 <pre class="language-js highlight"><c- kr>class</c-> TabElement <c- kr>extends</c-> HTMLElement <c- p>{</c->
@@ -1817,8 +1822,10 @@ of the <code>&lt;custom-tab></code>, instead of writing ARIA attributes to the D
         <c- a>let</c-> selected <c- o>=</c-> <c- p>(</c->newValue <c- o>!=</c-> <c- kc>null</c-><c- p>);</c->
         <c- k>this</c-><c- p>.</c->_tabpanel<c- p>.</c->shown <c- o>=</c-> selected<c- p>;</c->
         <c- k>this</c-><c- p>.</c->shadowRoot<c- p>.</c->ariaSelected <c- o>=</c-> selected<c- p>;</c->  <c- c1>// no longer reflects</c->
+
+        <c- c1>// ensure no other tab has "selected" set</c->
         <c- k>if</c-> <c- p>(</c->selected<c- p>)</c->
-          <c- k>this</c-><c- p>.</c->_tablist<c- p>.</c->setSelectedTab<c- p>(</c-><c- k>this</c-><c- p>);</c->     <c- c1>// ensure no other tab has &lt;code data-opaque bs-autolink-syntax='`selected`'>selected&lt;/code> set</c->
+          <c- k>this</c-><c- p>.</c->_tablist<c- p>.</c->setSelectedTab<c- p>(</c-><c- k>this</c-><c- p>);</c->
         <c- k>break</c-><c- p>;</c->
     <c- p>}</c->
   <c- p>}</c->
@@ -1838,6 +1845,20 @@ but no semantic implementation details would leak out:</p>
    </section>
    <h3 class="heading settled" data-level="3.2" id="custom-elements-semantics-mapping"><span class="secno">3.2. </span><span class="content">Mapping semantics to the accessibility tree</span><a class="self-link" href="#custom-elements-semantics-mapping"></a></h3>
    <p><strong class="advisement"> This section represents changes which should be made to <a href="https://www.w3.org/TR/html-aam-1.0/#mapping-html-to-accessibility-apis">HTML Accessibility API Mappings 1.0 §mapping-html-to-accessibility-apis</a>.</strong></p>
+   <h4 class="heading settled" data-level="3.2.1" id="shadow-root-semantics"><span class="secno">3.2.1. </span><span class="content">Rules for exposing semantics of elements with a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-root" id="ref-for-concept-shadow-root②">shadow root</a></span><a class="self-link" href="#shadow-root-semantics"></a></h4>
+   <p>If an element has a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-root" id="ref-for-concept-shadow-root③">shadow root</a>,
+any ARIA semantic properties set on the associated <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-root" id="ref-for-concept-shadow-root④">shadow root</a> via the <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole⑤">AccessibilityRole</a></code> or <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes⑤">AriaAttributes</a></code> mixin,
+these semantic properties must be <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_general" id="ref-for-mapping_general②">mapped</a> to accessibility APIs
+as if they were set on the element,
+unless there is a conflicting value for the same property
+set on the element.</p>
+   <h4 class="heading settled" data-level="3.2.2" id="custom-eleent-semantics"><span class="secno">3.2.2. </span><span class="content">Rules for exposing semantics of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element⑤">custom elements</a></span><a class="self-link" href="#custom-eleent-semantics"></a></h4>
+   <p>If an element is <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-element-custom" id="ref-for-concept-element-custom">custom</a>,
+and the element’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition③">custom element definition</a> includes <var>semantics</var>,
+the value of each property in <var>semantics</var> must be <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_general" id="ref-for-mapping_general③">mapped</a> to accessibility APIs as if they were set on the element,
+unless there is a conflicting value for the same property set on the element,
+or on the element’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-root" id="ref-for-concept-shadow-root⑤">shadow root</a>,
+if it exists.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -1995,6 +2016,7 @@ but no semantic implementation details would leak out:</p>
    <ul>
     <li><a href="#ref-for-idl-def-accessibilityrole">1.2. Changes to custom element definition</a> <a href="#ref-for-idl-def-accessibilityrole①">(2)</a> <a href="#ref-for-idl-def-accessibilityrole②">(3)</a>
     <li><a href="#ref-for-idl-def-accessibilityrole③">2.2. Changes to ShadowRoot</a> <a href="#ref-for-idl-def-accessibilityrole④">(2)</a>
+    <li><a href="#ref-for-idl-def-accessibilityrole⑤">3.2.1. Rules for exposing semantics of elements with a shadow root</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-def-ariaattributes">
@@ -2002,6 +2024,7 @@ but no semantic implementation details would leak out:</p>
    <ul>
     <li><a href="#ref-for-idl-def-ariaattributes">1.2. Changes to custom element definition</a> <a href="#ref-for-idl-def-ariaattributes①">(2)</a> <a href="#ref-for-idl-def-ariaattributes②">(3)</a>
     <li><a href="#ref-for-idl-def-ariaattributes③">2.2. Changes to ShadowRoot</a> <a href="#ref-for-idl-def-ariaattributes④">(2)</a>
+    <li><a href="#ref-for-idl-def-ariaattributes⑤">3.2.1. Rules for exposing semantics of elements with a shadow root</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-def-ariaattributes-ariaactivedescendant">
@@ -2039,6 +2062,8 @@ but no semantic implementation details would leak out:</p>
    <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">https://www.w3.org/TR/core-aam-1.1/#mapping_general</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-mapping_general">1.1. Introduction</a> <a href="#ref-for-mapping_general①">(2)</a>
+    <li><a href="#ref-for-mapping_general②">3.2.1. Rules for exposing semantics of elements with a shadow root</a>
+    <li><a href="#ref-for-mapping_general③">3.2.2. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-mapping_role">
@@ -2065,6 +2090,12 @@ but no semantic implementation details would leak out:</p>
     <li><a href="#ref-for-shadowroot①④">3.1. Introduction</a> <a href="#ref-for-shadowroot①⑤">(2)</a> <a href="#ref-for-shadowroot①⑥">(3)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-element-custom">
+   <a href="https://dom.spec.whatwg.org/#concept-element-custom">https://dom.spec.whatwg.org/#concept-element-custom</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-element-custom">3.2.2. Rules for exposing semantics of custom elements</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-concept-element">
    <a href="https://dom.spec.whatwg.org/#concept-element">https://dom.spec.whatwg.org/#concept-element</a><b>Referenced in:</b>
    <ul>
@@ -2088,6 +2119,8 @@ but no semantic implementation details would leak out:</p>
    <a href="https://dom.spec.whatwg.org/#concept-shadow-root">https://dom.spec.whatwg.org/#concept-shadow-root</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-shadow-root">2.2. Changes to ShadowRoot</a> <a href="#ref-for-concept-shadow-root①">(2)</a>
+    <li><a href="#ref-for-concept-shadow-root②">3.2.1. Rules for exposing semantics of elements with a shadow root</a> <a href="#ref-for-concept-shadow-root③">(2)</a> <a href="#ref-for-concept-shadow-root④">(3)</a>
+    <li><a href="#ref-for-concept-shadow-root⑤">3.2.2. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-customelementregistry">
@@ -2110,12 +2143,14 @@ but no semantic implementation details would leak out:</p>
     <li><a href="#ref-for-custom-element">1. Providing default custom element semantics via CustomElementRegistry.define()</a>
     <li><a href="#ref-for-custom-element①">2. Providing encapsulated custom element semantics via ShadowRoot</a>
     <li><a href="#ref-for-custom-element②">2.1. Introduction</a> <a href="#ref-for-custom-element③">(2)</a> <a href="#ref-for-custom-element④">(3)</a>
+    <li><a href="#ref-for-custom-element⑤">3.2.2. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-custom-element-definition">
    <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition">https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-custom-element-definition">1.2. Changes to custom element definition</a> <a href="#ref-for-custom-element-definition①">(2)</a> <a href="#ref-for-custom-element-definition②">(3)</a>
+    <li><a href="#ref-for-custom-element-definition③">3.2.2. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-customelementregistry-define">
@@ -2131,6 +2166,7 @@ but no semantic implementation details would leak out:</p>
    <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition">https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-custom-element-definition">1.2. Changes to custom element definition</a> <a href="#ref-for-custom-element-definition①">(2)</a> <a href="#ref-for-custom-element-definition②">(3)</a>
+    <li><a href="#ref-for-custom-element-definition③">3.2.2. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-details-id-17">
@@ -2176,6 +2212,7 @@ but no semantic implementation details would leak out:</p>
     <ul>
      <li><span class="dfn-paneled" id="term-for-element" style="color:initial">Element</span>
      <li><span class="dfn-paneled" id="term-for-shadowroot" style="color:initial">ShadowRoot</span>
+     <li><span class="dfn-paneled" id="term-for-concept-element-custom" style="color:initial">custom</span>
      <li><span class="dfn-paneled" id="term-for-concept-element" style="color:initial">element</span>
      <li><span class="dfn-paneled" id="term-for-dom-shadowroot-host" style="color:initial">host <small>(for ShadowRoot)</small></span>
      <li><span class="dfn-paneled" id="term-for-concept-reflect" style="color:initial">reflect</span>
