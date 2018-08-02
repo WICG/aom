@@ -18,8 +18,10 @@ Markup Shorthands: idl yes
 </pre>
 
 <pre class=link-defaults>
-  spec: dom; type: attribute; text: host
+  spec:dom; type:attribute; text:host
   spec:dom; type:dfn; text:host
+  spec:dom; type:dfn; for:/; text:shadow root
+  spec:dom; type:dfn; for:/; text:element
 </pre>
 
 <pre class=anchors>
@@ -43,10 +45,12 @@ urlPrefix: https://www.w3.org/TR/wai-aria-1.2/; spec: ARIA
     type: attribute
         text: role; url: idl-def-accessibilityrole-role
         text: ariaActiveDescendant; url: idl-def-ariaattributes-ariaactivedescendant
+        text: ariaSelected; url: idl-def-ariaattributes-ariaselected
 
 urlPrefix: https://html.spec.whatwg.org/multipage/custom-elements.html; spec: html
     type: interface
         text: ElementDefinitionOptions
+        text: CustomElementRegistry
     type: dfn
         url: custom-element-definition
             text: defined
@@ -249,6 +253,9 @@ When invoked, the {{define(name, constructor, options)}} method must run these s
 
 # Providing encapsulated <a>custom element</a> semantics via {{ShadowRoot}} # {#shadowroot-semantics}
 
+<section class=non-normative>
+## Introduction ## {#shadowroot-semantics-intro}
+
 If an {{Element}} has an attached {{ShadowRoot}},
 and the author has access to the {{ShadowRoot}}
 (for example, if the author is creating a
@@ -309,10 +316,33 @@ customElements.define("custom-checkbox", CustomCheckbox, { role: "checkbox" });
 ```
 </aside>
 
+</section>
+
+## Changes to {{ShadowRoot}} ## {#shadowroot-updates}
+
+<pre class="idl">
+// Existing IDL
+/*
+interface ShadowRoot : DocumentFragment {
+  readonly attribute ShadowRootMode mode;
+  readonly attribute Element host;
+};
+*/
+ShadowRoot includes AccessibilityRole;
+ShadowRoot includes AriaAttributes;
+</pre>
+
+A <a>shadow root</a>, like an <a>element</a>,
+includes the {{AccessibilityRole}} and {{AriaAttributes}} mixins.
+Setting any property from these mixins on the <a>shadow root</a>
+is equivalent to setting the same property on the <a>host</a>,
+without <a lt=reflect>reflection</a>,
+unless the property is <em>also</em> set on the <a>host</a>.
+
 # ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ShadowRoot}} and {{host}} # {#semantics-precedence}
 
 <section class=non-normative>
-## Introduction
+## Introduction ## {#semantics-precedence-intro}
 
 <em>This section is non-normative</em>
 
