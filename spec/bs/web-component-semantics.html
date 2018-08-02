@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 9c7b3c1bf4afcf8eca4fd3a1529a298ee35be006" name="generator">
   <link href="https://wicg.github.io/aom" rel="canonical">
-  <meta content="6198d6bf11da828b346f4a9f2d2bb39f786362d8" name="document-revision">
+  <meta content="9c62cfa22b58bb79b3030b84a7396b7bf7cbf278" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1546,8 +1546,8 @@ by setting properties via the <code class="idl"><a data-link-type="idl" href="ht
 passed in to the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define①">CustomElementRegistry.define()</a></code> method.</p>
     <p>The properties set on the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions①">ElementDefinitionOptions</a></code> object
 become the default values to be used when <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map">mapping</a> the custom element to an <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object" id="ref-for-dfn-accessible-object">accessible object</a>.</p>
-    <aside class="example" id="example-e4af274e">
-     <a class="self-link" href="#example-e4af274e"></a> For example, an author creating a custom tab control
+    <aside class="example" id="custom-tab-example">
+     <a class="self-link" href="#custom-tab-example"></a> For example, an author creating a custom tab control
 may define three custom elements for the individual tabs,
 the tab list and the tab panel: 
 <pre class="language-js highlight"><c- kr>class</c-> TabListElement <c- kr>extends</c-> HTMLElement <c- p>{</c-> <c- p>...</c-> <c- p>}</c->
@@ -1575,7 +1575,7 @@ the implementation for the <code>&lt;custom-tab></code> prototype might look som
 <pre class="language-js highlight"><c- kr>class</c-> TabElement <c- kr>extends</c-> HTMLElement <c- p>{</c->
   constructor<c- p>()</c-> <c- p>{</c-> <c- d>/* ... */</c-> <c- p>}</c->
 
-  <c- kr>static</c-> get observedAttributes<c- p>()</c-> <c- p>{</c-> <c- k>return</c-> <c- p>[</c-><c- u>"selected"</c-><c- p>];</c-> <c- p>}</c->
+  <c- kr>static</c-> get observedAttributes<c- p>()</c-> <c- p>{</c-> <c- k>return</c-> <c- p>[</c-><c- u>"active"</c-><c- p>];</c-> <c- p>}</c->
 
   connectedCallback<c- p>()</c-> <c- p>{</c->
     <c- k>this</c-><c- p>.</c->_tablist <c- o>=</c-> <c- k>this</c-><c- p>.</c->parentElement<c- p>;</c->
@@ -1591,11 +1591,11 @@ the implementation for the <code>&lt;custom-tab></code> prototype might look som
 
   <c- c1>// ... setters/getters for custom properties which reflect to attributes</c->
 
-  <c- c1>// When the custom "selected" attribute changes,</c->
+  <c- c1>// When the custom "active" attribute changes,</c->
   <c- c1>// keep the accessible checked state in sync.</c->
   attributeChangedCallback<c- p>(</c->name<c- p>,</c-> oldValue<c- p>,</c-> newValue<c- p>)</c-> <c- p>{</c->
     <c- k>switch</c-><c- p>(</c->name<c- p>)</c-> <c- p>{</c->
-      <c- k>case</c-> <c- u>"selected"</c-><c- o>:</c->
+      <c- k>case</c-> <c- u>"active"</c-><c- o>:</c->
         <c- a>let</c-> selected <c- o>=</c-> <c- p>(</c->newValue <c- o>!=</c-> <c- kc>null</c-><c- p>);</c->
         <c- k>this</c-><c- p>.</c->_tabpanel<c- p>.</c->shown <c- o>=</c-> selected<c- p>;</c->      <c- c1>// the tabpanel handles its own show/hide logic</c->
         <c- k>this</c-><c- p>.</c->ariaSelected <c- o>=</c-> selected<c- p>;</c->         <c- c1>// reflects to "aria-selected" attribute</c->
@@ -1633,7 +1633,7 @@ They could omit the tabpanel and add appropriate ARIA roles
 such that each tab acts as an option,
 while the tablist acts as a list box.</p>
 <pre class="language-html highlight"><c- p>&lt;</c-><c- f>custom-tablist</c-> <c- e>role</c-><c- o>=</c-><c- s>listbox</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-><c- p>></c->Option 1<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
+  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-> <c- e>selected</c-> <c- e>aria-selected</c-><c- o>=</c-><c- s>"true"</c-><c- p>></c->Option 1<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
   <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-><c- p>></c->Option 2<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
   <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-><c- p>></c->Option 3<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
 <c- p>&lt;/</c-><c- f>custom-tablist</c-><c- p>></c->
@@ -1708,8 +1708,8 @@ to an <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#dfn-acce
 in particular <em>dynamic</em> semantics
 (i.e. semantics like <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes-ariaselected" id="ref-for-idl-def-ariaattributes-ariaselected">ariaSelected</a></code> which are inherently likely to change),
 within the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑦">ShadowRoot</a></code>.</p>
-    <aside class="example" id="example-69593ea5">
-     <a class="self-link" href="#example-69593ea5"></a> For example,
+    <aside class="example" id="checkbox-example">
+     <a class="self-link" href="#checkbox-example"></a> For example,
 an author creating a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element③">custom element</a> may use a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑧">ShadowRoot</a></code> to encapsulate implementation details for the element. 
      <p>They may use the custom element definition to specify the role,
 and the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot⑨">ShadowRoot</a></code> to encapsulate dynamic semantic properties
@@ -1767,14 +1767,74 @@ unless the property is <em>also</em> set on the <a data-link-type="dfn" href="ht
     <h3 class="heading settled" data-level="3.1" id="semantics-precedence-intro"><span class="secno">3.1. </span><span class="content">Introduction</span><a class="self-link" href="#semantics-precedence-intro"></a></h3>
     <p><em>This section is non-normative</em></p>
     <p>In general, the precedence of semantic properties is that
-any ARIA property set directly on the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code> (either via setting an attribute or via the associated property)
+any ARIA property set directly on the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code> (either via setting an attribute or via the associated <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-reflect" id="ref-for-concept-reflect①">reflected</a> property)
 overrides a value for the same property on the <code>Element</code>'s attached <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①④">ShadowRoot</a></code>,
 and any ARIA property set either on the <code>Element</code> or the <code>ShadowRoot</code> will override a value set via the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define④">CustomElementRegistry.define()</a></code> method.</p>
-    <p>An author using the custom element could then use the reflected ARIA properties/content attributes to override the
-default values, just as they would when using a native element:</p>
-    <p></p>
-<pre class="language-html highlight"><c- p>&lt;</c-><c- f>custom-checkbox</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
+    <aside class="example" id="example-9142b789">
+     <a class="self-link" href="#example-9142b789"></a> An author using the <a href="#checkbox-example"><code>&lt;custom-checkbox></code></a> element
+could use the reflected ARIA properties/content attributes to override the
+default values, just as they would when using a native element:
+     <p></p>
+<pre class="language-html highlight"><c- p>&lt;</c-><c- f>input</c-> <c- e>type</c-><c- o>=</c-><c- s>"checkbox"</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
+
+<c- p>&lt;</c-><c- f>custom-checkbox</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
 </pre>
+    </aside>
+    <aside class="example" id="example-feb7b3fd">
+     <a class="self-link" href="#example-feb7b3fd"></a> The implementation of the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> element
+could use a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①⑤">ShadowRoot</a></code> to encapsulate the dynamic semantic properties
+of the <code>&lt;custom-tab></code>, instead of writing ARIA attributes to the DOM: 
+<pre class="language-js highlight"><c- kr>class</c-> TabElement <c- kr>extends</c-> HTMLElement <c- p>{</c->
+  constructor<c- p>()</c-> <c- p>{</c->
+    <c- kr>super</c-><c- p>();</c->
+    <c- k>this</c-><c- p>.</c->attachShadow<c- p>({</c->mode<c- o>:</c-> <c- t>'open'</c-><c- p>});</c->            <c- c1>// mode may also be "closed"</c->
+
+    <c- c1>// ... any other set-up</c->
+  <c- p>}</c->
+
+  <c- kr>static</c-> get observedAttributes<c- p>()</c-> <c- p>{</c-> <c- k>return</c-> <c- p>[</c-><c- u>"active"</c-><c- p>];</c-> <c- p>}</c->
+
+  connectedCallback<c- p>()</c-> <c- p>{</c->
+    <c- k>this</c-><c- p>.</c->_tablist <c- o>=</c-> <c- k>this</c-><c- p>.</c->parentElement<c- p>;</c->
+  <c- p>}</c->
+
+  setTabPanel<c- p>(</c->tabpanel<c- p>)</c-> <c- p>{</c->
+    <c- k>if</c-> <c- p>(</c->tabpanel<c- p>.</c->localName <c- o>!==</c-> <c- u>"custom-tabpanel"</c-> <c- o>||</c-> tabPanel<c- p>.</c->id <c- o>===</c-> <c- u>""</c-><c- p>)</c->
+      <c- k>return</c-><c- p>;</c->  <c- c1>// fail silently</c->
+
+    <c- k>this</c-><c- p>.</c->_tabpanel <c- o>=</c-> tabpanel<c- p>;</c->
+    tabpanel<c- p>.</c->setTab<c- p>(</c-><c- k>this</c-><c- p>);</c->
+    <c- k>this</c-><c- p>.</c->shadowRoot<c- p>.</c->ariaControls <c- o>=</c-> tabPanel<c- p>;</c->      <c- c1>// no longer reflects</c->
+  <c- p>}</c->
+
+  <c- c1>// ... setters/getters for custom properties which reflect to attributes</c->
+
+  <c- c1>// When the custom "active" attribute changes,</c->
+  <c- c1>// keep the accessible checked state in sync.</c->
+  attributeChangedCallback<c- p>(</c->name<c- p>,</c-> oldValue<c- p>,</c-> newValue<c- p>)</c-> <c- p>{</c->
+    <c- k>switch</c-><c- p>(</c->name<c- p>)</c-> <c- p>{</c->
+      <c- k>case</c-> <c- u>"active"</c-><c- o>:</c->
+        <c- a>let</c-> selected <c- o>=</c-> <c- p>(</c->newValue <c- o>!=</c-> <c- kc>null</c-><c- p>);</c->
+        <c- k>this</c-><c- p>.</c->_tabpanel<c- p>.</c->shown <c- o>=</c-> selected<c- p>;</c->
+        <c- k>this</c-><c- p>.</c->shadowRoot<c- p>.</c->ariaSelected <c- o>=</c-> selected<c- p>;</c->  <c- c1>// no longer reflects</c->
+        <c- k>if</c-> <c- p>(</c->selected<c- p>)</c->
+          <c- k>this</c-><c- p>.</c->_tablist<c- p>.</c->setSelectedTab<c- p>(</c-><c- k>this</c-><c- p>);</c->     <c- c1>// ensure no other tab has &lt;code data-opaque bs-autolink-syntax='`selected`'>selected&lt;/code> set</c->
+        <c- k>break</c-><c- p>;</c->
+    <c- p>}</c->
+  <c- p>}</c->
+<c- p>}</c->
+</pre>
+     <p>Then authors using the <code>&lt;custom-tablist></code> and <code>&lt;custom-tab></code> elements
+as a listbox could still override any semantic properties,
+including those set on the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#shadowroot" id="ref-for-shadowroot①⑥">ShadowRoot</a></code>,
+but no semantic implementation details would leak out:</p>
+<pre class="language-html highlight"><c- p>&lt;</c-><c- f>custom-tablist</c-> <c- e>role</c-><c- o>=</c-><c- s>listbox</c-><c- p>></c->
+  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-> <c- e>selected</c-><c- p>></c->Option 1<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
+  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-><c- p>></c->Option 2<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
+  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>role</c-><c- o>=</c-><c- s>option</c-><c- p>></c->Option 3<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
+<c- p>&lt;/</c-><c- f>custom-tablist</c-><c- p>></c->
+</pre>
+    </aside>
    </section>
    <h3 class="heading settled" data-level="3.2" id="custom-elements-semantics-mapping"><span class="secno">3.2. </span><span class="content">Mapping semantics to the accessibility tree</span><a class="self-link" href="#custom-elements-semantics-mapping"></a></h3>
    <p><strong class="advisement"> This section represents changes which should be made to <a href="https://www.w3.org/TR/html-aam-1.0/#mapping-html-to-accessibility-apis">HTML Accessibility API Mappings 1.0 §mapping-html-to-accessibility-apis</a>.</strong></p>
@@ -2002,7 +2062,7 @@ default values, just as they would when using a native element:</p>
     <li><a href="#ref-for-shadowroot②">2.1. Introduction</a> <a href="#ref-for-shadowroot③">(2)</a> <a href="#ref-for-shadowroot④">(3)</a> <a href="#ref-for-shadowroot⑤">(4)</a> <a href="#ref-for-shadowroot⑥">(5)</a> <a href="#ref-for-shadowroot⑦">(6)</a> <a href="#ref-for-shadowroot⑧">(7)</a> <a href="#ref-for-shadowroot⑨">(8)</a>
     <li><a href="#ref-for-shadowroot①⓪">2.2. Changes to ShadowRoot</a> <a href="#ref-for-shadowroot①①">(2)</a> <a href="#ref-for-shadowroot①②">(3)</a>
     <li><a href="#ref-for-shadowroot①③">3. ARIA semantic precedence between ElementDefinitionOptions, ShadowRoot and host</a>
-    <li><a href="#ref-for-shadowroot①④">3.1. Introduction</a>
+    <li><a href="#ref-for-shadowroot①④">3.1. Introduction</a> <a href="#ref-for-shadowroot①⑤">(2)</a> <a href="#ref-for-shadowroot①⑥">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-element">
@@ -2021,6 +2081,7 @@ default values, just as they would when using a native element:</p>
    <a href="https://dom.spec.whatwg.org/#concept-reflect">https://dom.spec.whatwg.org/#concept-reflect</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-reflect">2.2. Changes to ShadowRoot</a>
+    <li><a href="#ref-for-concept-reflect①">3.1. Introduction</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-shadow-root">

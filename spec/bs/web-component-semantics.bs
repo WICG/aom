@@ -73,7 +73,7 @@ The properties set on the {{ElementDefinitionOptions}} object
 become the default values to be used when <a>mapping</a>
 the custom element to an <a>accessible object</a>.
 
-<aside class="example">
+<aside class="example" id="custom-tab-example">
 For example, an author creating a custom tab control
 may define three custom elements for the individual tabs,
 the tab list and the tab panel:
@@ -109,7 +109,7 @@ the implementation for the `<custom-tab>` prototype might look something like th
 class TabElement extends HTMLElement {
   constructor() { /* ... */ }
 
-  static get observedAttributes() { return ["selected"]; }
+  static get observedAttributes() { return ["active"]; }
 
   connectedCallback() {
     this._tablist = this.parentElement;
@@ -125,11 +125,11 @@ class TabElement extends HTMLElement {
 
   // ... setters/getters for custom properties which reflect to attributes
 
-  // When the custom "selected" attribute changes,
+  // When the custom "active" attribute changes,
   // keep the accessible checked state in sync.
   attributeChangedCallback(name, oldValue, newValue) {
     switch(name) {
-      case "selected":
+      case "active":
         let selected = (newValue != null);
         this._tabpanel.shown = selected;      // the tabpanel handles its own show/hide logic
         this.ariaSelected = selected;         // reflects to "aria-selected" attribute
@@ -175,7 +175,7 @@ while the tablist acts as a list box.
 
 ```html
 <custom-tablist role=listbox>
-  <custom-tab role=option>Option 1</custom-tab>
+  <custom-tab role=option selected aria-selected="true">Option 1</custom-tab>
   <custom-tab role=option>Option 2</custom-tab>
   <custom-tab role=option>Option 3</custom-tab>
 </custom-tablist>
@@ -274,7 +274,7 @@ in particular <em>dynamic</em> semantics
 (i.e. semantics like {{ariaSelected}} which are inherently likely to change),
 within the {{ShadowRoot}}.
 
-<aside class="example">
+<aside class="example" id="checkbox-example">
 For example,
 an author creating a [=custom element=] may use a {{ShadowRoot}}
 to encapsulate implementation details for the element.
@@ -348,18 +348,86 @@ unless the property is <em>also</em> set on the <a>host</a>.
 
 In general, the precedence of semantic properties is that
 any ARIA property set directly on the {{Element}}
-(either via setting an attribute or via the associated property)
+(either via setting an attribute or via the associated <a>reflected</a> property)
 overrides a value for the same property on the `Element`'s attached {{ShadowRoot}},
 and any ARIA property set either on the `Element` or the `ShadowRoot`
 will override a value set via the {{define()|CustomElementRegistry.define()}} method.
 
-An author using the custom element could then use the reflected ARIA properties/content attributes to override the
+<aside class="example">
+An author using the <a href="#checkbox-example">`<custom-checkbox>`</a> element
+could use the reflected ARIA properties/content attributes to override the
 default values, just as they would when using a native element:</p>
 
 ```html
-<!-- ARIA role overrides Shadow DOM role -->
+<!-- ARIA role overrides implicit role -->
+<input type="checkbox" role="radio">
+
+<!-- ARIA role overrides custom element role -->
 <custom-checkbox role="radio">
 ```
+</aside>
+
+<aside class="example">
+The implementation of the <a href="#custom-tab-example">`<custom-tab>`</a> element
+could use a {{ShadowRoot}} to encapsulate the dynamic semantic properties
+of the `<custom-tab>`, instead of writing ARIA attributes to the DOM:
+
+```js
+class TabElement extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});            // mode may also be "closed"
+
+    // ... any other set-up
+  }
+
+  static get observedAttributes() { return ["active"]; }
+
+  connectedCallback() {
+    this._tablist = this.parentElement;
+  }
+
+  setTabPanel(tabpanel) {
+    if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
+      return;  // fail silently
+
+    this._tabpanel = tabpanel;
+    tabpanel.setTab(this);
+    this.shadowRoot.ariaControls = tabPanel;      // no longer reflects
+  }
+
+  // ... setters/getters for custom properties which reflect to attributes
+
+  // When the custom "active" attribute changes,
+  // keep the accessible checked state in sync.
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch(name) {
+      case "active":
+        let selected = (newValue != null);
+        this._tabpanel.shown = selected;
+        this.shadowRoot.ariaSelected = selected;  // no longer reflects
+        if (selected)
+          this._tablist.setSelectedTab(this);     // ensure no other tab has `selected` set
+        break;
+    }
+  }
+}
+```
+
+Then authors using the `<custom-tablist>` and `<custom-tab>` elements
+as a listbox could still override any semantic properties,
+including those set on the {{ShadowRoot}},
+but no semantic implementation details would leak out:
+
+```html
+<custom-tablist role=listbox>
+  <custom-tab role=option selected>Option 1</custom-tab>
+  <custom-tab role=option>Option 2</custom-tab>
+  <custom-tab role=option>Option 3</custom-tab>
+</custom-tablist>
+```
+
+
 </section>
 
 ## Mapping semantics to the accessibility tree ## {#custom-elements-semantics-mapping}
