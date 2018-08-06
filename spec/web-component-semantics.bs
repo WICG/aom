@@ -123,6 +123,9 @@ class TabElement extends HTMLElement {
     this.ariaControls = tabPanel.id;          // reflects to "aria-controls" attribute
   }
 
+  // Observe the custom "active" attribute.
+  static get observedAttributes() { return ["active"]; }
+
   // ... setters/getters for custom properties which reflect to attributes
 
   // When the custom "active" attribute changes,
