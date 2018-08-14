@@ -1,5 +1,5 @@
 <pre class=metadata>
-Title: ARIA reflection and Web Components
+Title: Default semantic properties for Custom Elements
 Shortname: aom-aria
 Level: 1
 Status: UD
@@ -342,7 +342,7 @@ When invoked, the {{define(name, constructor, options)}} method must run these s
 
 *[...]*
 
-Issue: Need to figure out where {{ElementDefinitionOptions}} and
+Issue: Need to figure out where {{ElementSettings}} and
 {{ElementSemantics}} get constructed and passed to
 the `createdCallback` method.
 
