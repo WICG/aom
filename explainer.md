@@ -15,9 +15,12 @@
   - [Motivating use cases](#motivating-use-cases)
   - [The Accessibility Object Model](#the-accessibility-object-model)
     - [Reflecting ARIA attributes](#reflecting-aria-attributes)
-      - [Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components](#use-case-1-setting-non-reflected-default-accessibility-properties-for-web-components)
+    - [Reflecting Element references](#reflecting-element-references)
       - [Use case 2: Setting relationship properties without needing to use IDREFs](#use-case-2-setting-relationship-properties-without-needing-to-use-idrefs)
-        - [Precedence between string-based and element-based relationship properties](#precedence-between-string-based-and-element-based-relationship-properties)
+    - [Custom Elements APIs](#custom-elements-apis)
+      - [Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components](#use-case-1-setting-non-reflected-default-accessibility-properties-for-web-components)
+        - [Default semantics via customElements.define()](#default-semantics-via-customelementsdefine)
+        - [Per-instance, dynamic semantics via the `createdCallback()` reaction](#per-instance-dynamic-semantics-via-the-createdcallback-reaction)
     - [User action events from Assistive Technology](#user-action-events-from-assistive-technology)
       - [Use case 3: Listening for events from Assistive Technology](#use-case-3-listening-for-events-from-assistive-technology)
     - [Virtual Accessibility Nodes](#virtual-accessibility-nodes)
@@ -97,86 +100,15 @@ We will
 [reflect](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect) 
 ARIA attributes on HTML elements.
 
+This is now a part of the [ARIA 1.2 spec](https://www.w3.org/TR/wai-aria-1.2/#idl-interface).
+
 ```js
 el.role = "button";
 el.ariaPressed = "true";  // aria-pressed is a tristate attribute
 el.ariaDisabled = true;   // aria-disabled is a true/false attribute
 ```
 
-These properties will also be available on the [`ShadowRoot` interface](https://dom.spec.whatwg.org/#interface-shadowroot).
-
-#### Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components
-
-Today, a library author creating a Web Component is forced to "sprout" ARIA attributes
-to express semantics which are implicit for native elements.
-
-```html
-<!-- Page author uses the custom element as they would a native element -->
-<custom-slider min="0" max="5" value="3"></custom-slider>
-
-<!-- Custom element is forced to "sprout" extra attributes to express semantics -->
-<custom-slider min="0" max="5" value="3" role="slider"
-               tabindex="0" aria-valuemin="0" aria-valuemax="5"
-               aria-valuenow="3" aria-valuetext="3"></custom-slider>
-```
-
-We propose that authors be allowed to set ARIA properties on `ShadowRoot` nodes
-to express "default" semantics for Web Components:
-
-```js
-class CustomCheckbox extends HTMLElement {
-
-  // ...
-
-  constructor() {
-    super();
-    this.attachShadow({mode: 'open'});  // mode may also be "closed".
-
-    // ... any other set-up
-  }
-
-  connectedCallback() {
-    // Set the default semantics for the custom element
-    // when it is inserted in the page.
-    this.shadowRoot.role = "checkbox";
-  }
-
-  // Observe the custom "checked" attribute
-  static get observedAttributes() { return ["checked"]; }
-
-  // ... setters/getters for properties which reflect to attributes
-
-  // When the custom "checked" attribute changes,
-  // keep the accessible checked state in sync.
-  attributeChangedCallback(name, oldValue, newValue) {
-    switch(name) {
-    case "checked":
-      this.shadowRoot.ariaChecked = (newValue !== null);
-    }
-  }
-}
-
-customElements.define("custom-checkbox", CustomCheckbox);
-```
-
-From the perspective of the embedding page, 
-a custom checkbox would now have this clean HTML, 
-with the accessibility fully encapsulated into the implementation 
-rather than exposed as a leaky abstraction:
-
-```html
-<custom-checkbox checked>Receive promotional offers</custom-checkbox>
-```
-
-The page author could override the default semantics using ARIA 
-exactly as they would with a built-in element:
-
-```html
-<!-- ARIA role overrides Shadow DOM role -->
-<custom-checkbox role="radio">
-```
-
-#### Use case 2: Setting relationship properties without needing to use IDREFs
+### Reflecting Element references
 
 Straight reflection of ARIA properties 
 would reflect relationship attributes like `aria-labelledby` as strings:
@@ -205,6 +137,11 @@ which participates in a relationship.
 Moreover, this would enable authors using open `ShadowRoot`s
 to specify relationships which cross over Shadow DOM boundaries.
 
+This API is being [proposed](https://github.com/whatwg/html/issues/3515)
+as a change to the WHATWG HTML spec.
+
+#### Use case 2: Setting relationship properties without needing to use IDREFs
+
 Today, an author attempting to express a relationship across Shadow DOM boundaries
 might attempt using `aria-activedescendant` like this:
 ```html
@@ -224,8 +161,7 @@ might attempt using `aria-activedescendant` like this:
 This fails, because IDREFs are scoped within the shadowRoot
 or document context in which they appear.
 
-Using Accessible Properties,
-an author could specify this relationship programmatically instead:
+An author could specify this relationship programmatically instead:
 
 ```js
 const input = comboBox.shadowRoot.querySelector("input");
@@ -235,40 +171,194 @@ input.activeDescendantElement = optionList.firstChild;
 
 This would allow the relationship to be expressed naturally.
 
-##### Precedence between string-based and element-based relationship properties
+### Custom Elements APIs
 
-Element-based relationship properties take precedence over 
-(reflected) string-based properties,
-while not affecting the DOM attribute value:
+We propose that Custom Element authors be able to provide static, default semantics
+via the `customElements.define()` options,
+and dynamic, per-element semantics via a configuration callback.
+
+#### Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components
+
+Today, a library author creating a Web Component is forced to "sprout" ARIA attributes
+to express semantics which are implicit for native elements.
+
+```html
+<!-- Page author uses the custom elements as they would native elements -->
+<custom-tablist>
+  <custom-tab selected>Tab 1</custom-tab>
+  <custom-tab>Tab 2</custom-tab>
+  <custom-tab>Tab 3</custom-tab>
+</custom-tablist>
+
+<!-- Custom elements are forced to "sprout" extra attributes to express semantics -->
+<custom-tablist role="tablist">
+  <custom-tab selected role="tab" aria-selected="true" aria-controls="tabpanel-1">Tab 1</custom-tab>
+  <custom-tab role="tab" aria-controls="tabpanel-2">Tab 2</custom-tab>
+  <custom-tab role="tab" aria-controle="tabpanel-3">Tab 3</custom-tab>
+</custom-tablist>
+```
+
+##### Default semantics via customElements.define()
+
+Authors may provide immutable default semantics for a custom element
+by setting properties via the `ElementDefinitionOptions` object
+passed in to the `CustomElementRegistry.define()` method.
+
+The properties set on the `ElementDefinitionOptions` object
+become the default values to be used
+when mapping the custom element to an accessible object.
+
+Note: this is analogous to creating an "immutable class variable" -
+these semantic properties are associated with the custom element definition,
+not with each custom element instance.
+The semantics they define apply to *all* instances of the custom element.
+
+For example, an author creating a custom tab control may define three custom elements
+for the individual tabs, the tab list and the tab panel:
 
 ```js
-// Reflects to "aria-labelledby" DOM attribute
-button.ariaLabelledBy = "id1";
+class TabListElement extends HTMLElement { ... }
+customElements.define("custom-tablist", TabListElement,
+                      { role: "tablist", ariaOrientation: "horizontal" });
 
-// DOM result: <button aria-labelledby="id1">
+class TabElement extends HTMLElement { ... }
+customElements.define("custom-tab", TabElement,
+                      { role: "tab" });
 
-// Takes precedence; does not affect reflected attribute value
-el.ariaLabelledByElements = [el2, el3];
-
-// DOM remains unchanged: <button aria-labelledby="id1">
+class TabPanelElement extends HTMLElement { ... }
+customElements.define("custom-tabpanel", TabPanelElement,
+                      { role: "tabpanel" });
 ```
+
+When a `<custom-tab>` element is mapped into the accessibility tree,
+by default it will have a mapped role of tab.
+
+This is analogous to how a `<button>` element is, by default,
+mapped to an accessible object with a role of button.
+
+##### Per-instance, dynamic semantics via the `createdCallback()` reaction
+
+This is being [discussed as part of the W3C Web Components project](https://github.com/w3c/webcomponents/issues/758).
+
+A custom element author may use the `ElementInternals`  object,
+provided in the `createdCallback` reaction,
+to modify the semantic state of an instance of a custom element
+in response to user interaction.
+
+The properties set on the `ElementInternals` object
+are used when mapping the element to an accessible object.
+
+Note: this is analogous to setting an "instance variable" -
+a copy of these semantic properties is created for each instance of the custom element.
+The semantics defined in each apply only to their associated custom element instance object.
+
+```js
+class CustomTab extends HTMLElement {
+  constructor() {
+    super();
+
+    let _privates = {};
+  }
+
+  // Observe the custom "active" attribute.
+  static get observedAttributes() { return ["active"]; }
+
+  createdCallback(elementInternals) {
+    // Keep a private reference to the internals object.
+    _privates.internals = elementInternals;
+  }
+
+  connectedCallback() {
+    _privates.tablist = this.parentElement;
+  }
+
+  setTabPanel(tabpanel) {
+    if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
+      return;  // fail silently
+
+    _privates.tabpanel = tabpanel;
+    tabpanel.setTab(this);
+    _privates.internals.ariaControls = tabPanel;    // does not reflect
+  }
+
+  // ... setters/getters for custom properties which reflect to attributes
+
+  // When the custom "active" attribute changes,
+  // keep the accessible checked state in sync.
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch(name) {
+    case "active":
+      let active = (newValue != null);
+      _privates.tabpanel.shown = active;
+      _privates.internals.ariaSelected = (newValue !== null);
+      if (selected)
+        this._tablist.setSelectedTab(this);  // ensure no other tab has "active" set
+        break;
+    }
+  }
+}
+
+customElements.define("custom-tab", CustomTab, { role: "tab" });
+```
+
+Authors using these elements may override the default semantics using ARIA attributes as normal.
+
+For example, an author may modify the appearance of a <custom-tablist> element to appear as a vertical list.
+They could add an aria-orientation attribute to indicate this,
+overriding the default semantics set in the custom element definition.
+
+```html
+<custom-tablist aria-orientation="vertical" class="vertical-tablist">
+  <custom-tab selected>Tab 1</custom-tab>
+  <custom-tab>Tab 2</custom-tab>
+  <custom-tab>Tab 3</custom-tab>
+</div>
+```
+
+If the author-provided semantics conflict with the Custom Element semantics,
+the author-provided semantics take precedence.
 
 ### User action events from Assistive Technology
 
-We will add a new [UI event](https://w3c.github.io/uievents/) type
-to capture action events from assistive technology.
+To preserve the privacy of assistive technology users,
+events from assistive technology will typically cause a synthesised DOM event to be triggered:
 
-The supported actions would include:
+| **AT event**     | **Targets**                                                                        | **DOM event**                                                                   |
+|------------------|------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `click`          | *all elements*                                                                     | `click`                                                                         |
+| `focus`          | *all elements*                                                                     | `focus`                                                                         |
+| `select`         | Elements whose mapped role is `cell` or `option`                                   | `click`                                                                         |
+| `scrollIntoView` | (n/a)                                                                              | No event                                                                        |
+| `dismiss`        | *all elements*                                                                     | Keypress sequence for `Escape` key                                              |
+| `contextMenu`    | *all elements*                                                                     | `contextmenu`                                                                   |
+| `scrollByPage`   | *all elements*                                                                     | Keypress sequence for `PageUp` or `PageDown` key, depending on scroll direction |
+| `increment`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Up` key                                                  |
+| `decrement`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Down` key                                                |
+| `setValue`       | Elements whose mapped role is `combobox`,`scrollbar`,`slider` or `textbox`         | TBD                                                                             |
 
-* `accessibleclick`
-* `accessiblecontextmenu`
-* `accessiblefocus`
-* `accessiblesetvalue`
-* `accessibleincrement`
-* `accessibledecrement`
-* `accessibleselect`
-* `accessiblescroll`
-* `accessibledismiss`
+We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
+
+* `increment`
+* `decrement`
+* `dismiss`
+* `scrollPageUp`
+* `scrollPageDown`
+
+These will be triggered via assistive technology events,
+along with the synthesised keyboard events listed in the above table,
+and also synthesised when the keyboard events listed above
+occur in the context of a valid target for the corresponding assistive technology event.
+
+For example,
+if a user not using assistive technology presses the `Escape` key in any context,
+an `input` event with a type of `dismiss` will be fired at the focused element
+along with the keypress sequence.
+
+If the same user pressed `Up` while page focus was on
+a `<input type="range">` *or* an element with a role of `slider`
+(either of which will have a computed role of `slider`),
+an `input` event with a type of `increment` will be fired at the focused element
+along with the keypress sequence.
 
 #### Use case 3: Listening for events from Assistive Technology
 
@@ -300,19 +390,23 @@ prompts a suggestion on VoiceOver for iOS
 to perform swipe gestures to increment or decrement, 
 but there is no way to handle that semantic event via any web API.
 
-The new UI Events would give web developers a mechanism 
-to listen for accessible actions directly, 
-by adding event listeners on an `Element`.
+Developers will be able to listen for keyboard events
+or input events to capture that semantic event.
 
-For example, to implement a custom slider, the author could simply listen for
-`accessibleincrement` and `accessibledecrement` events.
+For example, to implement a custom slider,
+the author could handle the `Up` and `Down` key events
+as recommended in the [ARIA Authoring Practices guide](https://www.w3.org/TR/wai-aria-practices-1.1/#slider_kbd_interaction),
+and this would handle the assistive technology event as well.
 
 ```js
-customSlider.addEventListener('accessibleincrement', function() {
-  customSlider.value += 1;
-});
-customSlider.addEventListener('accessibledecrement', function() {
-  customSlider.value -= 1;
+customSlider.addEventListener('keydown', (event) => {
+  switch (event.code) {
+  case "ArrowUp":
+    customSlider.value += 1;
+    return;
+  case "ArrowDown":
+    customSlider.value -= 1;
+    return;
 });
 ```
 
@@ -596,6 +690,7 @@ Many thanks for valuable feedback, advice, and tools from:
 * Cynthia Shelley
 * David Bolter
 * Domenic Denicola
+* Elliott Sprehn
 * Ian Hickson
 * Joanmarie Diggs
 * Marcos Caceres
