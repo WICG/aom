@@ -1214,8 +1214,8 @@ Possible extra rowspan handling
 </style>
   <link href="https://www.w3.org/StyleSheets/TR/2016/W3C-ED" rel="stylesheet" type="text/css">
   <meta content="Bikeshed version 3678d496235a6f1964fc14f56861db11f24476c4" name="generator">
-  <link href="https://garykac.github.io/aom-input-events/" rel="canonical">
-  <meta content="1784bcaddbf3636bbadca437e4e6215f896a6357" name="document-revision">
+  <link href="https://wicg.github.io/aom/spec/input-events.html" rel="canonical">
+  <meta content="f3f69b22b925e4c67472ccadc05ce2d3ba3bb9c1" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1462,15 +1462,15 @@ pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>AOM Input Event Types</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-10-17">17 October 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-10-23">23 October 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://garykac.github.io/aom-input-events/">https://garykac.github.io/aom-input-events/</a>
+     <dd><a class="u-url" href="https://wicg.github.io/aom/spec/input-events.html">https://wicg.github.io/aom/spec/input-events.html</a>
      <dt>Latest published version:
-     <dd><a href="https://garykac.github.io/aom-input-events/">https://garykac.github.io/aom-input-events/</a>
+     <dd><a href="https://wicg.github.io/aom/spec/input-events.html">https://wicg.github.io/aom/spec/input-events.html</a>
      <dt>Issue Tracking:
-     <dd><a href="https://github.com/garykac/aom-input-events/issues/">GitHub</a>
+     <dd><a href="https://github.com/wicg/aom/issues/">GitHub</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:aboxhall@google.com">Alice Boxhall</a> (<span class="p-org org">Google</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:garykac@google.com">Gary Kacmarcik</a> (<span class="p-org org">Google</span>)
@@ -1507,7 +1507,7 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
     <li>
      <a href="#Cases"><span class="secno">2</span> <span class="content">Use Cases</span></a>
      <ol class="toc">
-      <li><a href="#use-case-1"><span class="secno">2.1</span> <span class="content">Use Case 1</span></a>
+      <li><a href="#use-case-1"><span class="secno">2.1</span> <span class="content">Implementing an ARIA slider</span></a>
      </ol>
     <li>
      <a href="#input-events"><span class="secno">3</span> <span class="content">Input Events</span></a>
@@ -1516,11 +1516,11 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
       <li>
        <a href="#aom-input-event-types"><span class="secno">3.2</span> <span class="content"><span>Input Event Types</span></span></a>
        <ol class="toc">
-        <li><a href="#type-aom-increment"><span class="secno">3.2.1</span> <span class="content"><span>aomIncrement</span></span></a>
-        <li><a href="#type-aom-decrement"><span class="secno">3.2.2</span> <span class="content"><span>aomDecrement</span></span></a>
-        <li><a href="#type-aom-dismiss"><span class="secno">3.2.3</span> <span class="content"><span>aomDismiss</span></span></a>
-        <li><a href="#type-aom-scrollpageup"><span class="secno">3.2.4</span> <span class="content"><span>aomScrollPageUp</span></span></a>
-        <li><a href="#type-aom-scrollpagedown"><span class="secno">3.2.5</span> <span class="content"><span>aomScrollPageDown</span></span></a>
+        <li><a href="#type-action-increment"><span class="secno">3.2.1</span> <span class="content"><span>actionIncrement</span></span></a>
+        <li><a href="#type-action-decrement"><span class="secno">3.2.2</span> <span class="content"><span>actionDecrement</span></span></a>
+        <li><a href="#type-action-dismiss"><span class="secno">3.2.3</span> <span class="content"><span>actionDismiss</span></span></a>
+        <li><a href="#type-action-scrollpageup"><span class="secno">3.2.4</span> <span class="content"><span>actionScrollPageUp</span></span></a>
+        <li><a href="#type-action-scrollpagedown"><span class="secno">3.2.5</span> <span class="content"><span>actionScrollPageDown</span></span></a>
        </ol>
      </ol>
     <li><a href="#security"><span class="secno">4</span> <span class="content">Security Considerations</span></a>
@@ -1549,17 +1549,19 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
   <main>
    <h2 class="heading settled" data-level="1" id="secintro"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#secintro"></a></h2>
    <p><i>This section is non-normative.</i></p>
-   <p>TODO: Introduction for AOM input events</p>
+   <p>Input events will be triggered by certain user interactions,
+        in certain contexts,
+        as well as via assistive technology interactions.</p>
    <h2 class="heading settled" data-level="2" id="Cases"><span class="secno">2. </span><span class="content">Use Cases</span><a class="self-link" href="#Cases"></a></h2>
    <p><i>This section is non-normative.</i></p>
-   <h3 class="heading settled" data-level="2.1" id="use-case-1"><span class="secno">2.1. </span><span class="content">Use Case 1</span><a class="self-link" href="#use-case-1"></a></h3>
-   <p>TODO: Use case 1</p>
+   <h3 class="heading settled" data-level="2.1" id="use-case-1"><span class="secno">2.1. </span><span class="content">Implementing an ARIA slider</span><a class="self-link" href="#use-case-1"></a></h3>
+   <p>TODO: Use case</p>
    <h2 class="heading settled" data-level="3" id="input-events"><span class="secno">3. </span><span class="content">Input Events</span><a class="self-link" href="#input-events"></a></h2>
    <p>The <a data-link-type="biblio" href="#biblio-uievents">[UIEVENTS]</a> specification defines the <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent">InputEvent</a></code> type which is used by the <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/uievents/#event-type-beforeinput" id="ref-for-event-type-beforeinput①">beforeinput</a></code> and <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/uievents/#event-type-input" id="ref-for-event-type-input①">input</a></code> events.</p>
    <h3 class="heading settled" data-level="3.1" id="input-event-interfaces"><span class="secno">3.1. </span><span class="content">Input event interfaces</span><a class="self-link" href="#input-event-interfaces"></a></h3>
-   <p>The ClipboardEvent interface extends the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event">Event</a></code> interface.</p>
+   <p>The <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent①">InputEvent</a></code> interface extends the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event">Event</a></code> interface.</p>
    <div id="inputevent-idl">
-<pre class="idl highlight def" data-highlight="webidl"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent①">InputEvent</a> : <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/uievents/#uievent-uievent" id="ref-for-uievent-uievent">UIEvent</a> {
+<pre class="idl highlight def" data-highlight="webidl"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent②">InputEvent</a> : <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/uievents/#uievent-uievent" id="ref-for-uievent-uievent">UIEvent</a> {
   <span class="kt">readonly</span> <span class="kt">attribute</span> <a class="n idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString"><span class="kt">DOMString</span></a>? <dfn class="nv dfn-paneled idl-code" data-dfn-for="InputEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString?" id="dom-inputevent-inputtype"><code>inputType</code></dfn>;
 };
 </pre>
@@ -1572,8 +1574,8 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
 		it can be shared between this spec and the <a href="https://www.w3.org/TR/input-events-2/">Input Events Level 2</a> spec.</p>
    </div>
    <h3 class="heading settled" data-level="3.2" id="aom-input-event-types"><span class="secno">3.2. </span><span class="content"><dfn data-dfn-type="dfn" data-noexport="" id="input-event-types">Input Event Types<a class="self-link" href="#input-event-types"></a></dfn></span><a class="self-link" href="#aom-input-event-types"></a></h3>
-   <h4 class="heading settled" data-level="3.2.1" id="type-aom-increment"><span class="secno">3.2.1. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="aomincrement">aomIncrement</dfn></span><a class="self-link" href="#type-aom-increment"></a></h4>
-   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent②">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype②">inputType</a></code> set to <a data-link-type="dfn" href="#aomincrement" id="ref-for-aomincrement">aomIncrement</a> fires in
+   <h4 class="heading settled" data-level="3.2.1" id="type-action-increment"><span class="secno">3.2.1. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="actionincrement">actionIncrement</dfn></span><a class="self-link" href="#type-action-increment"></a></h4>
+   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent③">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype②">inputType</a></code> set to <a data-link-type="dfn" href="#actionincrement" id="ref-for-actionincrement">actionIncrement</a> fires in
 			response to an input action that increments a control. For example, as a
 			result of a <a data-link-type="dfn" href="http://www.w3.org/TR/uievents-code/#code-arrowright" id="ref-for-code-arrowright">ArrowRight</a> or <a data-link-type="dfn" href="http://www.w3.org/TR/uievents-code/#code-arrowup" id="ref-for-code-arrowup">ArrowUp</a> key press.</p>
    <p>This event type is valid for the following roles:</p>
@@ -1587,8 +1589,8 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
     <li data-md="">
      <p>"spinbutton"</p>
    </ul>
-   <h4 class="heading settled" data-level="3.2.2" id="type-aom-decrement"><span class="secno">3.2.2. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="aomdecrement">aomDecrement</dfn></span><a class="self-link" href="#type-aom-decrement"></a></h4>
-   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent③">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype③">inputType</a></code> set to <a data-link-type="dfn" href="#aomdecrement" id="ref-for-aomdecrement">aomDecrement</a> fires in
+   <h4 class="heading settled" data-level="3.2.2" id="type-action-decrement"><span class="secno">3.2.2. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="actiondecrement">actionDecrement</dfn></span><a class="self-link" href="#type-action-decrement"></a></h4>
+   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent④">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype③">inputType</a></code> set to <a data-link-type="dfn" href="#actiondecrement" id="ref-for-actiondecrement">actionDecrement</a> fires in
 			response to an input action that increments a control. For example, as a
 			result of a <a data-link-type="dfn" href="http://www.w3.org/TR/uievents-code/#code-arrowleft" id="ref-for-code-arrowleft">ArrowLeft</a> or <a data-link-type="dfn" href="http://www.w3.org/TR/uievents-code/#code-arrowdown" id="ref-for-code-arrowdown">ArrowDown</a> key press.</p>
    <p>This event type is valid for the following roles:</p>
@@ -1602,9 +1604,9 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
     <li data-md="">
      <p>"spinbutton"</p>
    </ul>
-   <h4 class="heading settled" data-level="3.2.3" id="type-aom-dismiss"><span class="secno">3.2.3. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="aomdismiss">aomDismiss</dfn></span><a class="self-link" href="#type-aom-dismiss"></a></h4>
-   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent④">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype④">inputType</a></code> set to <a data-link-type="dfn" href="#aomdismiss" id="ref-for-aomdismiss">aomDismiss</a> fires when
-			a dialog or other dismissable UI element is closed.</p>
+   <h4 class="heading settled" data-level="3.2.3" id="type-action-dismiss"><span class="secno">3.2.3. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="actiondismiss">actionDismiss</dfn></span><a class="self-link" href="#type-action-dismiss"></a></h4>
+   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑤">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype④">inputType</a></code> set to <a data-link-type="dfn" href="#actiondismiss" id="ref-for-actiondismiss">actionDismiss</a> fires when
+			a dialog or other dismissable ACTION element is closed.</p>
    <p>This event type is valid for the following roles:</p>
    <ul>
     <li data-md="">
@@ -1614,25 +1616,25 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
     <li data-md="">
      <p>"alertdialog"</p>
    </ul>
-   <h4 class="heading settled" data-level="3.2.4" id="type-aom-scrollpageup"><span class="secno">3.2.4. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="aomscrollpageup">aomScrollPageUp</dfn></span><a class="self-link" href="#type-aom-scrollpageup"></a></h4>
-   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑤">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype⑤">inputType</a></code> set to <a data-link-type="dfn" href="#aomscrollpageup" id="ref-for-aomscrollpageup">aomScrollPageUp</a> fires
+   <h4 class="heading settled" data-level="3.2.4" id="type-action-scrollpageup"><span class="secno">3.2.4. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="actionscrollpageup">actionScrollPageUp</dfn></span><a class="self-link" href="#type-action-scrollpageup"></a></h4>
+   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑥">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype⑤">inputType</a></code> set to <a data-link-type="dfn" href="#actionscrollpageup" id="ref-for-actionscrollpageup">actionScrollPageUp</a> fires
 			when user requests the current content to scroll up (or right) by a "page",
 			where a page of data is typically equal to one screen.</p>
-   <p>This type differs from <a data-link-type="dfn" href="#aomincrement" id="ref-for-aomincrement①">aomIncrement</a> in that it applies only to scrollable
+   <p>This type differs from <a data-link-type="dfn" href="#actionincrement" id="ref-for-actionincrement①">actionIncrement</a> in that it applies only to scrollable
 			content.</p>
    <p>This event type is intended for scrollable content, but is valid for all
 			roles (since it can bubble up to the `body` element, which is scrollable).</p>
-   <h4 class="heading settled" data-level="3.2.5" id="type-aom-scrollpagedown"><span class="secno">3.2.5. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="aomscrollpagedown">aomScrollPageDown</dfn></span><a class="self-link" href="#type-aom-scrollpagedown"></a></h4>
-   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑥">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype⑥">inputType</a></code> set to <a data-link-type="dfn" href="#aomscrollpagedown" id="ref-for-aomscrollpagedown">aomScrollPageDown</a> fires
+   <h4 class="heading settled" data-level="3.2.5" id="type-action-scrollpagedown"><span class="secno">3.2.5. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="actionscrollpagedown">actionScrollPageDown</dfn></span><a class="self-link" href="#type-action-scrollpagedown"></a></h4>
+   <p>An <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑦">InputEvent</a></code> event with <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype⑥">inputType</a></code> set to <a data-link-type="dfn" href="#actionscrollpagedown" id="ref-for-actionscrollpagedown">actionScrollPageDown</a> fires
 			when user requests the current content to scroll down (or left) by a "page",
 			where a page of data is typically equal to one screen.</p>
-   <p>This type differs from <a data-link-type="dfn" href="#aomdecrement" id="ref-for-aomdecrement①">aomDecrement</a> in that it applies only to scrollable
+   <p>This type differs from <a data-link-type="dfn" href="#actiondecrement" id="ref-for-actiondecrement①">actionDecrement</a> in that it applies only to scrollable
 			content.</p>
    <p>This event type is intended for scrollable content, but is valid for all
 			roles (since it can bubble up to the `body` element, which is scrollable).</p>
    <h2 class="heading settled" data-level="4" id="security"><span class="secno">4. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
    <p>Not applicable. This specification simply adds new possible values for an
-	existing <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑦">InputEvent</a></code> attribute.</p>
+	existing <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent⑧">InputEvent</a></code> attribute.</p>
    <h2 class="heading settled" data-level="5" id="privacy"><span class="secno">5. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
    <p>Not applicable. This specification defines new <code class="idl"><a data-link-type="idl" href="#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype⑦">inputType</a></code> values that will be
 	sent for all users, not just those with accessibility features enabled.</p>
@@ -1682,11 +1684,11 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#aomdecrement">aomDecrement</a><span>, in §3.2.2</span>
-   <li><a href="#aomdismiss">aomDismiss</a><span>, in §3.2.3</span>
-   <li><a href="#aomincrement">aomIncrement</a><span>, in §3.2.1</span>
-   <li><a href="#aomscrollpagedown">aomScrollPageDown</a><span>, in §3.2.5</span>
-   <li><a href="#aomscrollpageup">aomScrollPageUp</a><span>, in §3.2.4</span>
+   <li><a href="#actiondecrement">actionDecrement</a><span>, in §3.2.2</span>
+   <li><a href="#actiondismiss">actionDismiss</a><span>, in §3.2.3</span>
+   <li><a href="#actionincrement">actionIncrement</a><span>, in §3.2.1</span>
+   <li><a href="#actionscrollpagedown">actionScrollPageDown</a><span>, in §3.2.5</span>
+   <li><a href="#actionscrollpageup">actionScrollPageUp</a><span>, in §3.2.4</span>
    <li><a href="#input-event-types">Input Event Types</a><span>, in §3.2</span>
    <li>
     inputType
@@ -1712,13 +1714,13 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
    <a href="https://www.w3.org/TR/uievents/#inputevent">https://www.w3.org/TR/uievents/#inputevent</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-inputevent">3. Input Events</a>
-    <li><a href="#ref-for-inputevent①">3.1. Input event interfaces</a>
-    <li><a href="#ref-for-inputevent②">3.2.1. aomIncrement</a>
-    <li><a href="#ref-for-inputevent③">3.2.2. aomDecrement</a>
-    <li><a href="#ref-for-inputevent④">3.2.3. aomDismiss</a>
-    <li><a href="#ref-for-inputevent⑤">3.2.4. aomScrollPageUp</a>
-    <li><a href="#ref-for-inputevent⑥">3.2.5. aomScrollPageDown</a>
-    <li><a href="#ref-for-inputevent⑦">4. Security Considerations</a>
+    <li><a href="#ref-for-inputevent①">3.1. Input event interfaces</a> <a href="#ref-for-inputevent②">(2)</a>
+    <li><a href="#ref-for-inputevent③">3.2.1. actionIncrement</a>
+    <li><a href="#ref-for-inputevent④">3.2.2. actionDecrement</a>
+    <li><a href="#ref-for-inputevent⑤">3.2.3. actionDismiss</a>
+    <li><a href="#ref-for-inputevent⑥">3.2.4. actionScrollPageUp</a>
+    <li><a href="#ref-for-inputevent⑦">3.2.5. actionScrollPageDown</a>
+    <li><a href="#ref-for-inputevent⑧">4. Security Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-uievent-uievent">
@@ -1742,25 +1744,25 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
   <aside class="dfn-panel" data-for="term-for-code-arrowdown">
    <a href="http://www.w3.org/TR/uievents-code/#code-arrowdown">http://www.w3.org/TR/uievents-code/#code-arrowdown</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-code-arrowdown">3.2.2. aomDecrement</a>
+    <li><a href="#ref-for-code-arrowdown">3.2.2. actionDecrement</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-code-arrowleft">
    <a href="http://www.w3.org/TR/uievents-code/#code-arrowleft">http://www.w3.org/TR/uievents-code/#code-arrowleft</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-code-arrowleft">3.2.2. aomDecrement</a>
+    <li><a href="#ref-for-code-arrowleft">3.2.2. actionDecrement</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-code-arrowright">
    <a href="http://www.w3.org/TR/uievents-code/#code-arrowright">http://www.w3.org/TR/uievents-code/#code-arrowright</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-code-arrowright">3.2.1. aomIncrement</a>
+    <li><a href="#ref-for-code-arrowright">3.2.1. actionIncrement</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-code-arrowup">
    <a href="http://www.w3.org/TR/uievents-code/#code-arrowup">http://www.w3.org/TR/uievents-code/#code-arrowup</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-code-arrowup">3.2.1. aomIncrement</a>
+    <li><a href="#ref-for-code-arrowup">3.2.1. actionIncrement</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-idl-DOMString">
@@ -1822,7 +1824,7 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
    <dd>Cameron McCormack; Boris Zbarsky; Tobie Langel. <a href="https://heycam.github.io/webidl/">Web IDL</a>. 15 December 2016. ED. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
-<pre class="idl highlight def"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent①①">InputEvent</a> : <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/uievents/#uievent-uievent" id="ref-for-uievent-uievent①">UIEvent</a> {
+<pre class="idl highlight def"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://www.w3.org/TR/uievents/#inputevent" id="ref-for-inputevent②①">InputEvent</a> : <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/uievents/#uievent-uievent" id="ref-for-uievent-uievent①">UIEvent</a> {
   <span class="kt">readonly</span> <span class="kt">attribute</span> <a class="n idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString①"><span class="kt">DOMString</span></a>? <a class="nv" data-readonly="" data-type="DOMString?" href="#dom-inputevent-inputtype"><code>inputType</code></a>;
 };
 
@@ -1831,44 +1833,44 @@ This specification builds on the UI events spec [UI-EVENTS].</p>
    <b><a href="#dom-inputevent-inputtype">#dom-inputevent-inputtype</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-dom-inputevent-inputtype①">3.1. Input event interfaces</a>
-    <li><a href="#ref-for-dom-inputevent-inputtype②">3.2.1. aomIncrement</a>
-    <li><a href="#ref-for-dom-inputevent-inputtype③">3.2.2. aomDecrement</a>
-    <li><a href="#ref-for-dom-inputevent-inputtype④">3.2.3. aomDismiss</a>
-    <li><a href="#ref-for-dom-inputevent-inputtype⑤">3.2.4. aomScrollPageUp</a>
-    <li><a href="#ref-for-dom-inputevent-inputtype⑥">3.2.5. aomScrollPageDown</a>
+    <li><a href="#ref-for-dom-inputevent-inputtype②">3.2.1. actionIncrement</a>
+    <li><a href="#ref-for-dom-inputevent-inputtype③">3.2.2. actionDecrement</a>
+    <li><a href="#ref-for-dom-inputevent-inputtype④">3.2.3. actionDismiss</a>
+    <li><a href="#ref-for-dom-inputevent-inputtype⑤">3.2.4. actionScrollPageUp</a>
+    <li><a href="#ref-for-dom-inputevent-inputtype⑥">3.2.5. actionScrollPageDown</a>
     <li><a href="#ref-for-dom-inputevent-inputtype⑦">5. Privacy Considerations</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="aomincrement">
-   <b><a href="#aomincrement">#aomincrement</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="actionincrement">
+   <b><a href="#actionincrement">#actionincrement</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-aomincrement">3.2.1. aomIncrement</a>
-    <li><a href="#ref-for-aomincrement①">3.2.4. aomScrollPageUp</a>
+    <li><a href="#ref-for-actionincrement">3.2.1. actionIncrement</a>
+    <li><a href="#ref-for-actionincrement①">3.2.4. actionScrollPageUp</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="aomdecrement">
-   <b><a href="#aomdecrement">#aomdecrement</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="actiondecrement">
+   <b><a href="#actiondecrement">#actiondecrement</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-aomdecrement">3.2.2. aomDecrement</a>
-    <li><a href="#ref-for-aomdecrement①">3.2.5. aomScrollPageDown</a>
+    <li><a href="#ref-for-actiondecrement">3.2.2. actionDecrement</a>
+    <li><a href="#ref-for-actiondecrement①">3.2.5. actionScrollPageDown</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="aomdismiss">
-   <b><a href="#aomdismiss">#aomdismiss</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="actiondismiss">
+   <b><a href="#actiondismiss">#actiondismiss</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-aomdismiss">3.2.3. aomDismiss</a>
+    <li><a href="#ref-for-actiondismiss">3.2.3. actionDismiss</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="aomscrollpageup">
-   <b><a href="#aomscrollpageup">#aomscrollpageup</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="actionscrollpageup">
+   <b><a href="#actionscrollpageup">#actionscrollpageup</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-aomscrollpageup">3.2.4. aomScrollPageUp</a>
+    <li><a href="#ref-for-actionscrollpageup">3.2.4. actionScrollPageUp</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="aomscrollpagedown">
-   <b><a href="#aomscrollpagedown">#aomscrollpagedown</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="actionscrollpagedown">
+   <b><a href="#actionscrollpagedown">#actionscrollpagedown</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-aomscrollpagedown">3.2.5. aomScrollPageDown</a>
+    <li><a href="#ref-for-actionscrollpagedown">3.2.5. actionScrollPageDown</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */

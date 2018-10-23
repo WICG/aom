@@ -6,6 +6,7 @@ Level:
 Group: webplatform
 Status: ED
 TR: https://wicg.github.io/aom/spec/input-events.html
+ED: https://wicg.github.io/aom/spec/input-events.html
 Repository: wicg/aom
 Editor: Alice Boxhall, Google, aboxhall@google.com
 Editor: Gary Kacmarcik, Google, garykac@google.com
@@ -43,15 +44,17 @@ urlPrefix: http://www.w3.org/TR/uievents-code/#code-; type: dfn; spec: uievents-
 
 	<i>This section is non-normative.</i>
 
-	TODO: Introduction for AOM input events
+	Input events will be triggered by certain user interactions,
+        in certain contexts,
+        as well as via assistive technology interactions.
 
 <h2 id="Cases">Use Cases</h2>
 
 	<i>This section is non-normative.</i>
 
-	<h3 id="use-case-1">Use Case 1</h3>
+	<h3 id="use-case-1">Implementing an ARIA slider</h3>
 	
-		TODO: Use case 1
+		TODO: Use case
 		
 <h2 id="input-events">Input Events</h2>
 
@@ -60,7 +63,7 @@ urlPrefix: http://www.w3.org/TR/uievents-code/#code-; type: dfn; spec: uievents-
 	
 	<h3 id="input-event-interfaces">Input event interfaces</h3>
 
-		The ClipboardEvent interface extends the {{Event}} interface.
+		The {{InputEvent}} interface extends the {{Event}} interface.
 
 		<div id="inputevent-idl">
 
@@ -81,59 +84,59 @@ urlPrefix: http://www.w3.org/TR/uievents-code/#code-; type: dfn; spec: uievents-
 
 	<h3 id="aom-input-event-types"><dfn>Input Event Types</dfn></h3>
 
-		<h4 id="type-aom-increment"><dfn>aomIncrement</dfn></h4>
+		<h4 id="type-action-increment"><dfn>actionIncrement</dfn></h4>
 
-			An {{InputEvent}} event with {{inputType}} set to [=aomIncrement=] fires in
+			An {{InputEvent}} event with {{inputType}} set to [=actionIncrement=] fires in
 			response to an input action that increments a control. For example, as a
 			result of a [=ArrowRight=] or [=ArrowUp=] key press.
 
-			This event type is valid for the following roles:			
+			This event type is valid for the following roles:
 			* "progressbar"
 			* "scrollbar"
 			* "slider"
 			* "spinbutton"
 
-		<h4 id="type-aom-decrement"><dfn>aomDecrement</dfn></h4>
+		<h4 id="type-action-decrement"><dfn>actionDecrement</dfn></h4>
 
-			An {{InputEvent}} event with {{inputType}} set to [=aomDecrement=] fires in
+			An {{InputEvent}} event with {{inputType}} set to [=actionDecrement=] fires in
 			response to an input action that increments a control. For example, as a
 			result of a [=ArrowLeft=] or [=ArrowDown=] key press.
 
-			This event type is valid for the following roles:			
+			This event type is valid for the following roles:
 			* "progressbar"
 			* "scrollbar"
 			* "slider"
 			* "spinbutton"
 
-		<h4 id="type-aom-dismiss"><dfn>aomDismiss</dfn></h4>
+		<h4 id="type-action-dismiss"><dfn>actionDismiss</dfn></h4>
 
-			An {{InputEvent}} event with {{inputType}} set to [=aomDismiss=] fires when
-			a dialog or other dismissable UI element is closed.
+			An {{InputEvent}} event with {{inputType}} set to [=actionDismiss=] fires when
+			a dialog or other dismissable ACTION element is closed.
 
 			This event type is valid for the following roles:			
 			* "menu"
 			* "dialog"
 			* "alertdialog"
 
-		<h4 id="type-aom-scrollpageup"><dfn>aomScrollPageUp</dfn></h4>
+		<h4 id="type-action-scrollpageup"><dfn>actionScrollPageUp</dfn></h4>
 
-			An {{InputEvent}} event with {{inputType}} set to [=aomScrollPageUp=] fires
+			An {{InputEvent}} event with {{inputType}} set to [=actionScrollPageUp=] fires
 			when user requests the current content to scroll up (or right) by a "page",
 			where a page of data is typically equal to one screen.
 			
-			This type differs from [=aomIncrement=] in that it applies only to scrollable
+			This type differs from [=actionIncrement=] in that it applies only to scrollable
 			content.
 
 			This event type is intended for scrollable content, but is valid for all
 			roles (since it can bubble up to the `body` element, which is scrollable).
 
-		<h4 id="type-aom-scrollpagedown"><dfn>aomScrollPageDown</dfn></h4>
+		<h4 id="type-action-scrollpagedown"><dfn>actionScrollPageDown</dfn></h4>
 
-			An {{InputEvent}} event with {{inputType}} set to [=aomScrollPageDown=] fires
+			An {{InputEvent}} event with {{inputType}} set to [=actionScrollPageDown=] fires
 			when user requests the current content to scroll down (or left) by a "page",
 			where a page of data is typically equal to one screen.
 			
-			This type differs from [=aomDecrement=] in that it applies only to scrollable
+			This type differs from [=actionDecrement=] in that it applies only to scrollable
 			content.
 
 			This event type is intended for scrollable content, but is valid for all
