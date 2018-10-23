@@ -4,7 +4,7 @@
 Shortname: aom-input-events
 Level:
 Group: webplatform
-Status: ED
+Status: UD
 TR: https://wicg.github.io/aom/spec/input-events.html
 ED: https://wicg.github.io/aom/spec/input-events.html
 Repository: wicg/aom
@@ -14,7 +14,7 @@ Abstract:
 	This specification defines additional {{inputType}} values for the {{beforeinput}} and
 	{{input}} events that are required for the Accessibility Object Model [[!AOM]].
 	This specification builds on the UI events spec [UI-EVENTS].
-Status Text: <p> <strong>Changes to this document may be tracked at <a href="https://github.com/garykac/aom-input-events">https://github.com/garykac/aom-input-events</a>.</strong> </p>
+Status Text: <p> <strong>Changes to this document may be tracked at <a href="https://github.com/wicg/aom">https://github.com/wicg/aom</a>.</strong> </p>
 </pre>
 
 <pre class="anchors">
@@ -158,6 +158,9 @@ urlPrefix: http://www.w3.org/TR/uievents-code/#code-; type: dfn; spec: uievents-
 
 	We would like to acknowledge the contributions made by the following:
 
-	Alice Boxhall,
+        Dominic Mazzoni,
+        Ian Pouncey,
 	James Craig,
+        James Teh,
+        Jeffrey Yasskin,
 	and Léonie Watson.
