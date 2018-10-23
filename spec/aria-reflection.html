@@ -91,16 +91,12 @@
 <body>
   <section id="abstract">
     <p>
-      This specification describes the additions to existing specifications which will make it possible for web authors to programmatically
-      express Element semantics in two ways:
-      <ul>
-        <li>as reflected IDL attributes on Elements, or</li>
-        <li>as non-reflected IDL attributes on an attached ShadowRoot.</li>
-      </ul>
+      This specification describes the additions to the ARIA 1.2 specification which will make it possible for web authors to programmatically
+      express Element semantics via an IDL interface.
     </p>
   </section>
   <section id="idl-interface" class="normative">
-    <h2>IDL Interface</h2>
+    <h2>IDL Interfaces</h2>
     <p class="note">This section is part of the
       <a href="https://w3c.github.io/aria/#idl-interface">ARIA 1.2 Specification</a>, and is included here for informative purposes only.</p>
 
@@ -110,12 +106,11 @@
         <dfn>AccessibilityRole</dfn>
       </h2>
       <pre class="idl">
-    interface mixin AccessibilityRole {
-    attribute DOMString? role;
-    };
-    Element includes AccessibilityRole;
-          ShadowRoot includes AccessibilityRole;
-  </pre>
+interface mixin AccessibilityRole {
+attribute DOMString? role;
+};
+Element implements AccessibilityRole;
+</pre>
       <section id="role-reflection" class="normative">
         <h2>ARIA Role Reflection</h2>
         <p>User agents MUST
@@ -132,7 +127,7 @@
         <dfn>AriaAttributes</dfn>
       </h2>
       <pre class="idl">
-    interface mixin AriaAttributes {
+  interface mixin AriaAttributes {
     attribute DOMString? ariaActiveDescendant;
     attribute DOMString? ariaAtomic;
     attribute DOMString? ariaAutoComplete;
@@ -179,10 +174,9 @@
     attribute DOMString? ariaValueMin;
     attribute DOMString? ariaValueNow;
     attribute DOMString? ariaValueText;
-    };
-    Element includes AriaAttributes;
-          ShadowRoot includes AriaAttributes;
-  </pre>
+  };
+  Element implements AriaAttributes;
+</pre>
       <section id="attribute-reflection" class="normative">
         <h2>ARIA Attribute Reflection</h2>
         <p>User agents MUST
@@ -575,22 +569,22 @@
             a camel-cased IDL attribute capitalizing each word boundary. For example,
             <pref>aria-describedby</pref> becomes
             <code>ariaDescribedBy</code> with both the D and B capitalized.</li>
-          <li>Likewise, any attribute name referencing concepts that can be hyphenated (such as "multi-selectable") becomes a camel-cased
-            IDL attribute capitalizing each hyphenation boundary. For example, the only valid spelling for "multi-selectable" is
-            hyphenated, so
+          <li>Likewise, any attribute name referencing concepts that can be hyphenated (such as "multi-selectable") becomes a
+            camel-cased IDL attribute capitalizing each hyphenation boundary. For example, the only valid spelling for "multi-selectable"
+            is hyphenated, so
             <pref>aria-multiselectable</pref> becomes
             <code>ariaMultiSelectable</code> with both the M and S capitalized.</li>
           <li>When trusted dictionary sources list both hyphenated or non-hyphenated spellings (e.g. "multi-line" and "multiline"
             are both valid spellings) use the hyphenated version and apply the hyphenation rule above. For example,
             <pref>aria-multiline</pref> becomes
             <code>ariaMultiLine</code> with both the M and L capitalized.</li>
-          <li>If all trusted dictionary sources list a single spelling of a compound word with no spaces or hyphens, only the first
-            letter of the term is capitalized. For example, neither “place-holder” nor “place holder” are considered valid spellings
-            of the term “placeholder,” so
+          <li>If all trusted dictionary sources list a single spelling of a compound word with no spaces or hyphens, only the
+            first letter of the term is capitalized. For example, neither “place-holder” nor “place holder” are considered
+            valid spellings of the term “placeholder,” so
             <pref>aria-placeholder</pref> becomes
             <code>ariaPlaceholder</code> with only the P capitalized.</li>
-          <li>There are currently no acronym-based ARIA attributes, but if future attributes include acronym usage, attempt to match
-            existing DOM conventions (e.g. ID becomes Id).</li>
+          <li>There are currently no acronym-based ARIA attributes, but if future attributes include acronym usage, attempt to
+            match existing DOM conventions (e.g. ID becomes Id).</li>
         </ul>
       </section>
       <section class="informative" id="idl_attr_exceptions">
@@ -610,7 +604,6 @@
           <code>ariaPlaceHolder</code> despite the fact that it's not a hyphenated word.</p>
       </section>
     </section>
-
     <section class="informative" id="idl_example_usage">
       <h2>Example IDL Attribute Usage</h2>
       <p>The primary purpose of ARIA IDL attribute reflection is to ease JavaScript-based manipulation of values. The following
@@ -619,7 +612,7 @@
 
         <!-- ReSpec needs these examples to be unindented. -->
         <pre>&lt;div id="inaccessibleButton"&gt;
-    &lt;!-- Use semantic markup instead. This is just a retrofit example. --&gt;
+  &lt;!-- Use semantic markup instead. This is just a retrofit example. --&gt;
 &lt;/div&gt;</pre>
         <pre>// Get a reference to the element.
 let el = document.getElementById('inaccessibleButton'); 
@@ -647,113 +640,8 @@ el.getAttribute("aria-label"); // Returns "Publish"</pre>
 
       </aside>
     </section>
-
-    <section class="normative" id="shadowroot_interaction">
-      <h2>Interaction between
-        <code>ShadowRoot</code> and
-        <code>host</code>
-      </h2>
-      <p>If an
-        <code>Element</code> has an attached
-        <code>ShadowRoot</code>, and the author has access to the
-        <code>ShadowRoot</code>, authors may set a
-        <code>role</code> or ARIA attribute, such as
-        <a href="#dom-ariaattributes-ariaactivedescendant">
-          <code>ariaActivedescendant</code>
-        </a>, on
-        <em>either</em> the
-        <code>Element</code>,
-        <em>or</em> the
-        <code>ShadowRoot</code>, or both.
-      </p>
-      <p>
-        If an IDL property from either the
-        <code>AccessibilityRole</code> mixin or the
-        <code>AriaAttributes</code> mixin
-        is set on <em>either</em> the <code>Element</code>
-        <em>or</em> its associated <code>ShadowRoot</code>,
-        that IDL attribute should be
-        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_general">mapped</a>
-        to the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object">accessible object</a>
-        <a href="https://www.w3.org/TR/core-aam-1.1/#include_elements">associated</a>
-        with the host
-        <code>Element</code>.
-      </p>
-      <p>
-        If a property is set to a non-<code>null</code> value on
-        <em>both</em> the
-        <code>ShadowRoot</code>
-        and the host
-        <code>Element</code>, the reflected value on the host
-        <code>Element</code> takes precedence,
-        i.e. the reflected <code>role</code> value on the host <code>Element</code>
-        is used to compute the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#mapping_role">mapped role</a>
-        in the
-        <a href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree">accessibility tree</a>,
-        regardless of the value of the <code>role</code> value on the associated
-        <code>ShadowRoot</code>,
-        and similarly for all ARIA attribute properties.
-      </p>
-      <aside class="example">
-        <p>
-          For example, an author creating a
-          <a href="https://html.spec.whatwg.org/multipage/#custom-elements">Custom Element</a>
-          may use a
-          <code>ShadowRoot</code> to encapsulate implementation details for the element.
-        </p>
-        <p>
-          They may use the
-          <code>ShadowRoot</code> to encode certain "default" values for the ARIA
-          <code>role</code> and properties for the element, which an author using the Custom Element may choose to override using reflected
-          ARIA properties.
-        </p>
-        <pre>
-class CustomCheckbox extends HTMLElement {
-
-  // ...
-
-  constructor() {
-    super();
-    this.attachShadow({mode: 'open'});  // mode may also be "closed".
-
-    // ... any other set-up
-  }
-
-  connectedCallback() {
-    // Set the default semantics for the custom element
-    // when it is inserted in the page.
-    this.shadowRoot.role = "checkbox";
-  }
-
-  // Observe the custom "checked" attribute
-  static get observedAttributes() { return ["checked"]; }
-
-  // ... setters/getters for properties which reflect to attributes
-
-  // When the custom "checked" attribute changes,
-  // keep the accessible checked state in sync.
-  attributeChangedCallback(name, oldValue, newValue) {
-  switch(name) {
-    case "checked":
-      this.shadowRoot.ariaChecked = (newValue !== null);
-    }
-  }
-}
-
-customElements.define("custom-checkbox", CustomCheckbox);
-</pre>
-        <p>An author using the Custom Element could then use
-          the reflected ARIA properties/content attributes to override the default values,
-          just as they would when using a native element:</p>
-<pre>
-&lt;!-- ARIA role overrides Shadow DOM role --&gt;
-&lt;custom-checkbox role="radio"&gt;
-</pre>
-      </aside>
-    </section>
   </section>
+
 </body>
 
 </html>
