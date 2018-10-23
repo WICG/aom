@@ -1,7 +1,7 @@
 <!doctype html><html lang="en">
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-  <title>ARIA reflection and Web Components</title>
+  <title>Default semantic properties for Custom Elements</title>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
@@ -1212,9 +1212,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 9c7b3c1bf4afcf8eca4fd3a1529a298ee35be006" name="generator">
+  <meta content="Bikeshed version 3678d496235a6f1964fc14f56861db11f24476c4" name="generator">
   <link href="https://wicg.github.io/aom" rel="canonical">
-  <meta content="8b2e6dcc28727e9235af10a36e01a4dbec3fc203" name="document-revision">
+  <meta content="641edd3d07f6c9039c842c8bb95a4486469351f1" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1404,71 +1404,70 @@ pre.idl.highlight { color: #708090; }
 .highlight:not(.idl) { background: hsl(24, 20%, 95%); }
 code.highlight { padding: .1em; border-radius: .3em; }
 pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
-c-[a] { color: #990055 } /* Keyword.Declaration */
-c-[b] { color: #990055 } /* Keyword.Type */
-c-[c] { color: #708090 } /* Comment */
-c-[d] { color: #708090 } /* Comment.Multiline */
-c-[e] { color: #0077aa } /* Name.Attribute */
-c-[f] { color: #669900 } /* Name.Tag */
-c-[g] { color: #222222 } /* Name.Variable */
-c-[k] { color: #990055 } /* Keyword */
-c-[l] { color: #000000 } /* Literal */
-c-[m] { color: #000000 } /* Literal.Number */
-c-[n] { color: #0077aa } /* Name */
-c-[o] { color: #999999 } /* Operator */
-c-[p] { color: #999999 } /* Punctuation */
-c-[s] { color: #a67f59 } /* Literal.String */
-c-[t] { color: #a67f59 } /* Literal.String.Single */
-c-[u] { color: #a67f59 } /* Literal.String.Double */
-c-[cp] { color: #708090 } /* Comment.Preproc */
-c-[c1] { color: #708090 } /* Comment.Single */
-c-[cs] { color: #708090 } /* Comment.Special */
-c-[kc] { color: #990055 } /* Keyword.Constant */
-c-[kn] { color: #990055 } /* Keyword.Namespace */
-c-[kp] { color: #990055 } /* Keyword.Pseudo */
-c-[kr] { color: #990055 } /* Keyword.Reserved */
-c-[ld] { color: #000000 } /* Literal.Date */
-c-[nc] { color: #0077aa } /* Name.Class */
-c-[no] { color: #0077aa } /* Name.Constant */
-c-[nd] { color: #0077aa } /* Name.Decorator */
-c-[ni] { color: #0077aa } /* Name.Entity */
-c-[ne] { color: #0077aa } /* Name.Exception */
-c-[nf] { color: #0077aa } /* Name.Function */
-c-[nl] { color: #0077aa } /* Name.Label */
-c-[nn] { color: #0077aa } /* Name.Namespace */
-c-[py] { color: #0077aa } /* Name.Property */
-c-[ow] { color: #999999 } /* Operator.Word */
-c-[mb] { color: #000000 } /* Literal.Number.Bin */
-c-[mf] { color: #000000 } /* Literal.Number.Float */
-c-[mh] { color: #000000 } /* Literal.Number.Hex */
-c-[mi] { color: #000000 } /* Literal.Number.Integer */
-c-[mo] { color: #000000 } /* Literal.Number.Oct */
-c-[sb] { color: #a67f59 } /* Literal.String.Backtick */
-c-[sc] { color: #a67f59 } /* Literal.String.Char */
-c-[sd] { color: #a67f59 } /* Literal.String.Doc */
-c-[se] { color: #a67f59 } /* Literal.String.Escape */
-c-[sh] { color: #a67f59 } /* Literal.String.Heredoc */
-c-[si] { color: #a67f59 } /* Literal.String.Interpol */
-c-[sx] { color: #a67f59 } /* Literal.String.Other */
-c-[sr] { color: #a67f59 } /* Literal.String.Regex */
-c-[ss] { color: #a67f59 } /* Literal.String.Symbol */
-c-[vc] { color: #0077aa } /* Name.Variable.Class */
-c-[vg] { color: #0077aa } /* Name.Variable.Global */
-c-[vi] { color: #0077aa } /* Name.Variable.Instance */
-c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
+.highlight .c { color: #708090 } /* Comment */
+.highlight .k { color: #990055 } /* Keyword */
+.highlight .l { color: #000000 } /* Literal */
+.highlight .n { color: #0077aa } /* Name */
+.highlight .o { color: #999999 } /* Operator */
+.highlight .p { color: #999999 } /* Punctuation */
+.highlight .cm { color: #708090 } /* Comment.Multiline */
+.highlight .cp { color: #708090 } /* Comment.Preproc */
+.highlight .c1 { color: #708090 } /* Comment.Single */
+.highlight .cs { color: #708090 } /* Comment.Special */
+.highlight .kc { color: #990055 } /* Keyword.Constant */
+.highlight .kd { color: #990055 } /* Keyword.Declaration */
+.highlight .kn { color: #990055 } /* Keyword.Namespace */
+.highlight .kp { color: #990055 } /* Keyword.Pseudo */
+.highlight .kr { color: #990055 } /* Keyword.Reserved */
+.highlight .kt { color: #990055 } /* Keyword.Type */
+.highlight .ld { color: #000000 } /* Literal.Date */
+.highlight .m { color: #000000 } /* Literal.Number */
+.highlight .s { color: #a67f59 } /* Literal.String */
+.highlight .na { color: #0077aa } /* Name.Attribute */
+.highlight .nc { color: #0077aa } /* Name.Class */
+.highlight .no { color: #0077aa } /* Name.Constant */
+.highlight .nd { color: #0077aa } /* Name.Decorator */
+.highlight .ni { color: #0077aa } /* Name.Entity */
+.highlight .ne { color: #0077aa } /* Name.Exception */
+.highlight .nf { color: #0077aa } /* Name.Function */
+.highlight .nl { color: #0077aa } /* Name.Label */
+.highlight .nn { color: #0077aa } /* Name.Namespace */
+.highlight .py { color: #0077aa } /* Name.Property */
+.highlight .nt { color: #669900 } /* Name.Tag */
+.highlight .nv { color: #222222 } /* Name.Variable */
+.highlight .ow { color: #999999 } /* Operator.Word */
+.highlight .mb { color: #000000 } /* Literal.Number.Bin */
+.highlight .mf { color: #000000 } /* Literal.Number.Float */
+.highlight .mh { color: #000000 } /* Literal.Number.Hex */
+.highlight .mi { color: #000000 } /* Literal.Number.Integer */
+.highlight .mo { color: #000000 } /* Literal.Number.Oct */
+.highlight .sb { color: #a67f59 } /* Literal.String.Backtick */
+.highlight .sc { color: #a67f59 } /* Literal.String.Char */
+.highlight .sd { color: #a67f59 } /* Literal.String.Doc */
+.highlight .s2 { color: #a67f59 } /* Literal.String.Double */
+.highlight .se { color: #a67f59 } /* Literal.String.Escape */
+.highlight .sh { color: #a67f59 } /* Literal.String.Heredoc */
+.highlight .si { color: #a67f59 } /* Literal.String.Interpol */
+.highlight .sx { color: #a67f59 } /* Literal.String.Other */
+.highlight .sr { color: #a67f59 } /* Literal.String.Regex */
+.highlight .s1 { color: #a67f59 } /* Literal.String.Single */
+.highlight .ss { color: #a67f59 } /* Literal.String.Symbol */
+.highlight .vc { color: #0077aa } /* Name.Variable.Class */
+.highlight .vg { color: #0077aa } /* Name.Variable.Global */
+.highlight .vi { color: #0077aa } /* Name.Variable.Instance */
+.highlight .il { color: #000000 } /* Literal.Number.Integer.Long */
 </style>
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">ARIA reflection and Web Components</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Unofficial Proposal Draft, <time class="dt-updated" datetime="2018-08-06">6 August 2018</time></span></h2>
+   <h1 class="p-name no-ref" id="title">Default semantic properties for Custom Elements</h1>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Unofficial Proposal Draft, <time class="dt-updated" datetime="2018-10-23">23 October 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
      <dd><a class="u-url" href="https://wicg.github.io/aom">https://wicg.github.io/aom</a>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/WICG/aom/issues/">GitHub</a>
-     <dd><a href="#issues-index">Inline In Spec</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:aboxhall@google.com">Alice Boxhall</a> (<span class="p-org org">Google</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:jcraig@apple.com">James Craig</a> (<span class="p-org org">Apple</span>)
@@ -1477,7 +1476,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     </dl>
    </div>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2018 the Contributors to the ARIA reflection and Web Components Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
+   <p class="copyright" data-fill-with="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2018 the Contributors to the Default semantic properties for Custom Elements Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
 A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available. </p>
    <hr title="Separator for header">
   </div>
@@ -1515,7 +1514,7 @@ to programmatically express semantics for Web Components.</p>
       <li><a href="#element-definition-options"><span class="secno">1.2</span> <span class="content">Changes to custom element definition</span></a>
      </ol>
     <li>
-     <a href="#semantics-precedence"><span class="secno">2</span> <span class="content">ARIA semantic precedence between <code class="idl"><span>ElementDefinitionOptions</span></code>, <code class="idl"><span>ElementSemantics</span></code> and ARIA properties</span></a>
+     <a href="#semantics-precedence"><span class="secno">2</span> <span class="content">ARIA semantic precedence between <code class="idl"><span>ElementDefinitionOptions</span></code>, <code class="idl"><span>ElementInternals</span></code> and ARIA properties</span></a>
      <ol class="toc">
       <li><a href="#semantics-precedence-intro"><span class="secno">2.1</span> <span class="content">Introduction</span></a>
       <li>
@@ -1538,7 +1537,6 @@ to programmatically express semantics for Web Components.</p>
       <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
      </ol>
     <li><a href="#idl-index"><span class="secno"></span> <span class="content">IDL Index</span></a>
-    <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
    </ol>
   </nav>
   <main>
@@ -1546,12 +1544,12 @@ to programmatically express semantics for Web Components.</p>
    <section class="non-normative">
     <h3 class="heading settled" data-level="1.1" id="custom-elements-intro"><span class="secno">1.1. </span><span class="content">Introduction</span><a class="self-link" href="#custom-elements-intro"></a></h3>
     <p><em>This section is non-normative.</em></p>
-    <p>Authors may provide semantics for custom elements
+    <p>Authors may potentially provide semantics for custom elements
 in two ways:</p>
     <ul>
-     <li data-md>
+     <li data-md="">
       <p>as part of the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition">custom element definition</a></p>
-     <li data-md>
+     <li data-md="">
       <p>via an object provided to each instance of the custom element.</p>
     </ul>
     <h4 class="heading settled" data-level="1.1.1" id="custom-element-definition-semantics"><span class="secno">1.1.1. </span><span class="content">Defining custom element semantics as part of the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition①">custom element definition</a></span><a class="self-link" href="#custom-element-definition-semantics"></a></h4>
@@ -1570,17 +1568,17 @@ of the custom element.</p>
      <a class="self-link" href="#custom-tab-example"></a> For example, an author creating a custom tab control
 may define three custom elements for the individual tabs,
 the tab list and the tab panel: 
-<pre class="language-js highlight"><c- kr>class</c-> TabListElement <c- kr>extends</c-> HTMLElement <c- p>{</c-> <c- p>...</c-> <c- p>}</c->
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-tablist"</c-><c- p>,</c-> TabListElement<c- p>,</c->
-                      <c- p>{</c-> role<c- o>:</c-> <c- u>"tablist"</c-><c- p>,</c-> ariaOrientation<c- o>:</c-> <c- u>"horizontal"</c-> <c- p>});</c->
+<pre class="language-js highlight"><span class="kr">class</span> TabListElement <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tablist"</span><span class="p">,</span> TabListElement<span class="p">,</span>
+                      <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tablist"</span><span class="p">,</span> ariaOrientation<span class="o">:</span> <span class="s2">"horizontal"</span> <span class="p">});</span>
 
-<c- kr>class</c-> TabElement <c- kr>extends</c-> HTMLElement <c- p>{</c-> <c- p>...</c-> <c- p>}</c->
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-tab"</c-><c- p>,</c-> TabElement<c- p>,</c->
-                      <c- p>{</c-> role<c- o>:</c-> <c- u>"tab"</c-> <c- p>});</c->
+<span class="kr">class</span> TabElement <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tab"</span><span class="p">,</span> TabElement<span class="p">,</span>
+                      <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tab"</span> <span class="p">});</span>
 
-<c- kr>class</c-> TabPanelElement <c- kr>extends</c-> HTMLElement <c- p>{</c-> <c- p>...</c-> <c- p>}</c->
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-tabpanel"</c-><c- p>,</c-> TabPanelElement<c- p>,</c->
-                      <c- p>{</c-> role<c- o>:</c-> <c- u>"tabpanel"</c-> <c- p>});</c->
+<span class="kr">class</span> TabPanelElement <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tabpanel"</span><span class="p">,</span> TabPanelElement<span class="p">,</span>
+                      <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tabpanel"</span> <span class="p">});</span>
 </pre>
      <p>When a <code>&lt;custom-tab></code> element is <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_general" id="ref-for-mapping_general">mapped</a> into the <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessibility-tree" id="ref-for-dfn-accessibility-tree">accessibility tree</a>,
 by default it will have a <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_role" id="ref-for-mapping_role">mapped role</a> of <code>tab</code>.</p>
@@ -1588,11 +1586,12 @@ by default it will have a <a data-link-type="dfn" href="https://www.w3.org/TR/co
 mapped to an <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object" id="ref-for-dfn-accessible-object①">accessible object</a> with a <a data-link-type="dfn" href="https://www.w3.org/TR/html-aam-1.0/#details-id-17" id="ref-for-details-id-17">role of <code>button</code></a>.</p>
     </aside>
     <h4 class="heading settled" data-level="1.1.2" id="element-semantics"><span class="secno">1.1.2. </span><span class="content">Defining per-instance custom element semantics</span><a class="self-link" href="#element-semantics"></a></h4>
-    <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element①">custom element</a> author may use the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics">ElementSemantics</a></code> object,
-provided in the <a data-link-type="dfn" href="#createdcallback" id="ref-for-createdcallback"><code>createdCallback</code></a> reaction,
+    <p class="note" role="note"><span>Note:</span> see <a href="https://github.com/w3c/webcomponents/issues/758">Web Components issue #758</a> for up to date information on <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals">ElementInternals</a></code>.</p>
+    <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element①">custom element</a> author may use the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals①">ElementInternals</a></code> object,
+created via <code class="idl"><a data-link-type="idl">createInternals()</a></code>,
 to modify the semantic state of an instance of a custom element
 in response to user interaction.</p>
-    <p>The properties set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics①">ElementSemantics</a></code> object
+    <p>The properties set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals②">ElementInternals</a></code> object
 are used when <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">mapping</a> the element
 to an <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#dfn-accessible-object" id="ref-for-dfn-accessible-object②">accessible object</a>.</p>
     <p class="note" role="note"><span>Note:</span> this is analogous to setting an "instance variable" -
@@ -1602,77 +1601,66 @@ The semantics defined in each
 apply only to their associated custom element instance object.</p>
     <aside class="example" id="custom-tab-example-continued">
      <a class="self-link" href="#custom-tab-example-continued"></a> For example, the author creating the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> and related elements
-may use the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics②">ElementSemantics</a></code> object
+may use the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals③">ElementInternals</a></code> object
 to modify the semantic details for the elements
 as they change in response to user interaction. 
-<pre class="language-js highlight"><c- kr>const</c-> elementPrivates <c- o>=</c-> <c- k>new</c-> WeakMap<c- p>();</c->
+<pre class="language-js highlight"><span class="kr">class</span> CustomTab <span class="kr">extends</span> HTMLElement <span class="p">{</span>
+  #internals <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  #tablist <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  #tabpanel <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
 
-<c- kr>class</c-> CustomTab <c- kr>extends</c-> HTMLElement <c- p>{</c->
-  constructor<c- p>()</c-> <c- p>{</c->
-    <c- kr>super</c-><c- p>();</c->
+  constructor<span class="p">()</span> <span class="p">{</span>
+    <span class="kr">super</span><span class="p">();</span>
+    <span class="k">this</span><span class="p">.</span>#internals <span class="o">=</span> customElements<span class="p">.</span>createInternals<span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
 
-    <c- a>let</c-> privates <c- o>=</c-> <c- p>{};</c->
-    elementPrivates<c- p>.</c->set<c- p>(</c-><c- k>this</c-><c- p>,</c-> privates<c- p>);</c->
-  <c- p>}</c->
+  <span class="c1">// Observe the custom "active" attribute.</span>
+<span class="c1"></span>  <span class="kr">static</span> get observedAttributes<span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">];</span> <span class="p">}</span>
 
-  <c- c1>// Observe the custom "active" attribute.</c->
-  <c- kr>static</c-> get observedAttributes<c- p>()</c-> <c- p>{</c-> <c- k>return</c-> <c- p>[</c-><c- u>"active"</c-><c- p>];</c-> <c- p>}</c->
+  connectedCallback<span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span>#tablist <span class="o">=</span> <span class="k">this</span><span class="p">.</span>parentElement<span class="p">;</span>
+  <span class="p">}</span>
 
-  createdCallback<c- p>(</c->elementConfiguration<c- p>)</c-> <c- p>{</c->
-    <c- a>let</c-> privates <c- o>=</c-> elementPrivates<c- p>.</c->get<c- p>(</c-><c- k>this</c-><c- p>);</c->
+  setTabPanel<span class="p">(</span>tabpanel<span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span>tabpanel<span class="p">.</span>localName <span class="o">!==</span> <span class="s2">"custom-tabpanel"</span> <span class="o">||</span> tabPanel<span class="p">.</span>id <span class="o">===</span> <span class="s2">""</span><span class="p">)</span>
+      <span class="k">return</span><span class="p">;</span>  <span class="c1">// fail silently</span>
+<span class="c1"></span>
+    <span class="k">this</span><span class="p">.</span>#tabpanel <span class="o">=</span> tabpanel<span class="p">;</span>
+    tabpanel<span class="p">.</span>setTab<span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>ariaControls <span class="o">=</span> tabPanel<span class="p">;</span>    <span class="c1">// does not reflect</span>
+<span class="c1"></span>  <span class="p">}</span>
 
-    <c- c1>// Keep a private reference to the semantics object.</c->
-    <c- a>let</c-> semantics <c- o>=</c-> elementConfiguration<c- p>.</c->elementSemantics<c- p>;</c->
-    privates<c- p>.</c->semantics <c- o>=</c-> semantics<c- p>;</c->
-  <c- p>}</c->
+  <span class="c1">// ... setters/getters for custom properties which reflect to attributes</span>
+<span class="c1"></span>
+  <span class="c1">// When the custom "active" attribute changes,</span>
+<span class="c1"></span>  <span class="c1">// keep the accessible checked state in sync.</span>
+<span class="c1"></span>  attributeChangedCallback<span class="p">(</span>name<span class="p">,</span> oldValue<span class="p">,</span> newValue<span class="p">)</span> <span class="p">{</span>
+    <span class="k">switch</span><span class="p">(</span>name<span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="s2">"active"</span><span class="o">:</span>
+        <span class="kd">let</span> active <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span>#tabpanel<span class="p">.</span>shown <span class="o">=</span> active<span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>ariaSelected <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!==</span> <span class="kc">null</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span>selected<span class="p">)</span>
+          <span class="k">this</span><span class="p">.</span>#tablist<span class="p">.</span>setSelectedTab<span class="p">(</span><span class="k">this</span><span class="p">);</span>  <span class="c1">// ensure no other tab has "active" set</span>
+<span class="c1"></span>        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-  connectedCallback<c- p>()</c-> <c- p>{</c->
-    <c- a>let</c-> privates <c- o>=</c-> elementPrivates<c- p>.</c->get<c- p>(</c-><c- k>this</c-><c- p>);</c->
-    privates<c- p>.</c->tablist <c- o>=</c-> <c- k>this</c-><c- p>.</c->parentElement<c- p>;</c->
-  <c- p>}</c->
-
-  setTabPanel<c- p>(</c->tabpanel<c- p>)</c-> <c- p>{</c->
-    <c- k>if</c-> <c- p>(</c->tabpanel<c- p>.</c->localName <c- o>!==</c-> <c- u>"custom-tabpanel"</c-> <c- o>||</c-> tabPanel<c- p>.</c->id <c- o>===</c-> <c- u>""</c-><c- p>)</c->
-      <c- k>return</c-><c- p>;</c->  <c- c1>// fail silently</c->
-
-    <c- a>let</c-> privates <c- o>=</c-> elementPrivates<c- p>.</c->get<c- p>(</c-><c- k>this</c-><c- p>);</c->
-    privates<c- p>.</c->tabpanel <c- o>=</c-> tabpanel<c- p>;</c->
-    tabpanel<c- p>.</c->setTab<c- p>(</c-><c- k>this</c-><c- p>);</c->
-    privates<c- p>.</c->semantics<c- p>.</c->ariaControls <c- o>=</c-> tabPanel<c- p>;</c->    <c- c1>// does not reflect</c->
-  <c- p>}</c->
-
-  <c- c1>// ... setters/getters for custom properties which reflect to attributes</c->
-
-  <c- c1>// When the custom "active" attribute changes,</c->
-  <c- c1>// keep the accessible checked state in sync.</c->
-  attributeChangedCallback<c- p>(</c->name<c- p>,</c-> oldValue<c- p>,</c-> newValue<c- p>)</c-> <c- p>{</c->
-    <c- a>let</c-> privates <c- o>=</c-> elementPrivates<c- p>.</c->get<c- p>(</c-><c- k>this</c-><c- p>);</c->
-    <c- k>switch</c-><c- p>(</c->name<c- p>)</c-> <c- p>{</c->
-      <c- k>case</c-> <c- u>"active"</c-><c- o>:</c->
-        <c- a>let</c-> active <c- o>=</c-> <c- p>(</c->newValue <c- o>!=</c-> <c- kc>null</c-><c- p>);</c->
-        privates<c- p>.</c->tabpanel<c- p>.</c->shown <c- o>=</c-> active<c- p>;</c->
-        privates<c- p>.</c->semantics<c- p>.</c->ariaSelected <c- o>=</c-> <c- p>(</c->newValue <c- o>!==</c-> <c- kc>null</c-><c- p>);</c->
-        <c- k>if</c-> <c- p>(</c->selected<c- p>)</c->
-          <c- k>this</c-><c- p>.</c->_tablist<c- p>.</c->setSelectedTab<c- p>(</c-><c- k>this</c-><c- p>);</c->  <c- c1>// ensure no other tab has "active" set</c->
-        <c- k>break</c-><c- p>;</c->
-    <c- p>}</c->
-  <c- p>}</c->
-<c- p>}</c->
-
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-tab"</c-><c- p>,</c-> CustomTab<c- p>,</c-> <c- p>{</c-> role<c- o>:</c-> <c- u>"tab"</c-> <c- p>});</c->
+customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tab"</span><span class="p">,</span> CustomTab<span class="p">,</span> <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tab"</span><span class="p">,</span> needsElementInternals<span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
 </pre>
      <p>Authors using these elements may override the default semantics
 using ARIA attributes as normal -
-see <a href="#semantics-precedence">§2 ARIA semantic precedence between ElementDefinitionOptions, ElementSemantics and ARIA properties</a>.</p>
+see <a href="#semantics-precedence">§2 ARIA semantic precedence between ElementDefinitionOptions, ElementInternals and ARIA properties</a>.</p>
      <p>For example, an author may modify the appearance
 of a <code>&lt;custom-tablist></code> element to appear as a vertical list.
 They could add an <code>aria-orientation</code> attribute to indicate this,
 overriding the default semantics set in the custom element definition.</p>
-<pre class="language-html highlight"><c- p>&lt;</c-><c- f>custom-tablist</c-> <c- e>aria-orientation</c-><c- o>=</c-><c- s>"vertical"</c-> <c- e>class</c-><c- o>=</c-><c- s>"vertical-tablist"</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>selected</c-><c- p>></c->Tab 1<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-><c- p>></c->Tab 2<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-><c- p>></c->Tab 3<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-<c- p>&lt;/</c-><c- f>div</c-><c- p>></c->
+<pre class="language-html highlight"><span class="p">&lt;</span><span class="nt">custom-tablist</span> <span class="na">aria-orientation</span><span class="o">=</span><span class="s">"vertical"</span> <span class="na">class</span><span class="o">=</span><span class="s">"vertical-tablist"</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span> <span class="na">selected</span><span class="p">></span>Tab 1<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span><span class="p">></span>Tab 2<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span><span class="p">></span>Tab 3<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">></span>
 </pre>
      <p>Because the author-provided role overrides the default role,
 the <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_general" id="ref-for-mapping_general①">mapped</a> role will be based on the author-provided role in each case.</p>
@@ -1685,14 +1673,9 @@ the <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_ge
    <p><em>[...]</em></p>
    <p>A custom element definition [includes]:</p>
    <dl>
-    <dt>A set of default values for <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="semantic-properties">semantic properties</dfn> (optional)
+    <dt>A set of default values for <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="semantic-properties">semantic properties</dfn> (optional)
     <dd> A map, whose keys are each an attribute in either the <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole">AccessibilityRole</a></code> or <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes">AriaAttributes</a></code> interface mixin.
     The corresponding values are <code class="idl"><a data-link-type="idl" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString">DOMString</a></code>. 
-    <dt>A collection of <em>lifecycle callbacks</em>
-    <dd> A map, whose five keys are the strings <code>"createdCallback"</code>, <code>"connectedCallback"</code>, <code>"disconnectedCallback"</code>, <code>"adoptedCallback"</code>, and <code>"attributeChangedCallback"</code>.
-    The corresponding values are either
-    a Web IDL Function callback function type value, or null.
-    By default the value of each entry is null. 
    </dl>
    <p><em>[...]</em></p>
 <pre class="idl highlight def">// Existing IDL
@@ -1707,45 +1690,19 @@ dictionary ElementDefinitionOptions {
   DOMString extends;
 };
 */
-<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②"><c- n>ElementDefinitionOptions</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole①"><c- n>AccessibilityRole</c-></a>;
-<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions③"><c- n>ElementDefinitionOptions</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes①"><c- n>AriaAttributes</c-></a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole①">AccessibilityRole</a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions③">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes①">AriaAttributes</a>;
 
-<c- b>dictionary</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="dictionary" data-export id="dictdef-elementsettings"><code><c- g>ElementSettings</c-></code></dfn> {
-  <a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics③"><c- n>ElementSemantics</c-></a> <dfn class="idl-code" data-dfn-for="ElementSettings" data-dfn-type="dict-member" data-export data-type="ElementSemantics " id="dom-elementsettings-elementsemantics"><code><c- g>elementSemantics</c-></code><a class="self-link" href="#dom-elementsettings-elementsemantics"></a></dfn>;
-};
+<span class="kt">dictionary</span> <dfn class="nv dfn-paneled idl-code" data-dfn-type="dictionary" data-export="" id="dictdef-elementinternals"><code>ElementInternals</code></dfn> {};
 
-<c- b>dictionary</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="dictionary" data-export id="dictdef-elementsemantics"><code><c- g>ElementSemantics</c-></code></dfn> {};
-<a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics④"><c- n>ElementSemantics</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole②"><c- n>AccessibilityRole</c-></a>;
-<a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑤"><c- n>ElementSemantics</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes②"><c- n>AriaAttributes</c-></a>;
+<a class="n" data-link-type="idl-name" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals④">ElementInternals</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole②">AccessibilityRole</a>;
+<a class="n" data-link-type="idl-name" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑤">ElementInternals</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes②">AriaAttributes</a>;
 </pre>
    <p><strong>Element definition</strong> is a process of adding a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition③">custom element definition</a> to the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry" id="ref-for-customelementregistry">CustomElementRegistry</a></code>.
 This is accomplished by the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define①">define()</a></code> method.
-When invoked, the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define②">define(name, constructor, options)</a></code> method must run these steps:</p>
+When invoked, the <code class="idl"><a data-link-type="idl">define(name, constructor, options)</a></code> method must run these steps:</p>
    <p><em>[...]</em></p>
-   <ol start="10">
-    <li>
-     Run the following substeps while catching any exceptions: 
-     <ol>
-      <li>Let <var>prototype</var> be Get(<var>constructor</var>, "prototype").
-          Rethrow any exceptions.
-      <li>If Type(prototype) is not Object,
-          then throw a <code>TypeError</code> exception.
-      <li>Let <var>lifecycleCallbacks</var> be a map
-          with the five keys <code>"createdCallback"</code>, <code>"connectedCallback"</code>, <code>"disconnectedCallback"</code>, <code>"adoptedCallback"</code>,
-          and <code>"attributeChangedCallback"</code>,
-          each of which belongs to an entry whose value is null.
-      <li>
-       For each of the five keys <var>callbackName</var> in <var>lifecycleCallbacks</var>, in the order listed in the previous step: 
-       <ol>
-        <li>Let <var>callbackValue</var> be
-            Get(<var>prototype</var>, <var>callbackName</var>).
-            Rethrow any exceptions.
-        <li>If <var>callbackValue</var> is not undefined,
-            then set the value of the entry in <var>lifecycleCallbacks</var> with key <var>callbackName</var> to the result of converting <var>callbackValue</var> to the Web IDL <code>Function</code> callback type.
-            Rethrow any exceptions from the conversion. 
-       </ol>
-      <li>... 
-     </ol>
+   <ol start="11">
     <li>
      Run the following substeps: 
      <ol>
@@ -1769,102 +1726,89 @@ When invoked, the <code class="idl"><a data-link-type="idl" href="https://html.s
     <li> Add <var>definition</var> to this <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry" id="ref-for-customelementregistry①">CustomElementRegistry</a></code>. 
    </ol>
    <p><em>[...]</em></p>
-   <p class="issue" id="issue-ae1515f5"><a class="self-link" href="#issue-ae1515f5"></a> Need to figure out where <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions④">ElementDefinitionOptions</a></code> and <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑥">ElementSemantics</a></code> get constructed and passed to
-the <code>createdCallback</code> method.</p>
-   <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element②">custom element</a> possesses the ability
-to respond to certain occurrences by running author code:</p>
-   <ul>
-    <li data-md>
-     <p>When upgraded, its constructor is run, with no arguments.</p>
-    <li data-md>
-     <p>After the constructor is run, its <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="createdcallback"><code>createdCallback</code></dfn> is called,
-with an instance of <code class="idl"><a data-link-type="idl" href="#dictdef-elementsettings" id="ref-for-dictdef-elementsettings">ElementSettings</a></code> as its argument.</p>
-    <li data-md>
-     <p><em>[...]</em></p>
-   </ul>
-   <h2 class="heading settled" data-level="2" id="semantics-precedence"><span class="secno">2. </span><span class="content">ARIA semantic precedence between <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions⑤">ElementDefinitionOptions</a></code>, <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑦">ElementSemantics</a></code> and ARIA properties</span><a class="self-link" href="#semantics-precedence"></a></h2>
+   <h2 class="heading settled" data-level="2" id="semantics-precedence"><span class="secno">2. </span><span class="content">ARIA semantic precedence between <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions④">ElementDefinitionOptions</a></code>, <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑥">ElementInternals</a></code> and ARIA properties</span><a class="self-link" href="#semantics-precedence"></a></h2>
    <section class="non-normative">
     <h3 class="heading settled" data-level="2.1" id="semantics-precedence-intro"><span class="secno">2.1. </span><span class="content">Introduction</span><a class="self-link" href="#semantics-precedence-intro"></a></h3>
     <p><em>This section is non-normative</em></p>
     <p>In general, the precedence of semantic properties is that
 any ARIA property set directly on the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element">Element</a></code> (either via setting an attribute or via the associated <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-reflect" id="ref-for-concept-reflect">reflected</a> property)
 overrides a value for the same property on
-the <code>Element</code>'s <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑧">ElementSemantics</a></code> object,
-and any ARIA property set either on the <code>Element</code> or the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑨">ElementSemantics</a></code> object
-will override a value set via the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define③">CustomElementRegistry.define()</a></code> method.</p>
+the <code>Element</code>'s <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑦">ElementInternals</a></code> object,
+and any ARIA property set either on the <code>Element</code> or the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑧">ElementInternals</a></code> object
+will override a value set via the <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define" id="ref-for-dom-customelementregistry-define②">CustomElementRegistry.define()</a></code> method.</p>
     <aside class="example" id="example-0078eabd">
      <a class="self-link" href="#example-0078eabd"></a> Suppose an author had created a custom checkbox element: 
-<pre class="language-js highlight"><c- kr>class</c-> CustomCheckbox <c- kr>extends</c-> HTMLElement <c- p>{</c-> <c- d>/* ... */</c-> <c- p>}</c->
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-checkbox"</c-><c- p>,</c-> CustomCheckbox<c- p>,</c->
-                      <c- p>{</c-> role<c- o>:</c-> <c- u>"checkbox"</c-><c- p>,</c-> ariaChecked<c- o>:</c-> <c- u>"false"</c-> <c- p>});</c->
+<pre class="language-js highlight"><span class="kr">class</span> CustomCheckbox <span class="kr">extends</span> HTMLElement <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-checkbox"</span><span class="p">,</span> CustomCheckbox<span class="p">,</span>
+                      <span class="p">{</span> role<span class="o">:</span> <span class="s2">"checkbox"</span><span class="p">,</span> ariaChecked<span class="o">:</span> <span class="s2">"false"</span> <span class="p">});</span>
 </pre>
      <p>An author using a <code>&lt;custom-checkbox></code> element
 could use the reflected ARIA properties/content attributes to override the
 default values, just as they would when using a native element:</p>
      <p></p>
-<pre class="highlight"><c- p>&lt;</c-><c- f>--</c-> <c- e>ARIA</c-> <c- e>role</c-> <c- e>overrides</c-> <c- e>implicit</c-> <c- e>role</c-> <c- e>--</c-><c- p>></c->
-<c- p>&lt;</c-><c- f>input</c-> <c- e>type</c-><c- o>=</c-><c- s>"checkbox"</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
+<pre class="highlight"><span class="p">&lt;</span><span class="nt">--</span> <span class="na">ARIA</span> <span class="na">role</span> <span class="na">overrides</span> <span class="na">implicit</span> <span class="na">role</span> <span class="na">--</span><span class="p">></span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"checkbox"</span> <span class="na">role</span><span class="o">=</span><span class="s">"radio"</span><span class="p">></span>
 
-<c- p>&lt;</c-><c- f>--</c-> <c- e>ARIA</c-> <c- e>role</c-> <c- e>overrides</c-> <c- e>custom</c-> <c- e>element</c-> <c- e>role</c-> <c- e>--</c-><c- p>></c->
-<c- p>&lt;</c-><c- f>custom-checkbox</c-> <c- e>role</c-><c- o>=</c-><c- s>"radio"</c-><c- p>></c->
+<span class="p">&lt;</span><span class="nt">--</span> <span class="na">ARIA</span> <span class="na">role</span> <span class="na">overrides</span> <span class="na">custom</span> <span class="na">element</span> <span class="na">role</span> <span class="na">--</span><span class="p">></span>
+<span class="p">&lt;</span><span class="nt">custom-checkbox</span> <span class="na">role</span><span class="o">=</span><span class="s">"radio"</span><span class="p">></span>
 </pre>
     </aside>
-    <aside class="example" id="example-766a4c7a">
-     <a class="self-link" href="#example-766a4c7a"></a> In the implementation of the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> element,
+    <aside class="example" id="example-45a2b920">
+     <a class="self-link" href="#example-45a2b920"></a> In the implementation of the <a href="#custom-tab-example"><code>&lt;custom-tab></code></a> element,
 if the author explicitly defined the default value for <code>ariaSelected</code> in the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition⑤">custom element definition</a>,
-then the value set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics①⓪">ElementSemantics</a></code> object
+then the value set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑨">ElementInternals</a></code> object
 in the <code>attributeChangedCallback()</code> method
 would override that default value: 
-<pre class="language-js highlight"><c- kr>class</c-> TabElement <c- kr>extends</c-> HTMLElement <c- p>{</c->
-  <c- c1>// ... many details omitted</c->
+<pre class="language-js highlight"><span class="kr">class</span> TabElement <span class="kr">extends</span> HTMLElement <span class="p">{</span>
+  <span class="c1">// ... many details omitted</span>
+<span class="c1"></span>
+  <span class="c1">// When the custom "active" attribute changes,</span>
+<span class="c1"></span>  <span class="c1">// keep the accessible checked state in sync.</span>
+<span class="c1"></span>  attributeChangedCallback<span class="p">(</span>name<span class="p">,</span> oldValue<span class="p">,</span> newValue<span class="p">)</span> <span class="p">{</span>
+    <span class="k">switch</span><span class="p">(</span>name<span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="s2">"active"</span><span class="o">:</span>
+        <span class="kd">let</span> selected <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span>#tabpanel<span class="p">.</span>shown <span class="o">=</span> selected<span class="p">;</span>
 
-  <c- c1>// When the custom "active" attribute changes,</c->
-  <c- c1>// keep the accessible checked state in sync.</c->
-  attributeChangedCallback<c- p>(</c->name<c- p>,</c-> oldValue<c- p>,</c-> newValue<c- p>)</c-> <c- p>{</c->
-    <c- k>switch</c-><c- p>(</c->name<c- p>)</c-> <c- p>{</c->
-      <c- k>case</c-> <c- u>"active"</c-><c- o>:</c->
-        <c- a>let</c-> selected <c- o>=</c-> <c- p>(</c->newValue <c- o>!=</c-> <c- kc>null</c-><c- p>);</c->
-        <c- k>this</c-><c- p>.</c->_tabpanel<c- p>.</c->shown <c- o>=</c-> selected<c- p>;</c->
+        <span class="c1">// Note: overrides value set in custom element definition.</span>
+<span class="c1"></span>        <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>ariaSelected <span class="o">=</span> selected<span class="p">;</span>
 
-        <c- c1>// Note: overrides value set in custom element definition.</c->
-        <c- k>this</c-><c- p>.</c->shadowRoot<c- p>.</c->ariaSelected <c- o>=</c-> selected<c- p>;</c->
+        <span class="c1">// ensure no other tab has "selected" set</span>
+<span class="c1"></span>        <span class="k">if</span> <span class="p">(</span>selected<span class="p">)</span>
+          <span class="k">this</span><span class="p">.</span>#tablist<span class="p">.</span>setSelectedTab<span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-        <c- c1>// ensure no other tab has "selected" set</c->
-        <c- k>if</c-> <c- p>(</c->selected<c- p>)</c->
-          <c- k>this</c-><c- p>.</c->_tablist<c- p>.</c->setSelectedTab<c- p>(</c-><c- k>this</c-><c- p>);</c->
-        <c- k>break</c-><c- p>;</c->
-    <c- p>}</c->
-  <c- p>}</c->
-<c- p>}</c->
-
-<c- c1>// ariaSelected value defined here is overridden in attributeChanged callback</c->
-customElements<c- p>.</c->define<c- p>(</c-><c- u>"custom-tab"</c-><c- p>,</c-> CustomTab<c- p>,</c->
-                      <c- p>{</c-> role<c- o>:</c-> <c- u>"tab"</c-><c- p>,</c-> ariaSelected<c- o>:</c-> <c- u>"false"</c-> <c- p>});</c->
+<span class="c1">// ariaSelected value defined here is overridden in attributeChanged callback</span>
+<span class="c1"></span>customElements<span class="p">.</span>define<span class="p">(</span><span class="s2">"custom-tab"</span><span class="p">,</span> CustomTab<span class="p">,</span>
+                      <span class="p">{</span> role<span class="o">:</span> <span class="s2">"tab"</span><span class="p">,</span> ariaSelected<span class="o">:</span> <span class="s2">"false"</span> <span class="p">});</span>
 </pre>
      <p>Then authors using the <code>&lt;custom-tablist></code> and <code>&lt;custom-tab></code> elements
 as a listbox could still override any semantic properties,
-including those set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics①①">ElementSemantics</a></code> object,
+including those set on the <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals①⓪">ElementInternals</a></code> object,
 but no semantic implementation details would leak out:</p>
-<pre class="language-html highlight"><c- p>&lt;</c-><c- f>custom-tablist</c-> <c- e>aria-orientation</c-><c- o>=</c-><c- s>"vertical"</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>--</c-> <c- e>You</c-> <c- e>would</c-> <c- e>probably</c-> <c- e>never</c-> <c- e>want</c-> <c- e>to</c-> <c- e>do</c-> <c- e>this</c->, <c- e>but</c-> <c- e>it</c-> <c- e>would</c-> <c- e>work</c-> <c- e>--</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-> <c- e>selected</c-> <c- e>aria-selected</c-><c- o>=</c-><c- s>"false"</c-><c- p>></c->Option 1<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-><c- p>></c->Option 2<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-  <c- p>&lt;</c-><c- f>custom-tab</c-><c- p>></c->Option 3<c- p>&lt;/</c-><c- f>custom-tab</c-><c- p>></c->
-<c- p>&lt;/</c-><c- f>custom-tablist</c-><c- p>></c->
+<pre class="language-html highlight"><span class="p">&lt;</span><span class="nt">custom-tablist</span> <span class="na">aria-orientation</span><span class="o">=</span><span class="s">"vertical"</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">--</span> <span class="na">You</span> <span class="na">would</span> <span class="na">probably</span> <span class="na">never</span> <span class="na">want</span> <span class="na">to</span> <span class="na">do</span> <span class="na">this</span>, <span class="na">but</span> <span class="na">it</span> <span class="na">would</span> <span class="na">work</span> <span class="na">--</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span> <span class="na">selected</span> <span class="na">aria-selected</span><span class="o">=</span><span class="s">"false"</span><span class="p">></span>Option 1<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span><span class="p">></span>Option 2<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+  <span class="p">&lt;</span><span class="nt">custom-tab</span><span class="p">></span>Option 3<span class="p">&lt;/</span><span class="nt">custom-tab</span><span class="p">></span>
+<span class="p">&lt;/</span><span class="nt">custom-tablist</span><span class="p">></span>
 </pre>
     </aside>
    </section>
    <h3 class="heading settled" data-level="2.2" id="custom-elements-semantics-mapping"><span class="secno">2.2. </span><span class="content">Mapping semantics to the accessibility tree</span><a class="self-link" href="#custom-elements-semantics-mapping"></a></h3>
-   <p><strong class="advisement"> This section represents changes which should be made to <a href="https://www.w3.org/TR/html-aam-1.0/#mapping-html-to-accessibility-apis">HTML Accessibility API Mappings 1.0 §mapping-html-to-accessibility-apis</a>.</strong></p>
-   <h4 class="heading settled" data-level="2.2.1" id="custom-eleent-semantics"><span class="secno">2.2.1. </span><span class="content">Rules for exposing semantics of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element③">custom elements</a></span><a class="self-link" href="#custom-eleent-semantics"></a></h4>
+   <p><strong class="advisement"> This section represents changes which should be made to [[html-aam-1.0#mapping-html-to-accessibility-apis]].</strong></p>
+   <h4 class="heading settled" data-level="2.2.1" id="custom-eleent-semantics"><span class="secno">2.2.1. </span><span class="content">Rules for exposing semantics of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element" id="ref-for-custom-element②">custom elements</a></span><a class="self-link" href="#custom-eleent-semantics"></a></h4>
    <p>If an element is <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-element-custom" id="ref-for-concept-element-custom">custom</a>,
-for each key in the element’s <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics①②">ElementSemantics</a></code> object,
+for each key in the element’s <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals①①">ElementInternals</a></code> object,
 the associated value must be mapped to accessibility APIs
 as if they were a property set on the element.</p>
    <p>If the element’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition" id="ref-for-custom-element-definition⑥">custom element definition</a> includes <var>semantics</var>,
 the value of each property in <var>semantics</var> must be <a data-link-type="dfn" href="https://www.w3.org/TR/core-aam-1.1/#mapping_general" id="ref-for-mapping_general②">mapped</a> to accessibility APIs as if they were set on the element,
 unless there is a conflicting value for the same property
-in the element’s <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics①③">ElementSemantics</a></code> object,
+in the element’s <code class="idl"><a data-link-type="idl" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals①②">ElementInternals</a></code> object,
 or in a property set on the element.</p>
   </main>
   <div data-fill-with="conformance">
@@ -2016,10 +1960,7 @@ or in a property set on the element.</p>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#createdcallback">createdCallback</a><span>, in §1.2</span>
-   <li><a href="#dictdef-elementsemantics">ElementSemantics</a><span>, in §1.2</span>
-   <li><a href="#dom-elementsettings-elementsemantics">elementSemantics</a><span>, in §1.2</span>
-   <li><a href="#dictdef-elementsettings">ElementSettings</a><span>, in §1.2</span>
+   <li><a href="#dictdef-elementinternals">ElementInternals</a><span>, in §1.2</span>
    <li><a href="#semantic-properties">semantic properties</a><span>, in §1.2</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-idl-def-accessibilityrole">
@@ -2089,8 +2030,8 @@ or in a property set on the element.</p>
    <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions">https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-elementdefinitionoptions">1.1.1. Defining custom element semantics as part of the custom element definition</a> <a href="#ref-for-elementdefinitionoptions①">(2)</a>
-    <li><a href="#ref-for-elementdefinitionoptions②">1.2. Changes to custom element definition</a> <a href="#ref-for-elementdefinitionoptions③">(2)</a> <a href="#ref-for-elementdefinitionoptions④">(3)</a>
-    <li><a href="#ref-for-elementdefinitionoptions⑤">2. ARIA semantic precedence between ElementDefinitionOptions, ElementSemantics and ARIA properties</a>
+    <li><a href="#ref-for-elementdefinitionoptions②">1.2. Changes to custom element definition</a> <a href="#ref-for-elementdefinitionoptions③">(2)</a>
+    <li><a href="#ref-for-elementdefinitionoptions④">2. ARIA semantic precedence between ElementDefinitionOptions, ElementInternals and ARIA properties</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-custom-element">
@@ -2098,8 +2039,7 @@ or in a property set on the element.</p>
    <ul>
     <li><a href="#ref-for-custom-element">1. Defining custom element semantics</a>
     <li><a href="#ref-for-custom-element①">1.1.2. Defining per-instance custom element semantics</a>
-    <li><a href="#ref-for-custom-element②">1.2. Changes to custom element definition</a>
-    <li><a href="#ref-for-custom-element③">2.2.1. Rules for exposing semantics of custom elements</a>
+    <li><a href="#ref-for-custom-element②">2.2.1. Rules for exposing semantics of custom elements</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-custom-element-definition">
@@ -2116,8 +2056,8 @@ or in a property set on the element.</p>
    <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define">https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-dom-customelementregistry-define">1.1.1. Defining custom element semantics as part of the custom element definition</a>
-    <li><a href="#ref-for-dom-customelementregistry-define①">1.2. Changes to custom element definition</a> <a href="#ref-for-dom-customelementregistry-define②">(2)</a>
-    <li><a href="#ref-for-dom-customelementregistry-define③">2.1. Introduction</a>
+    <li><a href="#ref-for-dom-customelementregistry-define①">1.2. Changes to custom element definition</a>
+    <li><a href="#ref-for-dom-customelementregistry-define②">2.1. Introduction</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-custom-element-definition">
@@ -2179,7 +2119,7 @@ or in a property set on the element.</p>
      <li><span class="dfn-paneled" id="term-for-elementdefinitionoptions" style="color:initial">ElementDefinitionOptions</span>
      <li><span class="dfn-paneled" id="term-for-custom-element" style="color:initial">custom element</span>
      <li><span class="dfn-paneled" id="term-for-custom-element-definition" style="color:initial">custom element definition</span>
-     <li><span class="dfn-paneled" id="term-for-dom-customelementregistry-define" style="color:initial">define(name, constructor, options)</span>
+     <li><span class="dfn-paneled" id="term-for-dom-customelementregistry-define" style="color:initial">define(name, constructor)</span>
      <li><span class="dfn-paneled" id="term-for-custom-element-definition①" style="color:initial">defined</span>
     </ul>
    <li>
@@ -2228,49 +2168,29 @@ dictionary ElementDefinitionOptions {
   DOMString extends;
 };
 */
-<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②①"><c- n>ElementDefinitionOptions</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole①①"><c- n>AccessibilityRole</c-></a>;
-<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions③①"><c- n>ElementDefinitionOptions</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes①①"><c- n>AriaAttributes</c-></a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions②①">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole①①">AccessibilityRole</a>;
+<a class="n" data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions" id="ref-for-elementdefinitionoptions③①">ElementDefinitionOptions</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes①①">AriaAttributes</a>;
 
-<c- b>dictionary</c-> <a href="#dictdef-elementsettings"><code><c- g>ElementSettings</c-></code></a> {
-  <a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics③①"><c- n>ElementSemantics</c-></a> <a data-type="ElementSemantics " href="#dom-elementsettings-elementsemantics"><code><c- g>elementSemantics</c-></code></a>;
-};
+<span class="kt">dictionary</span> <a class="nv" href="#dictdef-elementinternals"><code>ElementInternals</code></a> {};
 
-<c- b>dictionary</c-> <a href="#dictdef-elementsemantics"><code><c- g>ElementSemantics</c-></code></a> {};
-<a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics④①"><c- n>ElementSemantics</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole②①"><c- n>AccessibilityRole</c-></a>;
-<a class="n" data-link-type="idl-name" href="#dictdef-elementsemantics" id="ref-for-dictdef-elementsemantics⑤①"><c- n>ElementSemantics</c-></a> <c- b>includes</c-> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes②①"><c- n>AriaAttributes</c-></a>;
+<a class="n" data-link-type="idl-name" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals④①">ElementInternals</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-accessibilityrole" id="ref-for-idl-def-accessibilityrole②①">AccessibilityRole</a>;
+<a class="n" data-link-type="idl-name" href="#dictdef-elementinternals" id="ref-for-dictdef-elementinternals⑤①">ElementInternals</a> <span class="kt">includes</span> <a class="n" data-link-type="idl-name" href="https://www.w3.org/TR/wai-aria-1.2/#idl-def-ariaattributes" id="ref-for-idl-def-ariaattributes②①">AriaAttributes</a>;
 
 </pre>
-  <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
-  <div style="counter-reset:issue">
-   <div class="issue"> Need to figure out where <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/custom-elements.html#elementdefinitionoptions">ElementDefinitionOptions</a></code> and <code class="idl"><a data-link-type="idl" href="#dictdef-elementsemantics">ElementSemantics</a></code> get constructed and passed to
-the <code>createdCallback</code> method.<a href="#issue-ae1515f5"> ↵ </a></div>
-  </div>
   <aside class="dfn-panel" data-for="semantic-properties">
    <b><a href="#semantic-properties">#semantic-properties</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-semantic-properties">1.2. Changes to custom element definition</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="dictdef-elementsettings">
-   <b><a href="#dictdef-elementsettings">#dictdef-elementsettings</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="dictdef-elementinternals">
+   <b><a href="#dictdef-elementinternals">#dictdef-elementinternals</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dictdef-elementsettings">1.2. Changes to custom element definition</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="dictdef-elementsemantics">
-   <b><a href="#dictdef-elementsemantics">#dictdef-elementsemantics</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-dictdef-elementsemantics">1.1.2. Defining per-instance custom element semantics</a> <a href="#ref-for-dictdef-elementsemantics①">(2)</a> <a href="#ref-for-dictdef-elementsemantics②">(3)</a>
-    <li><a href="#ref-for-dictdef-elementsemantics③">1.2. Changes to custom element definition</a> <a href="#ref-for-dictdef-elementsemantics④">(2)</a> <a href="#ref-for-dictdef-elementsemantics⑤">(3)</a> <a href="#ref-for-dictdef-elementsemantics⑥">(4)</a>
-    <li><a href="#ref-for-dictdef-elementsemantics⑦">2. ARIA semantic precedence between ElementDefinitionOptions, ElementSemantics and ARIA properties</a>
-    <li><a href="#ref-for-dictdef-elementsemantics⑧">2.1. Introduction</a> <a href="#ref-for-dictdef-elementsemantics⑨">(2)</a> <a href="#ref-for-dictdef-elementsemantics①⓪">(3)</a> <a href="#ref-for-dictdef-elementsemantics①①">(4)</a>
-    <li><a href="#ref-for-dictdef-elementsemantics①②">2.2.1. Rules for exposing semantics of custom elements</a> <a href="#ref-for-dictdef-elementsemantics①③">(2)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="createdcallback">
-   <b><a href="#createdcallback">#createdcallback</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-createdcallback">1.1.2. Defining per-instance custom element semantics</a>
+    <li><a href="#ref-for-dictdef-elementinternals">1.1.2. Defining per-instance custom element semantics</a> <a href="#ref-for-dictdef-elementinternals①">(2)</a> <a href="#ref-for-dictdef-elementinternals②">(3)</a> <a href="#ref-for-dictdef-elementinternals③">(4)</a>
+    <li><a href="#ref-for-dictdef-elementinternals④">1.2. Changes to custom element definition</a> <a href="#ref-for-dictdef-elementinternals⑤">(2)</a>
+    <li><a href="#ref-for-dictdef-elementinternals⑥">2. ARIA semantic precedence between ElementDefinitionOptions, ElementInternals and ARIA properties</a>
+    <li><a href="#ref-for-dictdef-elementinternals⑦">2.1. Introduction</a> <a href="#ref-for-dictdef-elementinternals⑧">(2)</a> <a href="#ref-for-dictdef-elementinternals⑨">(3)</a> <a href="#ref-for-dictdef-elementinternals①⓪">(4)</a>
+    <li><a href="#ref-for-dictdef-elementinternals①①">2.2.1. Rules for exposing semantics of custom elements</a> <a href="#ref-for-dictdef-elementinternals①②">(2)</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */

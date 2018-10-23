@@ -65,7 +65,7 @@ urlPrefix: https://html.spec.whatwg.org/multipage/custom-elements.html; spec: ht
 
 <em>This section is non-normative.</em>
 
-Authors may provide semantics for custom elements
+Authors may potentially provide semantics for custom elements
 in two ways:
 * as part of the <a>custom element definition</a>
 * via an object provided to each instance of the custom element.
@@ -114,12 +114,15 @@ mapped to an <a>accessible object</a> with a <a>role of `button`</a>.
 
 ### Defining per-instance custom element semantics ### {#element-semantics}
 
-A <a>custom element</a> author may use the {{ElementSemantics}} object,
-provided in the <a>`createdCallback`</a> reaction,
+Note: see <a href="https://github.com/w3c/webcomponents/issues/758">Web Components issue #758</a>
+for up to date information on {{ElementInternals}}.
+
+A <a>custom element</a> author may use the {{ElementInternals}} object,
+created via {{createInternals()}},
 to modify the semantic state of an instance of a custom element
 in response to user interaction.
 
-The properties set on the {{ElementSemantics}} object
+The properties set on the {{ElementInternals}} object
 are used when <a>mapping</a> the element
 to an <a>accessible object</a>.
 
@@ -132,45 +135,35 @@ apply only to their associated custom element instance object.
 <aside class="example" id="custom-tab-example-continued">
 For example, the author creating the
 <a href="#custom-tab-example">`<custom-tab>`</a> and related elements
-may use the {{ElementSemantics}} object
+may use the {{ElementInternals}} object
 to modify the semantic details for the elements
 as they change in response to user interaction.
 
 ```js
-const elementPrivates = new WeakMap();
-
 class CustomTab extends HTMLElement {
+  #internals = null;
+  #tablist = null;
+  #tabpanel = null;
+
   constructor() {
     super();
-
-    let privates = {};
-    elementPrivates.set(this, privates);
+    this.#internals = customElements.createInternals(this);
   }
 
   // Observe the custom "active" attribute.
   static get observedAttributes() { return ["active"]; }
 
-  createdCallback(elementConfiguration) {
-    let privates = elementPrivates.get(this);
-
-    // Keep a private reference to the semantics object.
-    let semantics = elementConfiguration.elementSemantics;
-    privates.semantics = semantics;
-  }
-
   connectedCallback() {
-    let privates = elementPrivates.get(this);
-    privates.tablist = this.parentElement;
+    this.#tablist = this.parentElement;
   }
 
   setTabPanel(tabpanel) {
     if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
       return;  // fail silently
 
-    let privates = elementPrivates.get(this);
-    privates.tabpanel = tabpanel;
+    this.#tabpanel = tabpanel;
     tabpanel.setTab(this);
-    privates.semantics.ariaControls = tabPanel;    // does not reflect
+    this.#internals.ariaControls = tabPanel;    // does not reflect
   }
 
   // ... setters/getters for custom properties which reflect to attributes
@@ -178,20 +171,19 @@ class CustomTab extends HTMLElement {
   // When the custom "active" attribute changes,
   // keep the accessible checked state in sync.
   attributeChangedCallback(name, oldValue, newValue) {
-    let privates = elementPrivates.get(this);
     switch(name) {
       case "active":
         let active = (newValue != null);
-        privates.tabpanel.shown = active;
-        privates.semantics.ariaSelected = (newValue !== null);
+        this.#tabpanel.shown = active;
+        this.#internals.ariaSelected = (newValue !== null);
         if (selected)
-          this._tablist.setSelectedTab(this);  // ensure no other tab has "active" set
+          this.#tablist.setSelectedTab(this);  // ensure no other tab has "active" set
         break;
     }
   }
 }
 
-customElements.define("custom-tab", CustomTab, { role: "tab" });
+customElements.define("custom-tab", CustomTab, { role: "tab", needsElementInternals: true });
 ```
 
 Authors using these elements may override the default semantics
@@ -240,15 +232,6 @@ A custom element definition [includes]:
     {{AccessibilityRole}} or {{AriaAttributes}} interface mixin.
     The corresponding values are {{DOMString}}.
   </dd>
-  <dt>A collection of <em>lifecycle callbacks</em></dt>
-  <dd>
-    A map, whose five keys are the strings
-    `"createdCallback"`, `"connectedCallback"`, `"disconnectedCallback"`,
-    `"adoptedCallback"`, and `"attributeChangedCallback"`.
-    The corresponding values are either
-    a Web IDL Function callback function type value, or null.
-    By default the value of each entry is null.
-  </dd>
 </dl>
 
 *[...]*
@@ -269,13 +252,10 @@ dictionary ElementDefinitionOptions {
 ElementDefinitionOptions includes AccessibilityRole;
 ElementDefinitionOptions includes AriaAttributes;
 
-dictionary ElementSettings {
-  ElementSemantics elementSemantics;
-};
+dictionary ElementInternals {};
 
-dictionary ElementSemantics {};
-ElementSemantics includes AccessibilityRole;
-ElementSemantics includes AriaAttributes;
+ElementInternals includes AccessibilityRole;
+ElementInternals includes AriaAttributes;
 </pre>
 
 <strong>Element definition</strong> is a process of adding a
@@ -285,34 +265,7 @@ When invoked, the {{define(name, constructor, options)}} method must run these s
 
 *[...]*
 
-<ol start=10>
-  <li>Run the following substeps while catching any exceptions:
-    <ol>
-      <li>Let <var>prototype</var> be Get(<var ignore>constructor</var>, "prototype").
-          Rethrow any exceptions.</li>
-      <li>If Type(prototype) is not Object,
-          then throw a `TypeError` exception.</li>
-      <li>Let <var>lifecycleCallbacks</var> be a map
-          with the five keys `"createdCallback"`, `"connectedCallback"`,
-          `"disconnectedCallback"`, `"adoptedCallback"`,
-          and `"attributeChangedCallback"`,
-          each of which belongs to an entry whose value is null.</li>
-      <li>For each of the five keys <var>callbackName</var>
-        in <var>lifecycleCallbacks</var>, in the order listed in the previous step:
-        <ol>
-          <li>Let <var>callbackValue</var> be
-            Get(<var>prototype</var>, <var>callbackName</var>).
-            Rethrow any exceptions.</li>
-          <li>If <var>callbackValue</var> is not undefined,
-            then set the value of the entry in <var>lifecycleCallbacks</var>
-            with key <var>callbackName</var>
-            to the result of converting <var>callbackValue</var>
-            to the Web IDL `Function` callback type.
-            Rethrow any exceptions from the conversion.
-        </ol>
-      <li>...
-    </ol>
-  </li>
+<ol start=11>
   <li>Run the following substeps:
     <ol>
       <li>Let <var>semantics</var> be an empty map.
@@ -342,19 +295,7 @@ When invoked, the {{define(name, constructor, options)}} method must run these s
 
 *[...]*
 
-Issue: Need to figure out where {{ElementSettings}} and
-{{ElementSemantics}} get constructed and passed to
-the `createdCallback` method.
-
-A <a>custom element</a> possesses the ability
-to respond to certain occurrences by running author code:
-
-* When upgraded, its constructor is run, with no arguments.
-* After the constructor is run, its <dfn>`createdCallback`</dfn> is called,
-    with an instance of {{ElementSettings}} as its argument.
-* *[...]*
-
-# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ElementSemantics}} and ARIA properties # {#semantics-precedence}
+# ARIA semantic precedence between {{ElementDefinitionOptions}}, {{ElementInternals}} and ARIA properties # {#semantics-precedence}
 
 <section class=non-normative>
 ## Introduction ## {#semantics-precedence-intro}
@@ -365,9 +306,9 @@ In general, the precedence of semantic properties is that
 any ARIA property set directly on the {{Element}}
 (either via setting an attribute or via the associated <a>reflected</a> property)
 overrides a value for the same property on
-the `Element`'s {{ElementSemantics}} object,
+the `Element`'s {{ElementInternals}} object,
 and any ARIA property set either on the `Element`
-or the {{ElementSemantics}} object
+or the {{ElementInternals}} object
 will override a value set via the {{define()|CustomElementRegistry.define()}} method.
 
 <aside class="example">
@@ -397,7 +338,7 @@ In the implementation of the
 <a href="#custom-tab-example">`<custom-tab>`</a> element,
 if the author explicitly defined the default value for
 `ariaSelected` in the <a>custom element definition</a>,
-then the value set on the {{ElementSemantics}} object
+then the value set on the {{ElementInternals}} object
 in the `attributeChangedCallback()` method
 would override that default value:
 
@@ -411,14 +352,14 @@ class TabElement extends HTMLElement {
     switch(name) {
       case "active":
         let selected = (newValue != null);
-        this._tabpanel.shown = selected;
+        this.#tabpanel.shown = selected;
 
         // Note: overrides value set in custom element definition.
-        this.shadowRoot.ariaSelected = selected;
+        this.#internals.ariaSelected = selected;
 
         // ensure no other tab has "selected" set
         if (selected)
-          this._tablist.setSelectedTab(this);
+          this.#tablist.setSelectedTab(this);
         break;
     }
   }
@@ -431,7 +372,7 @@ customElements.define("custom-tab", CustomTab,
 
 Then authors using the `<custom-tablist>` and `<custom-tab>` elements
 as a listbox could still override any semantic properties,
-including those set on the {{ElementSemantics}} object,
+including those set on the {{ElementInternals}} object,
 but no semantic implementation details would leak out:
 
 ```html
@@ -453,7 +394,7 @@ Advisement: This section represents changes which should be made to [[html-aam-1
 ### Rules for exposing semantics of <a>custom elements</a> ### {#custom-eleent-semantics}
 
 If an element is <a>custom</a>,
-for each key in the element's {{ElementSemantics}} object,
+for each key in the element's {{ElementInternals}} object,
 the associated value must be mapped to accessibility APIs
 as if they were a property set on the element.
 
@@ -461,5 +402,5 @@ If the element's <a>custom element definition</a> includes <var>semantics</var>,
 the value of each property in <var>semantics</var>
 must be <a>mapped</a> to accessibility APIs as if they were set on the element,
 unless there is a conflicting value for the same property
-in the element's {{ElementSemantics}} object,
+in the element's {{ElementInternals}} object,
 or in a property set on the element.
