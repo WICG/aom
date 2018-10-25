@@ -148,6 +148,7 @@ class CustomTab extends HTMLElement {
   constructor() {
     super();
     this.#internals = customElements.createInternals(this);
+    this.#internals.role = "tab";
   }
 
   // Observe the custom "active" attribute.
@@ -168,14 +169,16 @@ class CustomTab extends HTMLElement {
 
   // ... setters/getters for custom properties which reflect to attributes
 
-  // When the custom "active" attribute changes,
-  // keep the accessible checked state in sync.
   attributeChangedCallback(name, oldValue, newValue) {
     switch(name) {
       case "active":
         let active = (newValue != null);
         this.#tabpanel.shown = active;
+
+        // When the custom "active" attribute changes,
+        // keep the accessible "selected" state in sync.
         this.#internals.ariaSelected = (newValue !== null);
+
         if (selected)
           this.#tablist.setSelectedTab(this);  // ensure no other tab has "active" set
         break;
