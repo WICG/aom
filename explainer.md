@@ -171,6 +171,9 @@ input.activeDescendantElement = optionList.firstChild;
 
 This would allow the relationship to be expressed naturally.
 
+This API is being discussed in [issue #3513](https://github.com/whatwg/html/issues/3515#issuecomment-413716944) 
+on the WHATWG HTML repository.
+
 ### Custom Elements APIs
 
 We propose that Custom Element authors be able to provide static, default semantics
