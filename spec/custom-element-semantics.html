@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3678d496235a6f1964fc14f56861db11f24476c4" name="generator">
   <link href="https://wicg.github.io/aom" rel="canonical">
-  <meta content="b446df25035002797e2394f945e35d6c60a5efa3" name="document-revision">
+  <meta content="8511d5e25d856b921fc3b169aef95e8b56b79cd5" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1461,7 +1461,7 @@ pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Default semantic properties for Custom Elements</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Unofficial Proposal Draft, <time class="dt-updated" datetime="2018-10-23">23 October 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Unofficial Proposal Draft, <time class="dt-updated" datetime="2018-10-25">25 October 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1612,6 +1612,7 @@ as they change in response to user interaction.
   constructor<span class="p">()</span> <span class="p">{</span>
     <span class="kr">super</span><span class="p">();</span>
     <span class="k">this</span><span class="p">.</span>#internals <span class="o">=</span> customElements<span class="p">.</span>createInternals<span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>role <span class="o">=</span> <span class="s2">"tab"</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// Observe the custom "active" attribute.</span>
@@ -1632,14 +1633,16 @@ as they change in response to user interaction.
 
   <span class="c1">// ... setters/getters for custom properties which reflect to attributes</span>
 <span class="c1"></span>
-  <span class="c1">// When the custom "active" attribute changes,</span>
-<span class="c1"></span>  <span class="c1">// keep the accessible checked state in sync.</span>
-<span class="c1"></span>  attributeChangedCallback<span class="p">(</span>name<span class="p">,</span> oldValue<span class="p">,</span> newValue<span class="p">)</span> <span class="p">{</span>
+  attributeChangedCallback<span class="p">(</span>name<span class="p">,</span> oldValue<span class="p">,</span> newValue<span class="p">)</span> <span class="p">{</span>
     <span class="k">switch</span><span class="p">(</span>name<span class="p">)</span> <span class="p">{</span>
       <span class="k">case</span> <span class="s2">"active"</span><span class="o">:</span>
         <span class="kd">let</span> active <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
         <span class="k">this</span><span class="p">.</span>#tabpanel<span class="p">.</span>shown <span class="o">=</span> active<span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>ariaSelected <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!==</span> <span class="kc">null</span><span class="p">);</span>
+
+        <span class="c1">// When the custom "active" attribute changes,</span>
+<span class="c1"></span>        <span class="c1">// keep the accessible "selected" state in sync.</span>
+<span class="c1"></span>        <span class="k">this</span><span class="p">.</span>#internals<span class="p">.</span>ariaSelected <span class="o">=</span> <span class="p">(</span>newValue <span class="o">!==</span> <span class="kc">null</span><span class="p">);</span>
+
         <span class="k">if</span> <span class="p">(</span>selected<span class="p">)</span>
           <span class="k">this</span><span class="p">.</span>#tablist<span class="p">.</span>setSelectedTab<span class="p">(</span><span class="k">this</span><span class="p">);</span>  <span class="c1">// ensure no other tab has "active" set</span>
 <span class="c1"></span>        <span class="k">break</span><span class="p">;</span>

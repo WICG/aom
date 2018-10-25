@@ -22,6 +22,7 @@
         - [Default semantics via customElements.define()](#default-semantics-via-customelementsdefine)
         - [Per-instance, dynamic semantics via the `createdCallback()` reaction](#per-instance-dynamic-semantics-via-the-createdcallback-reaction)
     - [User action events from Assistive Technology](#user-action-events-from-assistive-technology)
+      - [New InputEvent types](#new-inputevent-types)
       - [Use case 3: Listening for events from Assistive Technology](#use-case-3-listening-for-events-from-assistive-technology)
     - [Virtual Accessibility Nodes](#virtual-accessibility-nodes)
       - [Use case 4: Adding non-DOM nodes (“virtual nodes”) to the Accessibility tree](#use-case-4-adding-non-dom-nodes-virtual-nodes-to-the-accessibility-tree)
@@ -239,12 +240,11 @@ by default it will have a mapped role of tab.
 This is analogous to how a `<button>` element is, by default,
 mapped to an accessible object with a role of button.
 
-##### Per-instance, dynamic semantics via the `createdCallback()` reaction
+##### Per-instance, dynamic semantics via the `ElementInternals` object
 
 This is being [discussed as part of the W3C Web Components project](https://github.com/w3c/webcomponents/issues/758).
 
-A custom element author may use the `ElementInternals`  object,
-provided in the `createdCallback` reaction,
+A custom element author may use the `ElementInternals`  object
 to modify the semantic state of an instance of a custom element
 in response to user interaction.
 
@@ -257,57 +257,60 @@ The semantics defined in each apply only to their associated custom element inst
 
 ```js
 class CustomTab extends HTMLElement {
+  #internals = null;
+  #tablist = null;
+  #tabpanel = null;
+
   constructor() {
     super();
-
-    let _privates = {};
+    this.#internals = customElements.createInternals(this);
+    this.#internals.role = "tab";
   }
 
   // Observe the custom "active" attribute.
   static get observedAttributes() { return ["active"]; }
 
-  createdCallback(elementInternals) {
-    // Keep a private reference to the internals object.
-    _privates.internals = elementInternals;
-  }
-
   connectedCallback() {
-    _privates.tablist = this.parentElement;
+    this.#tablist = this.parentElement;
   }
 
   setTabPanel(tabpanel) {
     if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
       return;  // fail silently
 
-    _privates.tabpanel = tabpanel;
+    this.#tabpanel = tabpanel;
     tabpanel.setTab(this);
-    _privates.internals.ariaControls = tabPanel;    // does not reflect
+    this.#internals.ariaControls = tabPanel;    // does not reflect
   }
 
   // ... setters/getters for custom properties which reflect to attributes
 
-  // When the custom "active" attribute changes,
-  // keep the accessible checked state in sync.
   attributeChangedCallback(name, oldValue, newValue) {
     switch(name) {
-    case "active":
-      let active = (newValue != null);
-      _privates.tabpanel.shown = active;
-      _privates.internals.ariaSelected = (newValue !== null);
-      if (selected)
-        this._tablist.setSelectedTab(this);  // ensure no other tab has "active" set
+      case "active":
+        let active = (newValue != null);
+        this.#tabpanel.shown = active;
+
+        // When the custom "active" attribute changes,
+        // keep the accessible "selected" state in sync.
+        this.#internals.ariaSelected = (newValue !== null);
+
+        if (selected)
+          this.#tablist.setSelectedTab(this);  // ensure no other tab has "active" set
         break;
     }
   }
 }
 
-customElements.define("custom-tab", CustomTab, { role: "tab" });
+customElements.define("custom-tab", CustomTab, { role: "tab", needsElementInternals: true });
 ```
 
-Authors using these elements may override the default semantics using ARIA attributes as normal.
+Authors using these elements may override the default semantics
+using ARIA attributes as normal.
 
-For example, an author may modify the appearance of a <custom-tablist> element to appear as a vertical list.
-They could add an aria-orientation attribute to indicate this,
+For example, an author may modify the appearance
+of a `<custom-tablist>` element to appear as a vertical list.
+They could add an `aria-orientation` attribute to indicate this,
 overriding the default semantics set in the custom element definition.
 
 ```html
@@ -317,6 +320,9 @@ overriding the default semantics set in the custom element definition.
   <custom-tab>Tab 3</custom-tab>
 </div>
 ```
+
+Because the author-provided role overrides the default role,
+the <a>mapped</a> role will be based on the author-provided role in each case.
 
 If the author-provided semantics conflict with the Custom Element semantics,
 the author-provided semantics take precedence.
@@ -338,6 +344,8 @@ events from assistive technology will typically cause a synthesised DOM event to
 | `increment`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Up` key                                                  |
 | `decrement`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Down` key                                                |
 | `setValue`       | Elements whose mapped role is `combobox`,`scrollbar`,`slider` or `textbox`         | TBD                                                                             |
+
+#### New InputEvent types
 
 We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
 
