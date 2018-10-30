@@ -4,14 +4,11 @@ Track the implementation status of the AOM in various browsers.
 
 ## How to enable AOM
 
-*Chrome*:
-```--enable-blink-features=AccessibilityObjectModel```
+*Chrome*: `--enable-blink-features=AccessibilityObjectModel`
 
-*Safari Technology Preview*:
-```Develop > Experimental Features > Accessibility Object Model```
+*Safari Technology Preview*: `Develop > Experimental Features > Accessibility Object Model`
 
-*Firefox*:
-```about:config accessibility.AOM.enabled = true```
+*Firefox*: `about:config accessibility.AOM.enabled = true`
 
 ## Summary
 
