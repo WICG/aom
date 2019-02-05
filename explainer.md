@@ -46,9 +46,9 @@
 
 ## Introduction
 
-This effort aims to create a JavaScript API
-to allow developers to modify (and eventually explore) the accessibility tree
-for an HTML page.
+This effort aims to develop additions to the web platform
+to allow developers to provide information to assistive technology APIs,
+and to understand what information browsers provide to those APIs.
 
 ## Motivating use cases
 
