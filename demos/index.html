@@ -436,18 +436,18 @@
     <article>
       <h3>Phase 1: Accessible Properties (2)</h3>
       <p>
-          These properties will also be available on the <a href="https://dom.spec.whatwg.org/#interface-shadowroot"><code>ShadowRoot</code> interface</a>.
+          These properties will also be available on the <a href="https://html.spec.whatwg.org/multipage/custom-elements.html#the-elementinternals-interface"><code>ElementInternals</code> interface</a>.
           This will allow Custom Elements to express their intrinsic semantics:
       </p>
       <pre>
           class CustomCheckbox extends HTMLElement {
             constructor() {
               super();
-              this.attachShadow({mode: 'open'});  // mode may also be "closed".
+              this._internals = this.attachInternals();
             }
           
             connectedCallback() {
-              this.shadowRoot.role = "checkbox";  // Set the default semantics.
+              this._internals.role = "checkbox";  // Set the default semantics.
             }
           
             static get observedAttributes() { return ["checked"]; }
@@ -456,7 +456,7 @@
             attributeChangedCallback(name, oldValue, newValue) {
               switch(name) {
               case "checked":
-                this.shadowRoot.ariaChecked = (newValue !== null);
+                this._internals.ariaChecked = (newValue !== null);
               }
             }
           }
@@ -518,101 +518,52 @@
         Phase 2: Accessible Actions / Input Events
       </h3>
       <p>
-        Listen to input events directly from assistive technology.
+        To preserve the privacy of assistive technology users, 
+        events from assistive technology will typically cause a synthesised DOM event to be triggered:
       </p>
       <pre>
-    slider.addEventListener("accessibleincrement", function(event) {
-      console.log("Got Increment from assistive technology");
+    slider.addEventListener("keydown", function(event) {
+      // Keydown event may be generated via keyboard or via assistive technology gesture
+      console.log("Got keydown event");
+      switch (event.code) {
+        case "ArrowUp":
+          customSlider.value += 1;
+          return;
+        case "ArrowDown":
+          customSlider.value -= 1;
+          return;
+      }
     });
-  </pre>
+    </article>
+
+    <article>
+      <h3>
+        Phase 2: Accessible Actions / Input Events
+      </h3>
       <p>
-        Possible events include:
+        New input event types capturing common patterns will also be added, 
+        and where supported will be triggered by user interactions which trigger 
+        the events which would be fired as a fallback.
+      </p>
+      <p>Once supported everwhere,
+        these events would eliminate the need to listen for specific user input events
+        to support common user interactions.
       </p>
       <pre>
-    "accessiblecontextmenu"
-    "accessibledecrement"
-    "accessibledismiss"
-    "accessiblefocus"
-    "accessibleincrement"
-    "accessiblescrollintoview"
-    "accessibleselect"
-    "accessiblesetvalue"
-    "accessibleclick"
-  </pre>
-    </article>
+    // "increment" or "decrement" may be triggered by an AT gesture, by a keyboard event or 
+    // by a specific interaction such as clicking a button
 
-    <article>
-      <h3>
-        Phase 2 Use cases include...
-      </h3>
-      <ul>
-        <li>Focus events in composite controls, e.g. when the AT wants to focus an option or cell, but the web app wants to focus
-          the listbox or grid and use aria-activedescendant.
-          <li>Events that don't have any equivalent on the web now, like
-            <code>"increment"</code>,
-            <code>"decrement"</code>, or
-            <code>"dismiss"</code>.
-            <li>Capturing events on virtual nodes intended entirely for AT (more in Phase 3).
-      </ul>
-    </article>
+    slider.addEventListener("increment", function(event) {
+      customSlider.value += 1;
+    });
 
-    <article>
-      <h3>
-        Phase 2 and privacy
-      </h3>
-      <p>
-        If an AOM event listener is ever called, the web page *definitively knows* that the user is running AT.
-      </p>
-      <p>
-        Some users may not be comfortable revealing this, due to concerns of discrimination, or of being offered an undesired alternate
-        interface.
-      </p>
-      <p>
-        So triggering an AOM event listener brings up a new
-        <b>user permission</b> dialog before the web page can capture the event.
-      </p>
-    </article>
-
-    <article>
-      <h3>
-        Phase 2 and feature detection
-      </h3>
-      <p>
-        If the user
-        <em>does</em> grant permission, this is great because the app can now enable any extra features needed by AT.
-      </p>
-      <p>
-        If the user does not grant permission, they can have more confidence they're getting the same experience as everyone else
-        and that they haven't revealed to the site that they're an AT user.
-      </p>
-      <p>
-        We would suggest that authors use progressive enhancement techniques to ensure that users have as acceptable experience as
-        possible regardless of whether they gave permission to use AOM, or indeed whether the browser supports AOM.
-      </p>
+    slider.addEventListener("decrement", function(event) {
+      customSlider.value -= 1;
+    });
+</pre>
     </article>
 
     <!--
-<article>
-  <h3>
-    Phase 2 demo: Feature detection
-  </h3>
-  <p>
-    This button has an AOM click listener on it:
-  </p>
-  <button id="at_detect" class="bigbutton">
-    Click here using AT
-  </button>
-  <div id="at_status" class="bigresult" aria-live="true">
-    Status: I don't know if you're using AT.
-  </div>
-  <script>
-    $("at_detect").accessibleNode.addEventListener("accessibleclick", function() {
-      $("at_status").textContent = "Status: You are using AT!";
-    });
-  </script>
-</article>
--->
-
     <article>
       <h3>Phase 2 demo: Canvas slider</h3>
       <style>
@@ -755,7 +706,7 @@
   });
 </pre>
     </article>
-
+  -->
     <article>
       <h3>
         Phase 3: Virtual Nodes
