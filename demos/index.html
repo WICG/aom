@@ -444,14 +444,9 @@
             constructor() {
               super();
               this._internals = this.attachInternals();
-            }
-          
-            connectedCallback() {
               this._internals.role = "checkbox";  // Set the default semantics.
             }
           
-            static get observedAttributes() { return ["checked"]; }
-
             // When the custom "checked" attribute changes, keep the accessible checked state in sync.
             attributeChangedCallback(name, oldValue, newValue) {
               switch(name) {
@@ -518,8 +513,8 @@
         Phase 2: Accessible Actions / Input Events
       </h3>
       <p>
-        To preserve the privacy of assistive technology users, 
-        events from assistive technology will typically cause a synthesised DOM event to be triggered:
+        To preserve the <a href="https://github.com/WICG/aom/issues/81">privacy</a> of assistive technology users,
+        events from assistive technology will cause a synthesised DOM event to be triggered where appropriate:
       </p>
       <pre>
     slider.addEventListener("keydown", function(event) {
@@ -541,13 +536,15 @@
         Phase 2: Accessible Actions / Input Events
       </h3>
       <p>
-        New input event types capturing common patterns will also be added, 
-        and where supported will be triggered by user interactions which trigger 
-        the events which would be fired as a fallback.
+        New input event types capturing common patterns will also be added.
+        Where supported, these new event types will be triggered any user interactions which
+        triggers the same events as those which would be fired as a fallback.
       </p>
-      <p>Once supported everwhere,
-        these events would eliminate the need to listen for specific user input events
-        to support common user interactions.
+      <p>
+        For example, if an "increment" gesture from AT triggers a
+        <code>keydown</code>/<code>keyup</code> sequence for the right arrow key,
+        then if a user presses the right arrow key while focused on an applicable element,
+        an <code>increment</code> event will also be fired.
       </p>
       <pre>
     // "increment" or "decrement" may be triggered by an AT gesture, by a keyboard event or 
