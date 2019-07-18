@@ -4,67 +4,138 @@ Track the implementation status of the AOM in various browsers.
 
 ## How to enable AOM
 
-*Chrome*:
+**Chrome**:
+*For `AccessibleNode`/`ComputedAccessibleNode`-related features:*
 ```--enable-blink-features=AccessibilityObjectModel```
 
-*Safari Technology Preview*:
+*For web platform related features:*
+Browse to `chrome://flags`, enable `enable-experimental-web-platform-features`.
+
+**Safari Technology Preview**:
 ```Develop > Experimental Features > Accessibility Object Model```
 
-*Firefox*:
+**Firefox**:
 ```about:config accessibility.AOM.enabled = true```
 
 ## Summary
 
-Last updated: May 8, 2018
+Last updated: July 9, 2019
 
 | | Chrome | Safari | Firefox |
 | --- | --- | --- | --- |
-| Phase 1: Reflect ARIA attributes on DOM nodes. | **Yes**, out-of-date syntax | **No** | **No** |
-| Phase 2: Listen for input events from AT. | **Yes**, out-of-date syntax, 6 events | **Yes**, 8 events | **No** |
+| Phase 1: Reflect ARIA attributes on DOM nodes. | **Yes**, behind experimental-web-platform-features flag | **Yes** | **No** |
+| Phase 1: Reflect element references for IDREF attributes | **No** | **No** | **No** |
+| Phase 1: Custom element semantics on `ElementInternals` | **No** | **No** | **No** |
+| Phase 2: Generated fallback events for AT actions | **No** | **No** | **No** |
+| Phase 2: New InputEvent types | **No** | **No** | **No** |
 | Phase 3: Build virtual accessible nodes. | **Yes**, out-of-date syntax | **No** | **No** |
 | Phase 4: Query computed accessibility tree. | **Yes**, out-of-date syntax | **No** | **Yes**, out-of-date syntax |
 
 ### Phase 1: Reflect ARIA attributes on DOM nodes.
 
-*Chrome*:
+*Available in Safari; behind `--experimental-web-platform-features` flag in Chrome*
 
-```
-element.accessibleNode.role = "button";
-element.accessibleNode.label = "Click Me";
-element.accessibleNode.labeledBy = new AccessibleNodeList();
-element.accessibleNode.labeledBy.add(other.accessibleNode);
-...
+```js
+element.role = "button";
+element.ariaLabel = "Click Me";
 ```
 
-### Phase 2: Listen for input events from AT.
+### Phase 1: Reflect element references for IDREF attributes
 
-*Chrome*:
+*Not yet implemented*
 
+Spec:
+https://whatpr.org/html/3917/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element
+
+```js
+element.ariaActiveDescendantElement = otherElement;
+element.ariaLabelledByElements = [ anotherElement, someOtherElement ];
 ```
-element.accessibleNode.addEventListener('accessibleclick', ...);
-element.accessibleNode.addEventListener('accessiblecontextmenu', ...);
-element.accessibleNode.addEventListener('accessiblefocus', ...);
-element.accessibleNode.addEventListener('accessiblescrollintoview', ...);
-element.accessibleNode.addEventListener('accessibleincrement', ...);
-element.accessibleNode.addEventListener('accessibledecrement', ...);
+
+### Phase 1: Custom element semantics on `ElementInternals` 
+
+*Not yet implemented*
+
+Spec: 
+https://whatpr.org/html/4658/custom-elements.html#native-accessibility-semantics-map
+
+```js
+class CustomTab extends HTMLElement {
+  constructor() {
+    super();
+    this._internals = customElements.createInternals(this);
+    this._internals.role = "tab";
+  }
+
+  // Observe the custom "active" attribute.
+  static get observedAttributes() { return ["active"]; }
+
+  connectedCallback() {
+    this._tablist = this.parentElement;
+  }
+
+  setTabPanel(tabpanel) {
+    if (tabpanel.localName !== "custom-tabpanel" || tabPanel.id === "")
+      return;  // fail silently
+
+    this._tabpanel = tabpanel;
+    tabpanel.setTab(this);
+    this._internals.ariaControls = tabPanel;    // does not reflect
+  }
+
+  // ... setters/getters for custom properties which reflect to attributes
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch(name) {
+      case "active":
+        let active = (newValue != null);
+        this._tabpanel.shown = active;
+
+        // When the custom "active" attribute changes,
+        // keep the accessible "selected" state in sync.
+        this._internals.ariaSelected = (newValue !== null);
+
+        if (selected)
+          this._tablist.setSelectedTab(this);  // ensure no other tab has "active" set
+        break;
+    }
+  }
+}
 ```
 
-*Safari Technology Preview*
+### Phase 2: Generated fallback events for AT actions 
 
+(Not yet specced/implemented)
+
+```js
+customSlider.addEventListener('keydown', (event) => {
+  switch (event.code) {
+  case "ArrowUp":
+    customSlider.value += 1;
+    return;
+  case "ArrowDown":
+    customSlider.value -= 1;
+    return;
+});
 ```
-element.addEventListener('accessibleclick', ...);
-element.addEventListener('accessiblecontextmenu', ...);
-element.addEventListener('accessiblefocus', ...);
-element.addEventListener('accessiblescrollintoview', ...);
-element.addEventListener('accessibleincrement', ...);
-element.addEventListener('accessibledecrement', ...);
-element.addEventListener('accessibledismiss', ...);
-element.addEventListener('accessiblesetvalue', ...);
+
+### Phase 2: New InputEvent types
+
+(Not yet specced/implemented)
+
+```js
+customSlider.addEventListener("increment", function(event) {
+  customSlider.value += 1;
+});
+
+customSlider.addEventListener("decrement", function(event) {
+  customSlider.value -= 1;
+});
 ```
 
 ### Phase 3: Build virtual accessible nodes.
 
-*Chrome*:
+*Chrome (out of date syntax, pass `--enable-blink-features=AccessibilityObjectModel`)*:
 
 ```
 var listitem = new AccessibleNode();
@@ -74,12 +145,14 @@ listitem.offsetTop = 32;
 listitem.offsetLeft = 0;
 listitem.offsetWidth = 200;
 listitem.offsetHeight = 16;
-list.accessibleNode.appendChild(listitem);
+
+// future syntax may be: list.attachAccessibleRoot().appendChild
+list.accessibleNode.appendChild(listitem);  
 ```
 
 ### Phase 4: Query computed accessibility tree.
 
-*Chrome*:
+*Chrome (speculative syntax, pass `--enable-blink-features=AccessibilityObjectModel`)*:
 
 ```
 var c = await window.getComputedAccessibleNode(element);
@@ -87,8 +160,7 @@ console.log(c.role);
 console.log(c.label);
 ```
 
-*Firefox*:
+*Firefox (out of date syntax)*:
 ```
-console.log(element.accessibleNode.role);
-console.log(element.accessibleNode.label);
+console.log(element.accessibleNode.computedRole);
 ```
