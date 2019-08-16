@@ -54,7 +54,7 @@ element.ariaLabelledByElements = [ anotherElement, someOtherElement ];
 
 ### Phase 1: Custom element semantics on `ElementInternals` 
 
-*Not yet implemented*
+*Currently being implemented in Chrome: https://chromestatus.com/feature/5962105603751936*
 
 Spec: 
 https://whatpr.org/html/4658/custom-elements.html#native-accessibility-semantics-map
