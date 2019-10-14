@@ -5,17 +5,20 @@ Track the implementation status of the AOM in various browsers.
 ## How to enable AOM
 
 **Chrome**:
-*For `AccessibleNode`/`ComputedAccessibleNode`-related features:*
-```--enable-blink-features=AccessibilityObjectModel```
+
+*For `AccessibleNode`/`ComputedAccessibleNode`-related features:*<br>
+`--enable-blink-features=AccessibilityObjectModel`
 
 *For web platform related features:*
 Browse to `chrome://flags`, enable `enable-experimental-web-platform-features`.
 
 **Safari Technology Preview**:
-```Develop > Experimental Features > Accessibility Object Model```
+
+`Develop > Experimental Features > Accessibility Object Model`
 
 **Firefox**:
-```about:config accessibility.AOM.enabled = true```
+
+`about:config accessibility.AOM.enabled = true`
 
 ## Summary
 
@@ -137,7 +140,7 @@ customSlider.addEventListener("decrement", function(event) {
 
 *Chrome (out of date syntax, pass `--enable-blink-features=AccessibilityObjectModel`)*:
 
-```
+```js
 var listitem = new AccessibleNode();
 listitem.role = "listitem";
 listitem.offsetParent = list.accessibleNode;
@@ -154,13 +157,14 @@ list.accessibleNode.appendChild(listitem);
 
 *Chrome (speculative syntax, pass `--enable-blink-features=AccessibilityObjectModel`)*:
 
-```
+```js
 var c = await window.getComputedAccessibleNode(element);
 console.log(c.role);
 console.log(c.label);
 ```
 
 *Firefox (out of date syntax)*:
-```
+
+```js
 console.log(element.accessibleNode.computedRole);
 ```
