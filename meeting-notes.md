@@ -56,7 +56,7 @@ Present: Alice Boxhall, James Craig, Ryosuke Niwa
 
 - Ryosuke believes that referring into deeper shadow scopes is unacceptable and should be prevented by the API
 - Alice is not opposed to preventing referring into deeper shadow scopes, 
-  but thinks the implementation complexity added by enforcing that rule outweighs the benefits.
+  but thinks the implementation and runtime complexity added by enforcing that rule outweighs the benefits.
   - Unlike other APIs which enforce encapsulation (such as event path), 
     it's not possible for the _browser_ to accidentally leak implementation details - 
     an author would have to create the association themselves - breaking their _own_ encapsulation.
