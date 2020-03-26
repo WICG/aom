@@ -56,13 +56,14 @@ Present: Alice Boxhall, James Craig, Ryosuke Niwa
 
 - Ryosuke believes that referring into deeper shadow scopes is unacceptable and should be prevented by the API
 - Alice is not opposed to preventing referring into deeper shadow scopes, 
-  but thinks the implementation complexity added by enforcing that rule outweighs the benefits,
-  since, unlike other APIs which enforce encapsulation (such as event path), 
-  it's not possible for the _browser_ to accidentally leak implementation details - 
-  an author would have to create the association themselves - breaking their _own_ encapsulation.
-  This is analogous to sharing a pointer to a private member in C++ - this is poor programming practice,
-  but is not prevented by the language.
-  - Ryosuke believes there are counter-examples to this, and will follow up.
+  but thinks the implementation complexity added by enforcing that rule outweighs the benefits.
+  - Unlike other APIs which enforce encapsulation (such as event path), 
+    it's not possible for the _browser_ to accidentally leak implementation details - 
+    an author would have to create the association themselves - breaking their _own_ encapsulation.
+    - Ryosuke believes there are counter-examples to this, and will follow up.
+  - This is analogous to sharing a pointer to a private member in C++ - this is poor programming practice,
+    but is not prevented by the language.
+  - The same "encapsulation leak" is currently possible using expando properties.
 
 ### Action items
 
