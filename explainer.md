@@ -239,7 +239,7 @@ to express semantics which are implicit for native elements.
     >Tab 1</custom-tab
   >
   <custom-tab role="tab" aria-controls="tabpanel-2">Tab 2</custom-tab>
-  <custom-tab role="tab" aria-controle="tabpanel-3">Tab 3</custom-tab>
+  <custom-tab role="tab" aria-controls="tabpanel-3">Tab 3</custom-tab>
 </custom-tablist>
 ```
 
