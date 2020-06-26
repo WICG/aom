@@ -331,23 +331,62 @@ customElements.define("custom-tablist", CustomTabList);
 
 ### User action events from Assistive Technology
 
-To preserve the privacy of assistive technology users,
-events from assistive technology will typically cause a synthesised DOM event to be triggered:
+To preserve the privacy of assistive technology users, events from assistive technology 
+will typically cause a synthesised DOM event to be triggered. The events are determined by
+platform conventions as documented in the [ARIA Authoring Practices Guide (APG)](https://www.w3.org/TR/wai-aria-practices/#aria_ex).
 
-| **AT event**     | **Targets**                                                                        | **DOM event**                                                                   |
-| ---------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `click`          | _all elements_                                                                     | `click`                                                                         |
-| `focus`          | _all elements_                                                                     | `focus`                                                                         |
-| `select`         | Elements whose mapped role is `cell` or `option`                                   | `click`                                                                         |
-| `scrollIntoView` | (n/a)                                                                              | No event                                                                        |
-| `dismiss`        | _all elements_                                                                     | Keypress sequence for `Escape` key                                              |
-| `contextMenu`    | _all elements_                                                                     | `contextmenu`                                                                   |
-| `scrollByPage`   | _all elements_                                                                     | Keypress sequence for `PageUp` or `PageDown` key, depending on scroll direction |
-| `increment`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Up` key                                                  |
-| `decrement`      | Elements whose mapped role is `progressbar`, `scrollbar`, `slider` or `spinbutton` | Keypress sequence for `Down` key                                                |
-| `setValue`       | Elements whose mapped role is `combobox`,`scrollbar`,`slider` or `textbox`         | TBD                                                                             |
+
+| **AT event**          | **Targets**                                                       | Orientation/Direction | **DOM event**                      |
+| --------------------- | ----------------------------------------------------------------- | --------------------- | ---------------------------------- |
+| `click` or `press`    | _all elements_                                                    |                       | `click`                            |
+
+| `focus`               | _all focusable elements_                                          |                       | `focus`                            |
+
+| `select`              | Elements whose computed role supports `aria-selected`             |                       | `click`                            |
+
+| `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent             |
+
+| `contextMenu`         | _all elements_                                                    |                       | `contextmenu`                      |
+
+| `increment`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Up` KeyboardEvent                 |
+|                       | ""                                                                | horizontal LTR        | `Right` KeyboardEvent              |
+|                       | ""                                                                | horizontal RTL        | `Left` KeyboardEvent               |
+|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Up` KeyboardEvent                 |
+
+| `decrement`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Down` KeyboardEvent               |
+|                       | ""                                                                | horizontal LTR        | `Left` KeyboardEvent               |
+|                       | ""                                                                | horizontal RTL        | `Right` KeyboardEvent              |
+|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Down` KeyboardEvent               |
+
+| `scrollByPage`        | TBD (possibly custom scroll views)                                |                       | TBD (possibly `PageUp`/`PageDown`) |
+
+| `scrollIntoView`      | TBD                                                               |                       | No equivalent DOM event            |
+
+| `setValue`            | n/a                                                               |                       | No equivalent DOM event            |
+
+
+Notes on the previous table:
+- KeyboardEvent sequences include keyup/keydown/keypress.
+- Control orientation is determined by the computed value of `aria-orientation` which 
+  defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for 
+  `scrollbar`.
+- Natural language direction is determined by the computed value of `dir` which defaults 
+  to `ltr`, but can be set to `rtl` for languages like Arabic and Hebrew.
+- The event target for KeyboardEvent sequences is the currently focused element.
+- The event target for `click` and `contextmenu` events is lowest leaf node DOM element in 
+  the assistive technology's "cursor" or "point-of-regard" .
+- If a web author does not cancel the event with `Event.preventDefault()` and/or 
+  `Event.stopPropagation()`, the event should propagate out of the web view an potentially 
+  trigger the platform behavior of the assistive technology event. For example, if an iOS 
+  user triggers a dismiss/escape event but the web author does not capture or cancel the 
+  Escape key sequence, the browser or system will execute the default functionality of the
+  native `accessibilityPerformEscape()` handler.
+
 
 #### New InputEvent types
+
+Note: This section is now obsolete, as there is no immediate plan to include InputEvents 
+for Assistive Technology Actions.
 
 We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
 
@@ -646,8 +685,10 @@ but without introducing any new semantics.
 Many thanks for valuable feedback, advice, and tools from:
 
 - Alex Russell
+- Anne van Kesteren
 - Bogdan Brinza
 - Chris Fleizach
+- Chris Hall
 - Cynthia Shelley
 - David Bolter
 - Domenic Denicola
@@ -655,8 +696,11 @@ Many thanks for valuable feedback, advice, and tools from:
 - Ian Hickson
 - Joanmarie Diggs
 - Marcos Caceres
+- Meredith Lane
 - Nan Wang
 - Robin Berjon
+- Rossen Atanassov
+- Ryosuke Niwa
 - Tess O'Connor
 
 Bogdan Brinza and Cynthia Shelley of Microsoft were credited as authors of an
