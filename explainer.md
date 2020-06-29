@@ -356,20 +356,21 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 | `setValue`            | n/a                                                               |                       | No equivalent DOM event            |
 
 Notes on the previous table:
-- KeyboardEvent sequences include keyup/keydown/keypress.
-- Control orientation is determined by the computed value of `aria-orientation` which 
-  defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for 
+- DOM KeyboardEvent sequences include keyup/keydown.
+- Control orientation is determined by the computed value of `aria-orientation` which
+  defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
   `scrollbar`.
-- Natural language direction is determined by the computed value of `dir` which defaults 
-  to `ltr`, but can be set to `rtl` for languages like Arabic and Hebrew.
-- The event target for KeyboardEvent sequences is the currently focused element.
-- The event target for `click` and `contextmenu` events is lowest leaf node DOM element in 
-  the assistive technology's "cursor" or "point-of-regard" .
-- If a web author does not cancel the event with `Event.preventDefault()` and/or 
-  `Event.stopPropagation()`, the event should propagate out of the web view an potentially 
-  trigger the platform behavior of the assistive technology event. For example, if an iOS 
-  user triggers a dismiss/escape event but the web author does not capture or cancel the 
-  Escape key sequence, the browser or system will execute the default functionality of the
+- Natural language direction is determined by the computed value of `dir` which usualy computes to
+  to `ltr` (`auto` in most contexts resolves to `ltr`), but can be set to `rtl` for languages such
+  as Arabic and Hebrew.
+- The DOM event target for DOM KeyboardEvent sequences is the currently focused DOM element.
+- The DOM event target for `click` and `contextmenu` DOM events is lowest leaf node DOM element in
+  the assistive technology's "cursor" or "point-of-regard".
+- If a web author does not cancel the DOM event with `Event.preventDefault()` and/or
+  `Event.stopPropagation()`, the DOM event should propagate out of the web view an potentially
+  trigger the platform behavior of the assistive technology event. For example, if an iOS
+  user triggers a native dismiss/escape event but the web author does not capture or cancel the
+  DOM Escape key sequence, the browser or system should execute the default functionality of the
   native `accessibilityPerformEscape()` handler.
 
 
