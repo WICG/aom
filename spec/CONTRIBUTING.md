@@ -40,7 +40,7 @@ instructions on running HTML5 tidy, see below.
 ## Running HTML5 Tidy
 
 Please make sure you have HTML5 tidy installed, instead of
-the the one that  ships with *nix systems. You can comfirm this by running:
+the one that  ships with *nix systems. You can comfirm this by running:
 
 ```bash 
 tidy5 --version  #HTML Tidy for Mac OS X version 4.9.XX ...
