@@ -340,6 +340,7 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 | --------------------- | ----------------------------------------------------------------- | --------------------- | ---------------------------------- |
 | `click` or `press`    | _all elements_                                                    |                       | `click`                            |
 | `focus`               | _all focusable elements_                                          |                       | `focus`                            |
+| `blur`                | _all focusable elements_                                          |                       | `blur`                             |
 | `select`              | Elements whose computed role supports `aria-selected`             |                       | `click`                            |
 | `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent             |
 | `contextMenu`         | _all elements_                                                    |                       | `contextmenu`                      |
@@ -357,6 +358,10 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 
 Notes on the previous table:
 - DOM KeyboardEvent sequences include keyup/keydown.
+-- Should the table list event property values like: `keyIdentifier`/`keyName`/`keyCode`/`charCode`?
+- DOM MouseEvent sequences include mousedown/mouseup and touchstart/touchend where relevant.
+-- If the table evnd up listing KeyEvent properties like `keyName`, should this also include
+  `MouseEvent.button: 2` for `contextmenu`?
 - Control orientation is determined by the computed value of `aria-orientation` which
   defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
   `scrollbar`.
