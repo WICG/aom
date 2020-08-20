@@ -26,7 +26,7 @@ Last updated: July 9, 2019
 
 | | Chrome | Safari | Firefox |
 | --- | --- | --- | --- |
-| Phase 1: Reflect ARIA attributes on DOM nodes. | **Yes**, behind experimental-web-platform-features flag | **Yes** | **No** |
+| Phase 1: Reflect ARIA attributes on DOM nodes. | **Yes** | **Yes** | **No** |
 | Phase 1: Reflect element references for IDREF attributes | **No** | **No** | **No** |
 | Phase 1: Custom element semantics on `ElementInternals` | **No** | **No** | **No** |
 | Phase 2: Generated fallback events for AT actions | **No** | **No** | **No** |
