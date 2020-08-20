@@ -28,7 +28,7 @@ Last updated: July 9, 2019
 | --- | --- | --- | --- |
 | Phase 1: Reflect ARIA attributes on DOM nodes. | **Yes** | **Yes** | **No** |
 | Phase 1: Reflect element references for IDREF attributes | **No** | **No** | **No** |
-| Phase 1: Custom element semantics on `ElementInternals` | **No** | **No** | **No** |
+| Phase 1: Custom element semantics on `ElementInternals` | **Yes** | **No** | **No** |
 | Phase 2: Generated fallback events for AT actions | **No** | **No** | **No** |
 | Phase 2: New InputEvent types | **No** | **No** | **No** |
 | Phase 3: Build virtual accessible nodes. | **Yes**, out-of-date syntax | **No** | **No** |
