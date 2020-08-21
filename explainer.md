@@ -338,12 +338,12 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 
 | **AT event**          | **Targets**                                                       | Orientation/Direction | **DOM event**                      |
 | --------------------- | ----------------------------------------------------------------- | --------------------- | ---------------------------------- |
-| `click` or `press`    | _all elements_                                                    |                       | `click`                            |
-| `focus`               | _all focusable elements_                                          |                       | `focus`                            |
-| `blur`                | _all focusable elements_                                          |                       | `blur`                             |
-| `select`              | Elements whose computed role supports `aria-selected`             |                       | `click`                            |
+| `click` or `press`    | _all elements_                                                    |                       | `click` MouseEvent                 |
+| `focus`               | _all focusable elements_                                          |                       | `focus` Event                      |
+| `blur`                | No targets, as `blur` could potentially 'out' AT users.           |                       | None                               |
+| `select`              | Elements whose computed role supports `aria-selected`             |                       | `click` MouseEvent                 |
 | `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent             |
-| `contextMenu`         | _all elements_                                                    |                       | `contextmenu`                      |
+| `contextMenu`         | _all elements_                                                    |                       | `contextmenu` MouseEvent           |
 | `increment`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Up` KeyboardEvent                 |
 |                       | ""                                                                | horizontal LTR        | `Right` KeyboardEvent              |
 |                       | ""                                                                | horizontal RTL        | `Left` KeyboardEvent               |
@@ -356,10 +356,10 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 | `scrollIntoView`      | TBD                                                               |                       | No equivalent DOM event            |
 | `setValue`            | n/a                                                               |                       | No equivalent DOM event            |
 
-Notes on the previous table:
+#### Notes on the previous table:
 - DOM KeyboardEvent sequences include keyup/keydown.
 - DOM MouseEvent sequences include mousedown/mouseup and touchstart/touchend where relevant.
-- `contextmenu` sequence may need to include MouseEvents, including `auxclick`.
+- `contextmenu` sequence may need to include MouseEvents, including `mousedown`/`mouseup`/`auxclick`/`contextmenu`.
 - Control orientation is determined by the computed value of `aria-orientation` which
   defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
   `scrollbar`.
@@ -368,15 +368,54 @@ Notes on the previous table:
   as Arabic and Hebrew.
 - The DOM event target for DOM KeyboardEvent sequences is the currently focused DOM element,
   regardless if the AT's "point of regard" matches the document.activeElement.
-- The DOM event target for `click` and `contextmenu` DOM events is lowest leaf node DOM element in
-  the assistive technology's "cursor" or "point-of-regard". TODO: Needs some serious wordsmithing
-  for clarification of hit-testing, etc.
 - If a web author does not cancel the DOM event with `Event.preventDefault()` and/or
   `Event.stopPropagation()`, the DOM event should propagate out of the web view an potentially
   trigger the platform behavior of the assistive technology event. For example, if an iOS
   user triggers a native dismiss/escape event but the web author does not capture or cancel the
   DOM Escape key sequence, the browser or system should execute the default functionality of the
   native `accessibilityPerformEscape()` handler.
+
+
+#### MouseEvent Object Properties
+
+| **MouseEvent** | **`button`**        | **`target`/`srcElement`** | **`which` (deprecated)** |
+| -------------- | ------------------- | ------------------------- | ------------------------ |
+| click          | 1                   | TBD                       | 1                        |
+| contextmenu    | 2 (secondary click) | TBD                       | 3 (legacy right click)   |
+
+Note: Only send the deprecated `which` property if the user agent would normally send it on a non-synthesized mouse event.
+
+Note: The `target` and `srcElement` properties should match the most likely element in the case of a non-synthesized MouseEvent (a real mouse click). Since AT focus targets and pointer event targets do not always align one-to-one, this event property is currently TBD. For example, users agents might attempt to synthesize a pointer event x/y position near the center of the element in AT focus. If hit-testing at that x/y position does not return a descendant of the element in AT focus, user agents might synthesize the event on the element directly in AT focus.
+
+
+
+#### KeyboardEvent Object Properties
+
+| **KeyEvent** | **`key`**    | **`code`**   | **`location`**                | **`target`/`srcElement`** |
+| ------------ | ------------ | ------------ | ----------------------------- | ------------------------- |
+| Escape       | "Escape"     | "Escape"     | DOM_KEY_LOCATION_STANDARD (0) | `document.activeElement`  |
+| Left         | "ArrowLeft"  | "ArrowLeft"  | DOM_KEY_LOCATION_STANDARD (0) | `document.activeElement`  |
+| Up           | "ArrowUp"    | "ArrowUp"    | DOM_KEY_LOCATION_STANDARD (0) | `document.activeElement`  |
+| Right        | "ArrowRight" | "ArrowRight" | DOM_KEY_LOCATION_STANDARD (0) | `document.activeElement`  |
+| Down         | "ArrowDown"  | "ArrowDown"  | DOM_KEY_LOCATION_STANDARD (0) | `document.activeElement`  |
+
+The `target` and `srcElement` properties should match `document.activeElement`, which is either the currently focused element or `document.body`.
+
+
+#### Deprecated KeyboardEvent Object Properties (Optional)
+
+Only send these deprecated properties if the user agent would normally send them on non-synthesized keyboard events.
+
+| **KeyEvent** | **`charCode`** | **`keyCode`** | **`keyIdentifier`**                 | **`keyLocation`** | **`which`** |
+| ------------ | -------------- | ------------- | ----------------------------------- | ----------------- | ----------- |
+| Escape       | 0              | 27            | U+001B (Unicode Character 'ESCAPE') | 0                 | 27          |
+| Left         | 0              | 37            | `Left`                              | 0                 | 37          |
+| Up           | 0              | 38            | `Up`                                | 0                 | 38          |
+| Right        | 0              | 39            | `Right`                             | 0                 | 39          |
+| Down         | 0              | 40            | `Down`                              | 0                 | 40          |
+
+
+Note: These event property tables are intended to assist implementors during the incubation process. This is not intended as a normative specification.
 
 
 #### Speculative: New InputEvent types
