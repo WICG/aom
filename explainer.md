@@ -358,19 +358,19 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 
 Notes on the previous table:
 - DOM KeyboardEvent sequences include keyup/keydown.
--- Should the table list event property values like: `keyIdentifier`/`keyName`/`keyCode`/`charCode`?
 - DOM MouseEvent sequences include mousedown/mouseup and touchstart/touchend where relevant.
--- If the table evnd up listing KeyEvent properties like `keyName`, should this also include
-  `MouseEvent.button: 2` for `contextmenu`?
+- `contextmenu` sequence may need to include MouseEvents, including `auxclick`.
 - Control orientation is determined by the computed value of `aria-orientation` which
   defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
   `scrollbar`.
 - Natural language direction is determined by the computed value of `dir` which usualy computes to
   to `ltr` (`auto` in most contexts resolves to `ltr`), but can be set to `rtl` for languages such
   as Arabic and Hebrew.
-- The DOM event target for DOM KeyboardEvent sequences is the currently focused DOM element.
+- The DOM event target for DOM KeyboardEvent sequences is the currently focused DOM element,
+  regardless if the AT's "point of regard" matches the document.activeElement.
 - The DOM event target for `click` and `contextmenu` DOM events is lowest leaf node DOM element in
-  the assistive technology's "cursor" or "point-of-regard".
+  the assistive technology's "cursor" or "point-of-regard". TODO: Needs some serious wordsmithing
+  for clarification of hit-testing, etc.
 - If a web author does not cancel the DOM event with `Event.preventDefault()` and/or
   `Event.stopPropagation()`, the DOM event should propagate out of the web view an potentially
   trigger the platform behavior of the assistive technology event. For example, if an iOS
@@ -379,9 +379,9 @@ Notes on the previous table:
   native `accessibilityPerformEscape()` handler.
 
 
-#### New InputEvent types
+#### Speculative: New InputEvent types
 
-Note: This section is now obsolete, as there is no immediate plan to include InputEvents 
+Note: This section is speculative, as there is now no immediate plan to include InputEvents 
 for Assistive Technology Actions.
 
 We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
