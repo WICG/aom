@@ -79,7 +79,7 @@ are computed each time they are retrieved,
 in order to check each element is still [valid](#valid-vs-invalid-references),
 the property value will appear not to be equal to itself:
 
-```
+```js
 input.ariaLabelledByElements === input.ariaLabelledByElements;  // false
 ```
 
