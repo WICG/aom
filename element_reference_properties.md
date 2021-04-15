@@ -4,6 +4,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Introduction](#introduction)
+- [Note on Element array property equality](#note-on-element-array-property-equality)
+- [Explicit setter and getter alternative](#explicit-setter-and-getter-alternative)
 - [Single vs. multiple element properties](#single-vs-multiple-element-properties)
 - [Reflection to HTML attributes](#reflection-to-html-attributes)
   - [Computing element references from HTML attributes](#computing-element-references-from-html-attributes)
@@ -68,6 +70,46 @@ tree.addEventListener('keydown', (event) => {
   }
 });
 ```
+
+## Note on Element array property equality
+
+Because Element array properties
+like `ariaLabelledByElements`
+are computed each time they are retrieved,
+in order to check each element is still [valid](#valid-vs-invalid-references),
+the property value will appear not to be equal to itself:
+
+```
+input.ariaLabelledByElements === input.ariaLabelledByElements;  // false
+```
+
+## Explicit setter and getter alternative
+
+If [lack of self-equality](#note-on-element-array-property-equality)
+disqualifies a property-based API,
+we may need to re-design the API to use explicit getters and setters,
+for example:
+
+```html
+<label>
+  Phone number:
+  <input type="tel">
+</label>
+<span id="description">Please include international country code, e.g. +61</span>
+```
+
+```js
+const input = document.querySelector('input');
+const description = document.getElementById('description');
+
+input.setAriaDescribedByElements([description]);
+
+console.log(input.getAriaDescribedByElements());
+```
+
+The remainder of this explainer assumes a property-based API.
+If the API needs to be re-designed,
+some of the design decisions explained below may need to be re-considered.
 
 ## Single vs. multiple element properties
 
@@ -311,6 +353,20 @@ or remove the referenced Element from the Array returned
 for multiple Element properties.
 
 If you tried:
+
+```html
+<custom-combobox>
+  #shadow-root (open)
+  |  <input>
+  |  <slot></slot>
+  #/shadow-root
+  <custom-optionlist>
+    <x-option id="opt1">Option 1</x-option>
+    <x-option id="opt2">Option 2</x-option>
+    <x-option id='opt3'>Option 3</x-option>
+ </custom-optionlist>
+</custom-combobox>
+```
 
 ```js
 // There's literally no reason you'd even think about doing
