@@ -71,6 +71,18 @@ tree.addEventListener('keydown', (event) => {
 });
 ```
 
+## Key use cases
+
+This API addresses two main use cases:
+- Creating element associations in scripting contexts where IDREFs are inconvenient or cumbersome;
+- [Associating elements across Shadow DOM boundaries](#element-reference-properties-and-shadow-dom) (without violating encapsulation).
+
+This API also generally reduces the amount of boilerplate code needed
+to use ARIA attributes like `aria-activedescendant`,
+which may change dynamically as the user interacts with the application.
+This makes it more ergonomic to use these attributes to begin with,
+which might encourage more use.
+
 ## Note on Element array property equality
 
 Because Element array properties
