@@ -119,38 +119,122 @@ which participates in a relationship.
 Moreover, this would enable authors using open `ShadowRoot`s
 to specify relationships which cross over Shadow DOM boundaries.
 
-#### Example: Setting relationship properties without needing to use IDREFs
+#### Querying attributes
 
-Today, an author attempting to express a relationship across Shadow DOM boundaries
-might attempt using `aria-activedescendant` like this:
+When an ARIA relationship attribute is set in the HTML DOM, it can be observed
+via new reflected attributes. This example demonstrates it with
+aria-activedescendant, which is reflected as ariaActiveDescendantElement.
 
 ```html
-<custom-combobox>
-  #shadow-root (open)
-  |  <!-- this doesn't work! -->
-  |  <input aria-activedescendant="opt1"></input>
-  |  <slot></slot>
-  <custom-optionlist>
-    <x-option id="opt1">Option 1</x-option>
-    <x-option id="opt2">Option 2</x-option>
-    <x-option id='opt3'>Option 3</x-option>
- </custom-optionlist>
-</custom-combobox>
+<div id='fruitbowl' role='listbox' aria-activedescendant='apple'>
+  <div id='apple'>I am an apple</div>
+</div>
 ```
-
-This fails, because IDREFs are scoped within the shadowRoot
-or document context in which they appear.
-
-Using Element references,
-an author could specify this relationship programmatically instead:
 
 ```js
-const input = comboBox.shadowRoot.querySelector("input");
-const optionList = comboBox.querySelector("custom-optionlist");
-input.activeDescendantElement = optionList.firstChild;
+// We can observe the active descendant relationship through the content attribute.
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "apple");
+
+// And we can also observe it through the new api.
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
 ```
 
-This would allow the relationship to be expressed naturally.
+When an ARIA attribute takes a list of IDREFs rather than a single one,
+the reflected attribute behaves like an array of elements.
+
+```html
+<span id="l1">Street name</span>
+<input aria-labelledby="l1 l2">
+<span id="l2">(just the name, no "Street" or "Road" or "Place")</span>
+```
+
+```js
+// We can observe the labelled-by relationship through the content attribute.
+assert_equals(input.getAttribute("aria-labelledby"), "l1 l2");
+
+// And we can also observe it through the new api.
+assert_equals(input.ariaLabelledByElements.length, 2);
+assert_equals(input.ariaLabelledByElements[0], l1);
+assert_equals(input.ariaLabelledByElements[1], l2);
+```
+
+#### Sprouting attributes
+
+When using reflection to set ARIA relationship properties, the element may "sprout" new attributes.
+
+```html
+<div id='fruitbowl' role='listbox'>
+  <div id='apple'>I am an apple</div>
+</div>
+```
+
+```js
+// We make the active descendant of the fruitbowl the apple through our new api.
+fruitbowl.ariaActiveDescendantElement = apple;
+
+// We can observe the relationship.
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
+// The fruitbowl has even sprouted a matching content attribute.
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "apple");
+```
+
+Attributes sprout only at the time the relationship is set, and only if certain conditions are met.
+
+If the target element does not
+have an ID attribute, no content attribute will sprout, even though the relationship will still be
+communicated correctly to assistive technology.
+
+```html
+<div id='fruitbowl' role='listbox'>
+</div>
+```
+
+```js
+const apple = document.createElement("div");
+apple.innerHTML = "I am an apple";
+fruitbowl.appendChild(apple);
+
+// We make the active descendant of the fruitbowl the apple.
+fruitbowl.ariaActiveDescendantElement = apple;
+// We can observe this relationship as the apple is not in a valid scope.
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
+
+// No content attribute is sprouted as apple lacks an id.
+// However, the relationship is still there, it's still communicated
+// to assistive technology. It's just invisible from the DOM.
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "");
+```
+
+In this example, attempting to set a relationship to an element that's not
+attached to the document yet will not sprout an attribute - and subsequently
+if the target element is added to the DOM, it still won't have a content
+attribute because content attributes are only sprouted at the time
+the property is set.
+
+```html
+<div id='fruitbowl' role='listbox'>
+</div>
+```
+
+```js
+const apple = document.createElement("div");
+apple.setAttribute("id", "apple");
+apple.innerHTML = "I am an apple";
+
+// We make the active descendant of the fruitbowl the apple.
+fruitbowl.ariaActiveDescendantElement = apple;
+
+// NB: we are appending *after* setting.
+fruitbowl.appendChild(apple);
+
+// We can observe this relationship as the apple is not in a valid scope.
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
+
+// No content attribute is sprouted as apple was in an invalid scope when set.
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "");
+```
+
+
 
 #### Spec/implementation status
 
