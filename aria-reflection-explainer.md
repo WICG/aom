@@ -119,7 +119,7 @@ which participates in a relationship.
 Moreover, this would enable authors using open `ShadowRoot`s
 to specify relationships which cross over Shadow DOM boundaries.
 
-#### Querying attributes
+#### Querying relationship attributes
 
 When an ARIA relationship attribute is set in the HTML DOM, it can be observed
 via new reflected attributes. This example demonstrates it with
@@ -158,7 +158,7 @@ assert_equals(input.ariaLabelledByElements[0], l1);
 assert_equals(input.ariaLabelledByElements[1], l2);
 ```
 
-#### Sprouting attributes
+#### Sprouting relationship attributes
 
 When using reflection to set ARIA relationship properties, the element may "sprout" new attributes.
 
@@ -234,7 +234,102 @@ assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
 assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "");
 ```
 
+#### Relationships are validated on get
 
+Relationships are validated on get, and are kept intact through invalid states.
+
+```html
+<div id='fruitbowl' role='listbox'>
+  <div id='apple'>I am an apple</div>
+</div>
+<div id='shadowFridge'></div>
+```
+
+```js
+const apple = document.getElementById("apple");
+const shadowRoot = shadowFridge.attachShadow({mode: "open"});
+
+// We make the active descendant of the fruitbowl the apple.
+fruitbowl.ariaActiveDescendantElement = apple;
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "apple");
+
+// We then move the referenced element (apple) into shadow DOM (fridge).
+shadowRoot.appendChild(apple);
+// The active descendant relationship is now non-observable.
+assert_equals(fruitbowl.ariaActiveDescendantElement, null, "computed attr-assoc element should be null as referenced element is in an invalid scope");
+// NB: The attribute still exposes the referenced element's id.
+assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "apple");
+
+// Move the referenced element (apple) back out of the shadow DOM (fridge).
+fruitbowl.appendChild(apple);
+// Our active descendant relationship remained intact!
+assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
+```
+
+#### Multi-valued (array) relationship attributes are supported
+
+ARIA relationship attributes that take a list of IDREFs reflect to an
+array of IDREFs.
+
+```html
+<div id='fruitbowl' role='listbox'>
+  <div id='apple'>I am an apple</div>
+  <div id='pear'>I am a pear</div>
+</div>
+```
+
+```js
+const apple = document.getElementById("apple");
+
+fruitbowl.ariaDescribedByElements = [apple, pear];
+assert_array_equals(fruitbowl.ariaDescribedByElements, [apple, pear]);
+assert_equals(fruitbowl.getAttribute("aria-describedby"), "apple pear");
+
+// Temporarily remove apple from the document.
+apple.remove();
+// The relationship with apple is hidden but kept intact.
+assert_array_equals(fruitbowl.ariaDescribedByElements, [pear]);
+
+// Reinsert apple back into the document.
+fruitbowl.appendChild(apple);
+// The relationship with apple remained intact!
+assert_array_equals(fruitbowl.ariaDescribedByElements, [apple, pear]);
+```
+
+#### Multi-valued (array) relationship attributes may violate equality expectations
+
+When interacting with a reflected multi-valued (array) ARIA relationship attribute,
+it may violate typical JavaScript object property expectations. For example,
+if you retrieve the same array twice in a row, the two returned objects may not
+be the same object using a === equality check.
+
+```html
+<div id='fruitbowl' role='listbox'>
+  <div id='apple'>I am an apple</div>
+  <div id='pear'>I am a pear</div>
+</div>
+```
+
+```js
+const apple = document.getElementById("apple");
+
+let array1 = [apple, pear];
+fruitbowl.ariaDescribedByElements = array1;
+
+// Retrieving the same property won't equal the array that we set it to:
+assert_false(array1 === fruitbowl.ariaDescribedByElements);
+
+// However, the contents will be the same:
+assert_true(array1.length == fruitbowl.ariaDescribedByElements.length);
+assert_true(array1[0] === fruitbowl.ariaDescribedByElements[0]);
+...
+
+// Even accessing the same property twice won't result in the same object:
+let array2 = fruitbowl.ariaDescribedByElements;
+let array3 = fruitbowl.ariaDescribedByElements;
+assert(false(array2 === array3);
+```
 
 #### Spec/implementation status
 
