@@ -411,7 +411,12 @@ Not yet specced or implemented anywhere.
 
 ### Virtual Accessibility Nodes
 
-**Virtual Accessibility Nodes** will allow authors
+Important note: At this point, due to a number of complications including
+privacy concerns, the working group is not pursuing virtual nodes as
+intended. Instead, the goal is to focus on alternate solutions to valid
+use-cases.
+
+Original idea: **Virtual Accessibility Nodes** would allow authors
 to expose "virtual" accessibility nodes,
 which are not associated directly with any particular DOM element,
 to assistive technology.
@@ -420,6 +425,8 @@ This mechanism is often present in native accessibility APIs,
 in order to allow authors more granular control over the accessibility
 of custom-drawn APIs.
 
+How it could look:
+
 - Calling `attachAccessibleRoot()` causes an `AccessibleNode` to be associated with a `Node`.
   - The returned `AccessibleNode` forms the root of a virtual accessibility tree.
   - The Node's DOM children are implicitly ignored for accessibility once an `AccessibleRoot` is attached - there is no mixing of DOM children and virtual accessible nodes.
@@ -427,9 +434,24 @@ of custom-drawn APIs.
 - Only `AccessibleNode`s may have `AccessibleNodes` as children,
   and `AccessibleNode`s may only have `AccessibleNode`s as children.
 
-#### Use case 4: Adding non-DOM nodes (“virtual nodes”) to the Accessibility tree
+(Again, the current plan is to try to solve use cases without virtual nodes.)
 
-For example, to express a complex UI built out of a `<canvas>` element:
+#### Use case 4: Custom-drawn UI
+
+The most common example expressed is canvas-based UI, but there are several
+ways that a web app might have custom-drawn UI:
+
+- Canvas with a 2D context
+- Canvas with a WebGL context
+- SVG
+- HTML elements that are used as raw building blocks rather than semantic groupings
+- The video element, perhaps the UI is rendered on a remote server and streamed
+
+The challenge is that when the UI is custom-drawn, there aren't any DOM elements
+to add ARIA attributes to in order to make it accessible.
+
+The original idea was to use virtual nodes as a solution - create nodes
+specifically for accessibility, for example:
 
 ```js
 // Implementing a canvas-based spreadsheet's semantics
@@ -444,7 +466,7 @@ headerRow.rowindex = 0;
 // etc. etc.
 ```
 
-Virtual nodes will typically need to have location and dimensions set explicitly:
+Virtual nodes would typically need to have location and dimensions set explicitly:
 
 ```js
 cell.offsetLeft = "30px";
@@ -480,6 +502,28 @@ but no DOM events are fired and document.activeElement is unchanged.
 
 When the focused DOM element changes, accessible focus follows it:
 the DOM element's associated accessible node gets focused.
+
+#### Privacy concerns
+
+One of the biggest concerns around this proposal is that any events fired
+on virtual nodes would be an immediate indication that the user must be
+using assistive technology, which is private information that the user
+may not want to reveal.
+
+Adding a permission dialog might help if virtual nodes were only truly
+needed on a small number of specialized websites, but that would
+preclude their use in any widget library.
+
+#### Current thinking
+
+To avoid privacy concerns, the most likely path forwards for custom-drawn
+UI will be to promote the use of true DOM elements as fallback content,
+with efforts to address weaknesses in this approach, such as:
+
+- Addressing performance issues, perhaps by making it easier to avoid layout for fallback nodes
+- New ARIA attributes to allow specifying the accessible bounding box of a node
+- New ARIA attributes to decouple the node that has input focus, from the node that is exposed as focused to assistive technology
+- New ARIA attributes to make it possible to build a fully custom text editing control
 
 #### Spec/implementation status
 
