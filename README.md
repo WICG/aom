@@ -4,14 +4,14 @@ This effort aims to create a JavaScript API to allow developers to
 modify (and eventually explore) the accessibility tree for an HTML
 page.
 
-## Editors:
+### Editors:
 
 * Alice Boxhall, Google, aboxhall@google.com
 * James Craig, Apple, jcraig@apple.com
 * Dominic Mazzoni, Google, dmazzoni@google.com
 * Alexander Surkov, Mozilla, surkov.alexander@gmail.com
 
-## Details
+### Details
 
 Read the [Explainer](./explainer.md)
 
@@ -22,3 +22,18 @@ Read the [Spec](https://wicg.github.io/aom/spec/) - note, not up-to-date
 [Interactive Slide Deck](http://wicg.github.io/aom/demos/) (for Chrome)
 
 [Tic-tac-toe demo](http://wicg.github.io/aom/demos/tictactoe.html) (for Chrome)
+
+## Notification API for Confirmation of Action
+
+This effort aims to create a JavaScript API to allow developers to
+initiate notifications that confirm user actions (not necessarily tied 
+to direct UI changes).
+
+### Editors:
+
+* Travis Leithead, Microsoft, travil@microsoft.com
+* Daniel Libby, Microsoft
+
+### Details
+
+Read the [Explainer](./notification-api.md)
