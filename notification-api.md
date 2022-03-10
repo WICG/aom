@@ -184,7 +184,9 @@ document.ariaNotify( "Text copied to clipboard." );
 Each element (and the document) has a unique queue for notifications. There are some affordances
 for managing these queues and the notifications that go into them (see below). It is implementation-
 dependent how all the various queues are serviced (e.g., round-robin, random selection, FIFO, DOM order),
-though they should all be serviced on one "thread" so as to avoid race-conditions.
+though they should all be serviced as part of one 
+[agent](https://html.spec.whatwg.org/multipage/webappapis.html#agents-and-agent-clusters) so as to avoid 
+race-conditions.
 
 The API offers two additional options for managing *the current node's* notification queue:
 * `placeInQueue` - how to insert the notification into the queue (at the end, at the start, or to 
