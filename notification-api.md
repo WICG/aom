@@ -1,8 +1,10 @@
 # Notification API for Confirmation of Action
 
 Authors: 
-* [Travis Leithead](https://github.com/travisleithead), Microsoft
 * [Daniel Libby](https://github.com/dlibby-), Microsoft
+* [Sara Tang](https://github.com/sartang), Microsoft
+* [Travis Leithead](https://github.com/travisleithead), Microsoft
+
 
 ## Abstract
 
@@ -156,84 +158,79 @@ that should be announced beyond the immediate effect of the primary action.
 
 ## Proposed Solution
 
-(This version inspired by [UIA Notification API](https://docs.microsoft.com/en-us/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiaraisenotificationevent))
-
-For use cases that don't have an express UI tie-in, it makes sense to provide a solution
-not expressly tied to HTML element, but for which other document-centric information can
-be inferred (such as language).
+We provide an API on Documents and Elements to enable posting imperative notifications with 
+independently-managable queues. Additionally, Element-based context should be assumed for
+language.
 
 ```js
-// As the assistive technology to notify the user, given a specific string
-document.ariaNotify( "Selected text is now glowing blue." );
+// Queue a message to the body element's notification queue given the provided string
+document.body.ariaNotify( "Selected text is now glowing blue." );
 ```
+
 A screen reader or other assistive technology tool would speak or show "selected text is now
 glowing blue". For users without assistive technology tools running, nothing would happen.
 The call to the API has no web-observable side effects and its use should not infer that the 
 user is using assistive technology. 
 
-Here the content author provides a label to group a set of related notification about the 
-clipboard.
+The API can also be called on the document. The document also has a single [indpendent] queue
+for notifications:
 
 ```js
-// Use a label to categorize this notification
-document.ariaNotify( "Paste failed.", { label: "clipboard" } );
-document.ariaNotify( "Text copied to clipboard.", { label: "clipboard" } );
+// Use the document's queue.
+document.ariaNotify( "Paste failed." );
+document.ariaNotify( "Text copied to clipboard." );
 ```
 
-The label is used to group or categorize similar notifications. Assistive technology may
-chose to use these labels to provide a filtering mechanism for users.
+Each element (and the document) has a unique queue for notifications. There are some affordances
+for managing these queues and the notifications that go into them (see below). It is implementation-
+dependent how all the various queues are serviced (e.g., round-robin, random selection, FIFO, DOM order),
+though they should all be serviced on one "thread" so as to avoid race-conditions.
 
-Other means of expressing priority and coalescing behavior for similarly-labelled 
-notifications may be defined.
+The API offers two additional options for managing *the current node's* notification queue:
+* `placeInQueue` - how to insert the notification into the queue (at the end, at the start, or to 
+    clear the queue first on insertion).
+* `interruptCurrent` - If an existing notification is being read, is this notification so time-sensitive
+    that it should interterrupt what is currently being read.
 
 ```js
-// Experiment with priority and message combining
-let ariaNotifyOptions = {
-  required: true,
-  priority: "important",
-  label: "formatting commands"
+
+let ariaNotificationOptions = {
+  placeInQueue: "update", // other values "front" & "back" (default value)
+  interruptCurrent: false // false is the default value, specified for illustrative purposes
 };
 // (Each of these triggered by rapid keyboard shortcut usage, of course)
-document.ariaNotify( "Text bolded", ariaNotifyOptions );
-document.ariaNotify( "Text unbolded", ariaNotifyOptions );
-document.ariaNotify( "Text bolded", ariaNotifyOptions );
-document.ariaNotify( "Text unbolded", ariaNotifyOptions );
+document.body.ariaNotify( "Text bolded", ariaNotificationOptions );
+document.body.ariaNotify( "Text unbolded", ariaNotificationOptions );
+document.body.ariaNotify( "Text bolded", ariaNotificationOptions );
+document.body.ariaNotify( "Text unbolded", ariaNotificationOptions );
 ```
-
-The above `priority` and `required` options are only suggestions. We invite the community
-to provide feedback on what priority or coalescing behavior is appropriate given the range 
-of platforms and assistive technologies on the web.
 
 ## Considerations & Open Issues
 
-#### Only plain text as input?
+### Only plain text as input?
 
 Should the API allow for richer formatted text? Formatted text could provide hints 
 for expressiveness and pronounciation (TTML and WebVTT are potential candidates).
+While we think Element-level context will help with some of the desired context, 
+we aren't pursing a richer text format at this time.
 
-What about supporting non-textual cues? We think other platform capabilities (like 
-`<audio>.play()`) can be used to handle non-textual output, and that non-textual
-based messages don't need to be handled by this API.
+### "Earcons"
 
-#### Document vs Element exposure
+Supporting non-textual notficiations? We see the value in having a set of known,
+standardized (enum) values that can be associated with notification audio queues--
+generic enough to be used across many scenarios, but scoped enough to be easily 
+configurable by a user in their favorite screen reader.
 
-With a single API offered on the `document` object, the notion of priority and 
-language (see below) must be made explicit in the API. As an alternative, an 
-element-based API could use facets of its context to make some of the priority
-and language, etc. more implicit. For example, an element's visibility state,
-layout position, level in the DOM hierarchy, and computed language value (via 
-`lang` attributes) could be used to infer context and priority for a notification
-queued from that element.
-
-#### Language input
-
-Should language preference or hints be added to the API? Presumably the author's 
-language can be implied by context outside of this proposal (i.e., explicitly by 
-required language tags or implicitly via textual analysis at the AT layer). In 
-some scenarios it might be helpful to offer notifications in a language not 
-inferred from other context (such as how automated helpdesk phone systems might
-offer assistance in alternate languages--prompts spoken in those alternate 
-languages).
+For example, a generic set of "earcons" might map to the following scenarios and
+values:
+* recent action completion status: `success` / `warning` / `failure`
+* async/indeterminate task progress: `started` / `in-progress` / `blocked` / `canceled`
+* navigational boundary endpoints: `beginning` / `middle` / `end`
+* value-relative state changes: `increase` / `decrease`
+* user interface state: 
+   * `clickable` / `clicked`
+   * `enabled` / `disabled`
+   * `editable` / `readonly`
 
 #### Catering to verbosity preferences?
 
@@ -288,6 +285,8 @@ avoid the risk of denial-of-service type attacks on ATs through this API.
     text could tie up an AT or cause a hang as data is marshalled across boundaries.
     
 ## Alternative Solutions
+
+The design of this API is loosely inspired by the [UIA Notification API](https://docs.microsoft.com/en-us/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiaraisenotificationevent)).
 
 Previous discussions for a Notifications API in the AOM and ARIA groups:
 * [Issue 3 - Use Case: Accessibility Notifications](https://github.com/wicg/aom/issues/3)
