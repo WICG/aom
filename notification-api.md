@@ -218,7 +218,8 @@ we aren't pursing a richer text format at this time.
 
 ### "Earcons"
 
-Supporting non-textual notficiations? We see the value in having a set of known,
+"Earcons" are short audio cues used to convey contextual information in the way that
+icons provide meaning for sighted users. We see the value in having a set of known,
 standardized (enum) values that can be associated with notification audio queues--
 generic enough to be used across many scenarios, but scoped enough to be easily 
 configurable by a user in their favorite screen reader.
