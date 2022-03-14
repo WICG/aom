@@ -159,8 +159,8 @@ that should be announced beyond the immediate effect of the primary action.
 ## Proposed Solution
 
 We provide an API on Documents and Elements to enable posting imperative notifications with 
-independently-managable queues. Additionally, Element-based context should be assumed for
-language.
+independently-managable queues. Additionally, the language of the notification is based on the
+element on which the notification is sent from (or the language defaults for the document).
 
 ```js
 // Queue a message to the body element's notification queue given the provided string
@@ -172,7 +172,7 @@ glowing blue". For users without assistive technology tools running, nothing wou
 The call to the API has no web-observable side effects and its use should not infer that the 
 user is using assistive technology. 
 
-The API can also be called on the document. The document also has a single [indpendent] queue
+The API can also be called on the document. The document also has a single (independent) queue
 for notifications:
 
 ```js
