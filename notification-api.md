@@ -1,4 +1,4 @@
-# Notification API for Confirmation of Action
+# Accessibility (ARIA) Notification API
 
 Authors: 
 * [Daniel Libby](https://github.com/dlibby-), Microsoft
@@ -8,15 +8,13 @@ Authors:
 
 ## Abstract
 
-For limited-vision or non-sighted users, identifying dynamic changes in the content
+For limited-vision or non-sighted users, identifying dynamic changes (non-user-initiated) in the content
 of a web app is very challenging. ARIA live regions are the only mechanism available
 today that communicate content changes down to the accessibility layer so that users
 can hear about them. ARIA live regions are stretched far beyond their original use
 cases as authors struggle to use them in scenarios that they weren't designed for.
 We propose a notification API purpose-built to communicate to the accessibility layer 
-for scenarios in which ARIA live regions are a poor choice. One of these scenarios is
-a "confirmation of action" where the action in question is not necessarily tied to UI 
-(elements) in the app.
+for scenarios in which ARIA live regions are a poor choice.
    
 ## Introduction
 
@@ -27,7 +25,7 @@ readers move through the content much the same way a sighted user might scan
 through the document with their eyes. When something about the document changes
 (above the fold), sighted users are quick to notice and process the change. When
 something below the fold (offscreen) changes, sighted users have no way of knowing
-that there was a change nor how important a change it might be. This is the 
+that there was a change nor how important a change it might be. This latter case is the 
 conundrum for non-sighted users in general: how and when should changes in the
 content be brought to their attention?
 
@@ -78,7 +76,7 @@ pre-existing issues with the feature make it a challenge to use effectively:
 ## Goals
 
 * Find a solution that can expand the capabilities presently offered by live-regions
-  to offer additional desired behavior
+  to offer additional desired behavior.
 * Look into the scenarios where "live region hacks" are being used and understand the
   use cases and tailor an experience for those use cases. Replace the usage of "live 
   region hacks" on the web with a more appropriate solution.
@@ -158,22 +156,29 @@ that should be announced beyond the immediate effect of the primary action.
 
 ## Proposed Solution
 
-We provide an API on Documents and Elements to enable posting imperative notifications with 
-independently-managable queues. Additionally, the language of the notification is based on the
-element on which the notification is sent from (or the language defaults for the document).
+A new API enables posting textual descriptions (strings) as imperative notifications to the
+browser's accessibility layer. The API `ariaNotify` is available on both the Document and on 
+every Element.
 
 ```js
-// Queue a message to the body element's notification queue given the provided string
-document.body.ariaNotify( "Selected text is now glowing blue." );
+// Queue a message to the notification queue associated with the document:
+document.ariaNotify( "New collaborator X is now connected." );
+// Queue a message to the notification queue associated with an element:
+document.querySelector("#richEditRegion1").ariaNotify( "Selected text is now glowing blue." );
 ```
 
-A screen reader or other assistive technology tool would speak or show "selected text is now
-glowing blue". For users without assistive technology tools running, nothing would happen.
-The call to the API has no web-observable side effects and its use should not infer that the 
-user is using assistive technology. 
+A screen reader or other assistive technology tool would pick from among these queues to speak
+or show "new collaborator X is now connected" and "selected text is now glowing blue" in some
+implementation-dependant manner. (This proposal does not attempt to define the mutli-queue total 
+order for all notifications (which may be interleaved with ARIA live region announcements or other
+announcements from user-actions).
 
-The API can also be called on the document. The document also has a single (independent) queue
-for notifications:
+For users without assistive technology tools running, nothing would happen. The call to the API
+has no web-observable side effects and its use should not infer that the user is using assistive 
+technology. 
+
+For a single notification queue source, multiple calls to its notification API will append 
+notifications into its queue one after another.
 
 ```js
 // Use the document's queue.
@@ -181,21 +186,31 @@ document.ariaNotify( "Paste failed." );
 document.ariaNotify( "Text copied to clipboard." );
 ```
 
-Each element (and the document) has a unique queue for notifications. There are some affordances
-for managing these queues and the notifications that go into them (see below). It is implementation-
-dependent how all the various queues are serviced (e.g., round-robin, random selection, FIFO, DOM order),
-though they should all be serviced as part of one 
-[agent](https://html.spec.whatwg.org/multipage/webappapis.html#agents-and-agent-clusters) so as to avoid 
-race-conditions.
+In this example, the author is guaranteed that the notification "paste failed" will be announced
+*before* the notification "text copied to clipboard". However, there is no guarantee that other 
+announcements from other notification queues won't happen before, between, or after either of these
+two notifications.
 
-The API offers two additional options for managing *the current node's* notification queue:
-* `placeInQueue` - how to insert the notification into the queue (at the end, at the start, or to 
-    clear the queue first on insertion).
+For a single notification queue source (like the one on *document* shown previously), several options
+are available to manage how notifications behave in the queue and how they may interact with other
+notifications being serviced:
+
+* `placeInQueue` - indicates which end of the notification queue the new notification should be inserted 
+    into: at the `back` (traditional queuing behavior, similar to ARIA live region's "polite" value);
+    at the `front` (traditional stacking behavior. This notification will be serviced next, similar to
+    ARIA live region's "assertive" value), or `update` (clear this notification queue of any previous
+    notifications and then add this notification).
+    * The **default value** is `back`.
 * `interruptCurrent` - If an existing notification is being read, is this notification so time-sensitive
-    that it should interterrupt what is currently being read.
+    that it should interterrupt what is currently being read? Takes a `true` or `false` value.
+    * The **default value** is `false`.
+
+The following example puts four notifications in the body element's notification queue, using the
+`placeInQueue: "update"` which "updates" the queue each time so that only the most recent notification
+is kept in the queue. As each notification enters the queue it will not attempt to interrupt any 
+existing notification being read/shown to the user:
 
 ```js
-
 let ariaNotificationOptions = {
   placeInQueue: "update", // other values "front" & "back" (default value)
   interruptCurrent: false // false is the default value, specified for illustrative purposes
@@ -207,22 +222,101 @@ document.body.ariaNotify( "Text bolded", ariaNotificationOptions );
 document.body.ariaNotify( "Text unbolded", ariaNotificationOptions );
 ```
 
-## Considerations & Open Issues
+## Open Issues
 
-### Only plain text as input?
+### 1. Spamming mitigations
 
-Should the API allow for richer formatted text? Formatted text could provide hints 
+The general nature of a notification API means that authors could use it for scenarios 
+that are already handled by the AT (such as for focus-change actions) resulting in
+confusing double-announcements (in the worst case) or extra unwanted verbosity (in
+the best case).
+
+Note: ATs tune their behavior for the best customer experiences. AT-provided 
+verbosity settings matching user preferences could conflict with author expectations
+leading to poor experiences.
+
+Authors may also apply the use of this API too liberally, confirming many trivial
+user actions where typical expectations do not require any notification.
+
+Finally, malicious attackers can use the API as a Denial-of-Service against AT users.
+
+To mitigate against these approaches we can consider several options:
+* making use of [User Activation](https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation)
+   primitives to limit usage of this API to only actions taken by the author
+* global notification queue limits. Apply a maximum threshold to the combined queues 
+   so that queue growth is not unbounded.
+* time-gated use. Add a "cool down" timer between calls to the API so that notifications
+   cannot be added to the queue in a tight loop. (This option may not be desirable as some
+   scenarios may require frequent (but not sustained) queue management.
+
+### 2. Cross-origin iframe access
+
+Should `ariaNotify` be allowed from cross-origin iframes? We would like to avoid potential
+3rd party abuse.
+
+### 3. Express clearing of the queue
+
+Some scenarios may add many notifications into the queue, but then have an event happen
+that renders all the previously-queued notifications irrelevant. This scenario could happen
+both for notifications queued using `front`/`back` and also for `update`.
+
+The API as it stands currently provides no way to clear the queue without adding a new
+notification into the queue at the same time (see `update`). One option is to add a new
+`ariaClearNotifications()` API. Another workaround might be an `update` message with an 
+empty string (if such empty string messages are not dropped as an implementation 
+optimization).
+
+### 4. Non-interruptable messages
+
+The API provides `interruptCurrent` as a way of expressing that the new notification may 
+interrupt (or not) any existing notification that is being spoken/displayed.
+
+In the scenario that some notification is generated which needs to be received in full
+(and not cut short because of a focus-change announcement or other state change), an option 
+to set `interruptable` for the current message to provide a boolean hint to ATs that the
+message should not be interrupted except by express "mute" action by the user.
+
+## FAQ
+
+### 1. Is this API going to lead to privacy concerns for AT users?
+
+No. This API has been designed to be "write-only" meaning that its use shoudl have no other
+apparent observable side-effects that could be used for fingerprinting.
+
+See Security and Privacy section for additional details.
+
+### 2. Are Element-level notifications really necessary?
+
+Adding `ariaNotify` to Elements was driven by several goals:
+
+* Resolve the question of how *language* input should be provided. To keep the API
+   simple, we are able to leverage the `lang` attribute that is used to override
+   the document language for specific subtrees. `ariaNotify` can use the nearest
+   ancestor element's `lang` attribute as a language hint (or the document's 
+   default language).
+* Provide a simpler model for handling multiple queues. Being able to enqueue 
+   notifications into separately-managed queues is an important scenario and would
+   require explicit queue management if only a singleton `ariaNotify` existed on the
+   document. By giving each node (elements + document) their own queue, the API can
+   stay simple while enabling specific queue managment options.
+* ATs such as screen readers can filter/prioritize notifications based on the 
+   element associated with the notification queue. E.g., the element's current
+   visibility in the User Agent, the element's proximity to the focused element.
+   (Same potential options available with ARIA live regions today.)
+
+### 3. Is the notification limited to plaintext strings as input?
+
+For example, should the API allow for richer formatted text? Formatting could provide hints 
 for expressiveness and pronounciation (TTML and WebVTT are potential candidates).
 While we think Element-level context will help with some of the desired context, 
 we aren't pursing a richer text format at this time.
 
-### "Earcons"
+### 4. Will "Earcons" or other notification filtering options be available?
 
 "Earcons" are short audio cues used to convey contextual information in the way that
-icons provide meaning for sighted users. We see the value in having a set of known,
-standardized (enum) values that can be associated with notification audio queues--
-generic enough to be used across many scenarios, but scoped enough to be easily 
-configurable by a user in their favorite screen reader.
+icons provide meaning for sighted users. "Earcons" might provide a set of known,
+standardized (enum) values that can be associated with notification audio cues and
+may also provide notification filtering options for users.
 
 For example, a generic set of "earcons" might map to the following scenarios and
 values:
@@ -235,40 +329,27 @@ values:
    * `enabled` / `disabled`
    * `editable` / `readonly`
 
-#### Catering to verbosity preferences?
+Providing earcons (through this API or something similar) is a request we are
+considering for future work.
 
-It may useful to enable authors to offer multiple levels of verbosity for a
-notification depending on how a user has configured their AT. For example, if ATs
-are configured for minimal output, perhaps a single word could additionally be
-provided that generalizes the full text of the notification.
+### 5. Can this API allow for output verbosity preferences?
 
-Alternatively, ATs may process the text content and apply heuristics to shorten 
-the text automatically (without complicating the API or relying on authors to furnish
-additional terse phrases).
+Screen reader users can customize the verbosity of the information (and context) that
+is read to them via settings. This API does not offer a way to provide alternative strings
+for different levels of verbosity (or flags to mark the expected verbosity of the 
+notifications that get queued). 
 
-#### Too easy to abuse?
-
-Will this API be a "footgun" that will lead to inappropriate usage patterns? The
-general nature of a notification API means that authors could use it for scenarios 
-that are already handled by the AT (such as for focus-change actions) resulting in
-confusing double-announcements (in the worst case) or extra unwanted verbosity (in
-the best case). 
-
-Note: ATs tune their behavior for the best customer experiences. AT provided 
-verbosity settings matching user preferences could conflict with author expectations
-leading to poor experiences.
-
-Authors may also apply the use of this API too liberally, confirming many trivial
-user actions where typical expectations do not require any notification.
-
-We can consider making use of 
-[User Activation](https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation)
-primitives to limit usage of this API to only actions taken by the author, and to
-avoid the risk of denial-of-service type attacks on ATs through this API.
+ATs may derive their own methods of shortening notifications sent via `ariaNotify`, but
+these design decisions are beyond the scope of this proposal. 
 
 ## Privacy and Security Considerations
 
-1. **Readback.** Any readback of configuration settings for an AT via an API have the
+1. **Timing.** The use of the API provides no return value, but parameters must still
+    be processed. Implementations should take care to avoid optimizing-out the synchronous
+    aspects of processing this API, as predictable timing differences from when the 
+    API is "working" (an AT is connected) vs. "not working" (no AT connnected) could 
+    still be used to infer the presence of a user with an AT active.
+3. **Readback.** Any readback of configuration settings for an AT via an API have the
     potential of exposing a connected (vs. not connected) AT, and as such is an easy
     target for fingerprinting AT users, an undesireable outcome. Similarly, confirmation
     of notifications (such as via a fulfilled promise) have similar traits and are
