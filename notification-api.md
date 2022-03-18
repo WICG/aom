@@ -234,6 +234,7 @@ values:
    * `clickable` / `clicked`
    * `enabled` / `disabled`
    * `editable` / `readonly`
+   * `selected` / `unselected`
 
 #### Catering to verbosity preferences?
 
