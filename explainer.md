@@ -23,11 +23,11 @@
   - [Default semantics for Custom Elements via the `ElementInternals` object](#default-semantics-for-custom-elements-via-the-elementinternals-object)
     - [Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components](#use-case-1-setting-non-reflected-default-accessibility-properties-for-web-components)
     - [Spec/implementation status](#specimplementation-status-2)
-  - [User action events from Assistive Technology](#user-action-events-from-assistive-technology)
-    - [New InputEvent types](#new-inputevent-types)
+  - [Implemented: User action events from Assistive Technology](#user-action-events-from-assistive-technology)
+  - [Abandoned: New InputEvent types](#new-inputevent-types)
     - [Use case 3: Listening for events from Assistive Technology](#use-case-3-listening-for-events-from-assistive-technology)
     - [Spec/implementation status](#specimplementation-status-3)
-  - [Virtual Accessibility Nodes](#virtual-accessibility-nodes)
+  - [Speculative: Virtual Accessibility Nodes](#virtual-accessibility-nodes)
     - [Use case 4: Adding non-DOM nodes (“virtual nodes”) to the Accessibility tree](#use-case-4-adding-non-dom-nodes-virtual-nodes-to-the-accessibility-tree)
     - [Spec/implementation status](#specimplementation-status-4)
   - [Full Introspection of an Accessibility Tree - `ComputedAccessibleNode`](#full-introspection-of-an-accessibility-tree---computedaccessiblenode)
@@ -325,13 +325,12 @@ Only send these deprecated properties if the user agent would normally send them
 
 Note: These event property tables are intended to assist implementors during the incubation process. This is not intended as a normative specification.
 
+### Abandoned: New InputEvent types
 
-#### Speculative: New InputEvent types
-
-Note: This section is speculative, as there is now no immediate plan to include InputEvents
+Note: This section is abandoned, as there is now no immediate plan to include InputEvents
 for Assistive Technology Actions.
 
-We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
+We considered also adding some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputevent) types:
 
 - `increment`
 - `decrement`
@@ -339,7 +338,7 @@ We will also add some new [`InputEvent`](https://www.w3.org/TR/uievents/#inputev
 - `scrollPageUp`
 - `scrollPageDown`
 
-These will be triggered via assistive technology events,
+These could have been be triggered via assistive technology events,
 along with the synthesised keyboard events listed in the above table,
 and also synthesised when the keyboard events listed above
 occur in the context of a valid target for the corresponding assistive technology event.
