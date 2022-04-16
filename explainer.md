@@ -246,28 +246,28 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 
 | **AT event**          | **Targets**                                                       | Orientation/Direction | **DOM event**                      |
 | --------------------- | ----------------------------------------------------------------- | --------------------- | ---------------------------------- |
-| `click` or `press`    | _all elements_                                                    |                       | `click` MouseEvent                 |
+| `click` or `press`    | _all elements_                                                    |                       | `click` MouseEvent¹                |
 | `focus`               | _all focusable elements_                                          |                       | `focus` Event                      |
 | `blur`                | No targets, as `blur` could potentially 'out' AT users.           |                       | None                               |
-| `select`              | Elements whose computed role supports `aria-selected`             |                       | `click` MouseEvent                 |
-| `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent             |
-| `contextMenu`         | _all elements_                                                    |                       | `contextmenu` MouseEvent           |
-| `increment`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Up` KeyboardEvent                 |
-|                       | ""                                                                | horizontal LTR        | `Right` KeyboardEvent              |
-|                       | ""                                                                | horizontal RTL        | `Left` KeyboardEvent               |
-|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Up` KeyboardEvent                 |
-| `decrement`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Down` KeyboardEvent               |
-|                       | ""                                                                | horizontal LTR        | `Left` KeyboardEvent               |
-|                       | ""                                                                | horizontal RTL        | `Right` KeyboardEvent              |
-|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Down` KeyboardEvent               |
+| `select`              | Elements whose computed role supports `aria-selected`             |                       | `click` MouseEvent¹                |
+| `contextMenu`         | _all elements_                                                    |                       | `contextmenu` MouseEvent²          |
+| `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent³            |
+| `increment`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Up` KeyboardEvent³                |
+|                       | ""                                                                | horizontal LTR        | `Right` KeyboardEvent³             |
+|                       | ""                                                                | horizontal RTL        | `Left` KeyboardEvent³              |
+|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Up` KeyboardEvent³                |
+| `decrement`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Down` KeyboardEvent³              |
+|                       | ""                                                                | horizontal LTR        | `Left` KeyboardEvent³              |
+|                       | ""                                                                | horizontal RTL        | `Right` KeyboardEvent³             |
+|                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Down` KeyboardEvent³              |
 | `scrollByPage`        | TBD (possibly custom scroll views)                                |                       | TBD (possibly `PageUp`/`PageDown`) |
 | `scrollIntoView`      | TBD                                                               |                       | No equivalent DOM event            |
 | `setValue`            | n/a                                                               |                       | No equivalent DOM event            |
 
 #### Notes on the previous table:
-- DOM KeyboardEvent sequences include keyup/keydown.
-- DOM MouseEvent sequences include mousedown/mouseup and touchstart/touchend where relevant.
-- `contextmenu` sequence may need to include MouseEvents, including `mousedown`/`mouseup`/`auxclick`/`contextmenu`.
+- ¹ `click` sequences include `mousedown`/`mouseup` and `touchstart`/`touchend` where relevant.
+- ² `contextmenu` sequences may need to include MouseEvents, including `mousedown`/`mouseup`/`auxclick`/`contextmenu`.
+- ³ DOM KeyboardEvent sequences include `keyup`/`keydown`.
 - Control orientation is determined by the computed value of `aria-orientation` which
   defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
   `scrollbar`.
