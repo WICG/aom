@@ -62,7 +62,7 @@ customSlider.addEventListener('keydown', (event) => {
 
 ### Phase 2: InputEvent types
 
-(Abaondoned path. No near-term planned support for Accessibilty-specific events.)
+(Abandoned path. No near-term planned support for Accessibilty-specific events.)
 
 ### Phase 2: Custom element semantics on `ElementInternals` 
 
