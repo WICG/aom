@@ -18,6 +18,10 @@ Last updated: April 15, 2022
 
 ### Phase 1: Reflect simple ARIA attributes on DOM nodes.
 
+* Safari/WebKit (supported)
+* Chrome/Chromium (supported)
+* Firefox/Gecko (unsupported)
+
 ```js
 element.role = "button";
 element.ariaLabel = "Click Me";
@@ -44,9 +48,9 @@ Examples: AT increment/decrement on a slider will send synthesized up/down arrow
 
 More detail: https://github.com/WICG/aom/blob/gh-pages/explainer.md#user-action-events-from-assistive-technology
 
-*Safari/WebKit (pass)
-*Chrome/Chromium (unsupported)
-*Firefox/Gecko (unsupported)
+* Safari/WebKit (supported)
+* Chrome/Chromium (unsupported)
+* Firefox/Gecko (unsupported)
 
 ```js
 customSlider.addEventListener('keydown', (event) => {
