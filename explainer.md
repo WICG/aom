@@ -252,11 +252,11 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 | `select`              | Elements whose computed role supports `aria-selected`             |                       | `click` MouseEvent¹                |
 | `contextMenu`         | _all elements_                                                    |                       | `contextmenu` MouseEvent²          |
 | `dismiss` or `escape` | _all elements_                                                    |                       | `Escape` KeyboardEvent³            |
-| `increment`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Up` KeyboardEvent³                |
+| `increment`           | Elements w/ computed role `scrollbar`, or `slider`                | vertical              | `Up` KeyboardEvent³                |
 |                       | ""                                                                | horizontal LTR        | `Right` KeyboardEvent³             |
 |                       | ""                                                                | horizontal RTL        | `Left` KeyboardEvent³              |
 |                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Up` KeyboardEvent³                |
-| `decrement`           | Elements w/ computed role `progressbar`, `scrollbar`, or `slider` | vertical              | `Down` KeyboardEvent³              |
+| `decrement`           | Elements w/ computed role `scrollbar` or `slider`                 | vertical              | `Down` KeyboardEvent³              |
 |                       | ""                                                                | horizontal LTR        | `Left` KeyboardEvent³              |
 |                       | ""                                                                | horizontal RTL        | `Right` KeyboardEvent³             |
 |                       | Elements w/ computed role `spinbutton`                            | orientation n/a       | `Down` KeyboardEvent³              |
@@ -269,7 +269,7 @@ platform conventions and partially documented in the [ARIA Authoring Practices G
 - ² `contextmenu` sequences may need to include MouseEvents, including `mousedown`/`mouseup`/`auxclick`/`contextmenu`.
 - ³ DOM KeyboardEvent sequences include `keyup`/`keydown`.
 - Control orientation is determined by the computed value of `aria-orientation` which
-  defaults to `horizontal` for `progressbar` and `slider`, and defaults to `vertical` for
+  defaults to `horizontal` for `slider`, and defaults to `vertical` for
   `scrollbar`.
 - Natural language direction is determined by the computed value of `dir` which usualy computes to
   to `ltr` (`auto` in most contexts resolves to `ltr`), but can be set to `rtl` for languages such
