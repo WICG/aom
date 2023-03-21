@@ -90,8 +90,9 @@ in particular, they are much less expressive than the native APIs that the brows
    - These should be able to express at least the same set of accessible properties as Elements,
      as well as parent/child/other relationships with other virtual nodes,
      and position/dimensions.
-5. Introspecting the computed accessibility tree
+5. Introspecting the computed accessibility tree and interpreted accessibility attributes/properties
    - Developers currently have no way to probe or test how ARIA and other accessible properties are applied.
+   - Browser implementers have no API to automate comparison testing of engine accessibilty internals for interoperability.
 
 ## The Accessibility Object Model
 
@@ -534,16 +535,16 @@ This API is still being considered.
 
 It may be approached initially as a testing-only API.
 
-#### Use case 5: Introspecting the computed tree
+#### Use case 5: Introspecting the computed accessibility tree and interpreted accessibility attributes/properties
 
 The **Computed Accessibility Tree** API will allow authors to access
 the full computed accessibility tree -
 all computed properties for the accessibility node associated with each DOM element,
-plus the ability to walk the computed tree structure including virtual nodes.
+plus the ability to walk the computed tree structure.
 
-This will make it possible to:
+This could make it possible to:
 
-- write any programmatic test which asserts anything
+- write a programmatic interoperability test which asserts anything
   about the semantic properties of an element or a page.
 - build a reliable browser-based assistive technology -
   for example, a browser extension which uses the accessibility tree
@@ -554,13 +555,20 @@ This will make it possible to:
   (via ARIA or otherwise)
   to an element -
   for example, to detect whether a browser has implemented a particular version of ARIA.
-- do any kind of console-based debugging/checking of accessibility tree issues.
+- perform debugging/checking of accessibility tree issues.
 - react to accessibility tree state,
   for example, detecting the exposed role of an element
   and modifying the accessible help text to suit.
 
 #### Spec/implementation status
 
+##### WebDriver (Shipping in WebKit/Chrome, [implemented 20 Mar 2023 in Gecko](https://bugzilla.mozilla.org/show_bug.cgi?id=1585622#c22))
+ - [computedrole](https://www.w3.org/TR/webdriver/#dfn-get-computed-role)
+ - [computedlabel](https://www.w3.org/TR/webdriver/#dfn-get-computed-label)
+ - Some discussion of `getComputedAccessibilityNode` (and parent/children) for tree access
+ 
+ 
+##### Legacy and abondoned implementations
 A purely experimental implementation exists in Blink,
 via the command-line flag `--enable-blink-features="AccessibilityObjectModel"`.
 
@@ -568,6 +576,9 @@ This adds a method to `Window`, `getComputedAccessibleNode(node)`,
 which returns the computed accessible properties for the given node.
 
 This implementation is not reliable and may be removed at any point.
+
+The similar experimental implementation in WebKit is scheduled to be removed.
+
 
 #### Why is accessing the computed properties being addressed last?
 
