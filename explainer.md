@@ -567,6 +567,11 @@ This could make it possible to:
  - [computedlabel](https://www.w3.org/TR/webdriver/#dfn-get-computed-label)
  - Some discussion of `getComputedAccessibilityNode` (and parent/children) for tree access
  
+##### WPT TestDriver (functional as of March 2023)
+Leverages WebDriver accessors for ease of test development.
+ - [basic computedrole tests](https://wpt.fyi/results/wai-aria/role/basic.html)
+ - [basic computedlabel test](https://wpt.fyi/results/accname/basic.html)
+ - [WPT Interop 2023 Accessibility Investigation](https://github.com/web-platform-tests/interop-2023-accessibility-testing/issues/3)
  
 ##### Legacy and abondoned implementations
 A purely experimental implementation exists in Blink,
