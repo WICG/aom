@@ -437,7 +437,7 @@ document.getElementById('item2').remove();
 ... then it's no longer the case that the referenced element
 is _a descendant of a shadow-including ancestor_ of the host element.
 Because of this,
-the `actiaActiveDescendantElement` property getter
+the `ariaActiveDescendantElement` property getter
 will return `null`:
 
 ```js
