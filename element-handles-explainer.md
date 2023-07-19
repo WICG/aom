@@ -12,45 +12,6 @@ For more background on the cross-root ARIA problem and other proposals, see Alic
 * **[Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards)**. An element inside a shadow tree needs to create a relationship like `aria-labelledby` with an element in the light tree.
 * **Referring out from one Shadow DOM and into another**. There is also the combined case, where an element in one shadow tree needs to refer to an element in a sibling shadow tree (or any relationship that is not a direct ancestor/descendant relationship). A complete solution should work in this case as well. An example is described by Nolan Lawson: [ARIA element reflection across non-descendant/ancestor shadow roots](https://github.com/WICG/aom/issues/192).
 
-### Existing proposed solutions
-
-There have been a number of solutions proposed to one or both of the problems listed above. In general, they fall into one of two categories: either changing how attribute lookups work, or changing how ID reference lookup works:
-
-#### Attribute lookup changes
-
-Attributes on the host element like `aria-labelledby` are delegated to an element inside the shadow tree. The delegate element is chosen by the author of the web component (not the user).
-
-Proposals in this category include:
-- [Cross-root ARIA delegation](https://github.com/leobalter/cross-root-aria-delegation/blob/main/explainer.md)
-- [Cross-root ARIA reflection](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md)
-- [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md)
-
-**Pros**
-- Simple for the user: attributes on the custom component "just work" without needing additional knowledge of the component.
-- Does not expose any component internals outside of the shadow tree.
-
-**Cons**
-- The Bottleneck Effect: only one element in the shadow DOM can be the target of an attribute. For example, there's no way for a range slider component, which has two input elements (min and max), to have separate labels for each input.
-- The component is in charge of picking the target of an attribute. For example, in the case of `aria-activedescendant`, it's up to the component to internally track the active descendant, and re-delegate the attribute to the correct element.
-- Potentially confusing which attributes are delegated; and it's not necessarily consistent between web components.
-
-#### ID lookup changes
-
-Provide a way for users to directly target elements in the shadow tree.
-
-Proposals in this category include:
-  - [Content attribute to import/export IDs across shadow boundaries](https://github.com/WICG/aom/issues/169)
-  - [Using ::part](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#part)
-  - [Encapsulation-preserving IDL Element reference attributes](https://github.com/WICG/aom/issues/195)
-  - This proposal: Element Handles
-
-**Pros**
-- No bottleneck effect: the developer using the component can target any element that the component author exposed via handles.
-- Re-targeting an attribute like `aria-activedescendant` can be handled by either the developer using the component (by changing the value of `aria-activedescendant`) OR by the component author (by internally moving names to different elements).
-
-**Cons**
-- Increased complexity when using a component: need to know some details about the internals of the component to target the correct element (can be published with documentation for the web component).
-
 ## Proposal
 
 Create a new attribute named `handle`. This attribute would be a way to refer to an element similar to `id`, but can only be used as the target of certain attributes that refer to other elements, such as `aria-labelledby` or `for`.
@@ -123,14 +84,49 @@ The `importhandles` attribute can also refer to a handle inside another shadow t
 In this example, both the `label` and `input` are inside separate shadow trees, but can still 
 
 ```html
-<x-label id="x-label" importhandles="label-for: x-input::handle(the-input)">
+<x-label id="x-label" importhandles="my-target: x-input::handle(the-input)">
   #shadowRoot
-  | <label for=":host::handle(label-for)">Example Label</label>
+  | <label for=":host::handle(my-target)">Example Label</label>
 </x-label>
 <x-input id="x-input">
   #shadowRoot
   | <input handle="the-input" type="text" />
 </x-input>
+```
+
+### Putting it all together
+
+**Example 5: Combobox**
+
+This combobox example is more complex, but demonstrates a few of the features of handles working together.
+* The label's `for="combobox-1::handle(the-input)"` directly targets the input element inside the x-combobox.
+* The x-combobox imports two handles: my-activedescendant and my-listbox
+
+```html
+<label for="combobox-1::handle(the-input)">Example combobox</label>
+
+<x-combobox 
+  id="combobox-1"
+  importhandles="my-activedescendant: listbox-1::handle(active-option), my-listbox: listbox-1::handle(the-listbox)">
+  #shadowRoot
+  | <input
+  |   role="combobox"
+  |   handle="the-input"
+  |   aria-controls=":host::handle(my-listbox)"
+  |   aria-activedescendant=":host::handle(my-activedescendant)"
+  |   aria-expanded="true"
+  | />
+  | <button aria-label="Open" aria-expanded="true">v</button>
+</x-combobox>
+
+<x-listbox id="listbox-1">
+  #shadowRoot
+  | <div role="listbox" handle="the-listbox">
+  |   <div role="option" handle="option-1, active-option">Option 1</div>
+  |   <div role="option" handle="option-2">Option 2</div>
+  |   <div role="option" handle="option-3">Option 3</div>
+  | </div>
+</x-listbox>
 ```
 
 ### JavaScript API
@@ -164,14 +160,46 @@ The following is an initial list of elements that will support lookups of handle
 * `importhandles`
 * (List is likely incomplete so far)
 
-## Alternatives
+## Alternative Solutions
 
-### Potential alternative names for the attributes
+### Existing proposed solutions
 
-* `publicid`
-* `exportid`
-* `partid` (re-emphasizes the similarity to `part`, but potentially confusing since it is distinct from `part`).
-* _Other suggestions?_
+There have been a number of solutions proposed to one or both of the problems listed above. In general, they fall into one of two categories: either changing how attribute lookups work, or changing how ID reference lookup works:
+
+#### Attribute lookup changes
+
+Attributes on the host element like `aria-labelledby` are delegated to an element inside the shadow tree. The delegate element is chosen by the author of the web component (not the user).
+
+Proposals in this category include:
+- [Cross-root ARIA delegation](https://github.com/leobalter/cross-root-aria-delegation/blob/main/explainer.md)
+- [Cross-root ARIA reflection](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md)
+- [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md)
+
+**Pros**
+- Simple for the user: attributes on the custom component "just work" without needing additional knowledge of the component.
+- Does not expose any component internals outside of the shadow tree.
+
+**Cons**
+- The Bottleneck Effect: only one element in the shadow DOM can be the target of an attribute. For example, there's no way for a range slider component, which has two input elements (min and max), to have separate labels for each input.
+- The component is in charge of picking the target of an attribute. For example, in the case of `aria-activedescendant`, it's up to the component to internally track the active descendant, and re-delegate the attribute to the correct element.
+- Potentially confusing which attributes are delegated; and it's not necessarily consistent between web components.
+
+#### ID lookup changes
+
+Provide a way for users to directly target elements in the shadow tree.
+
+Proposals in this category include:
+  - [Content attribute to import/export IDs across shadow boundaries](https://github.com/WICG/aom/issues/169)
+  - [Using ::part](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#part)
+  - [Encapsulation-preserving IDL Element reference attributes](https://github.com/WICG/aom/issues/195)
+  - This proposal: Element Handles
+
+**Pros**
+- No bottleneck effect: the developer using the component can target any element that the component author exposed via handles.
+- Re-targeting an attribute like `aria-activedescendant` can be handled by either the developer using the component (by changing the value of `aria-activedescendant`) OR by the component author (by internally moving names to different elements).
+
+**Cons**
+- Increased complexity when using a component: need to know some details about the internals of the component to target the correct element (can be published with documentation for the web component).
 
 ### Reuse the `id` attribute
 
