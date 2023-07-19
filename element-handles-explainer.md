@@ -2,7 +2,7 @@
 
 Author: [Ben Howell](https://github.com/behowell)
 
-Thanks to all who've given feedback on this propsal, especially [Alice Boxhall](https://github.com/WICG/aom/issues/195) and [Nolan Lawson](https://github.com/nolanlawson).
+Thanks to all who've given feedback on this propsal, including [Alice Boxhall](https://github.com/WICG/aom/issues/195) and [Nolan Lawson](https://github.com/nolanlawson).
 
 ## Introduction
 
@@ -104,9 +104,24 @@ This example shows how to import a handle called "my-labelledby" into a the x-in
 
 The `importhandles` attribute can also refer to a handle inside another shadow tree. This allows references that don't strictly follow a descendant-ancestor relationship. For example `importhandles="aria-activedescendant: x-listbox-1::handle(active)"`.
 
-#### Example 4: Combobox
+#### Example 4: Label and Input in separate shadow trees
 
-This is a complex example utilizing several different features of handles. 
+In this example, both the `label` and `input` are inside sibling shadow trees. The label uses importhandles and the `::handle()` syntax to connect the two.
+
+```html
+<x-label id="x-label" importhandles="label-for: x-input::handle(the-input)">
+  #shadowRoot
+  | <label for=":host::handle(label-for)">Example Label</label>
+</x-label>
+<x-input id="x-input">
+  #shadowRoot
+  | <input handle="the-input" type="text" />
+</x-input>
+```
+
+#### Example 5: A more complicated example of a Combobox
+
+This is a more complex example utilizing several different features of handles. 
 * The **x-combobox** component contains an **x-input** and an **x-listbox** component.
 * The **x-input** has `exporthandles="the-input"` so that the label's `for` attribute can refer to the input element.
 * The **x-input** imports two handles: `my-activedescendant` and `my-listbox`. They are each mapped to a handle inside the **x-listbox**'s shadow tree.
@@ -155,7 +170,7 @@ In the event that the referenced handle was an exported handle, this returns the
 
 A DOMTokenList that reflects the `handle` attribute. Similar to [`Element.part`](https://developer.mozilla.org/en-US/docs/Web/API/Element/part).
 
-#### Example 5: Using `getElementByHandle` and the `handle` property
+#### Example 6: Using `getElementByHandle` and the `handle` property
 
 ```html
 <x-listbox id="x-listbox-1">
@@ -187,7 +202,7 @@ A DOMTokenList that reflects the `handle` attribute. Similar to [`Element.part`]
 
 A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) that reflects the `exporthandles` attribute.
 
-#### Example 6: The `exportHandles` property
+#### Example 7: The `exportHandles` property
 
 ```html
 <x-input id="x-input-1" exporthandles="the-input, renamed: inner-handle-name">
@@ -207,7 +222,7 @@ A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap
 
 A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) that reflects the `importhandles` attribute. Allows programmatic access to read and modify the list of imported handles.
 
-#### Example 7: The `importHandles` property
+#### Example 8: The `importHandles` property
 
 ```html
 <x-input id="x-input-1" importhandles="my-listbox: listbox-1, my-activedescendant: listbox-1::handle(active)">
@@ -243,7 +258,7 @@ When accessing a property that refers to an element via handle, the returned ele
 
 > **Note**: This solution borrows from Alice Boxhall's recommendation for [Encapsulation-preserving IDL Element reference attributes](https://github.com/WICG/aom/issues/195).
 
-#### Example 8: Accessing handles by JavaScript properties
+#### Example 9: Accessing handles by JavaScript properties
 
 This is a simplified combobox example, to show how accessing the `ariaActiveDescendantElement` property works when the `aria-activedescendant` attribute references a handle.
 
