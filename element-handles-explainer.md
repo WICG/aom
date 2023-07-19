@@ -4,7 +4,7 @@ Author: [Ben Howell](https://github.com/behowell)
 
 ## Introduction
 
-The Shadow DOM provides a powerful way to encapsulate web components and keep their implementation details separate from other code on the page. However, this presents a problem for accessibility, which needs to establish semantic relationships between elements on the page. There is currently no way to refer to an element inside another shadow tree from an attribute like `aria-labelledby`. Referring across shadow roots has been called "cross-root ARIA", although it affects non-ARIA properties like the label's `for` attribute as well.
+The Shadow DOM provides a powerful way to encapsulate web components and keep their implementation details separate from other code on the page. However, this presents a problem for accessibility, which needs to establish semantic relationships between elements on the page. There is currently no way to refer to an element inside another shadow tree from an attribute like `aria-labelledby`. Referring to elements across shadow root boundaries is called "cross-root ARIA", although it affects non-ARIA properties like the label's `for` attribute as well.
 
 For more detailed background on the problem and other proposals to solve it, see Alice Boxhall's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). 
 
@@ -15,11 +15,11 @@ As laid out in Alice's article, there are separate but related problems to solve
 * There is also the combined case, where an element in one shadow tree needs to refer to an element in a sibling shadow tree (or any relationship that is not a direct ancestor/descendant relationship). A complete solution should work in this case as well. 
   * An example of when this is needed is described by Nolan Lawson: [ARIA element reflection across non-descendant/ancestor shadow roots](https://github.com/WICG/aom/issues/192).
 
-This problem has been discussed for several years, and there have been many proposed solutions. Existing proposals are described below, in the **Alternative Solutions** sections. The proposal here draws on the ideas from many of the other proposals.
+The cross-root ARIA problem has been discussed for several years, and there have been many proposed solutions. Existing proposals are described below, in the **Alternative Solutions** sections. This proposal draws on the ideas from many of the other proposals.
 
 ## Proposal: Element Handles
 
-Element handles are a way to refer to an element inside a shadow tree from an ID reference attribute like `aria-labelledby` or `for`, while preserving shadow DOM encapsulation. Handles can be summed up as "like [shadow parts](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/part), but for ID references." Much of the API is designed to be parallel to the shadow parts API, and follows similar syntax. 
+Element handles are a way to refer to an element inside a shadow tree from an ID reference attribute like `aria-labelledby` or `for`, while preserving shadow DOM encapsulation. Handles can be summed up as "like [shadow parts](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/part), but for ID references." Much of the API is designed to be parallel to the shadow parts API and follows similar syntax. 
 
 **Goals**
 
@@ -162,7 +162,7 @@ Supporting handles in JavaScript requires several new APIs and updates to existi
 
 Find an Element by its handle name in the given document fragment (aka shadow root). Similar to [`DocumentFragment.getElementById`](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment/getElementById).
 
-In the event that the referenced handle was an exported handle, this returns the element that has the `exporthandle` attribute, and does _not_ drill into the nested shadow tree. If needed, it is possible for the caller to call `getElementByHandle` again with the .
+In the event that the referenced handle was an exported handle, this returns the element that has the `exporthandles` attribute, and does _not_ drill into the nested shadow tree. If needed, it is possible for the caller to call `getElementByHandle` again with the .
 
 #### `Element.handle` property
 
@@ -331,7 +331,7 @@ For example:
 ```html
 <label for="x-input::the-input">Example</label>
 <x-input id="x-input">
-  # shadowRoot
+  #shadowRoot
   | <input id="the-input" exportid />
   </template>
 </x-input>
