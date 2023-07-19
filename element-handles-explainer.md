@@ -2,8 +2,6 @@
 
 Author: [Ben Howell](https://github.com/behowell)
 
-Thanks to all who've given feedback on this propsal, including [Alice Boxhall](https://github.com/WICG/aom/issues/195) and [Nolan Lawson](https://github.com/nolanlawson).
-
 ## Introduction
 
 The Shadow DOM provides a powerful way to encapsulate web components and keep their implementation details separate from other code on the page. However, this presents a problem for accessibility, which needs to establish semantic relationships between elements on the page. There is currently no way to refer to an element inside another shadow tree from an attribute like `aria-labelledby`. Referring across shadow roots has been called "cross-root ARIA", although it affects non-ARIA properties like the label's `for` attribute as well.
