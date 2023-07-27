@@ -23,19 +23,20 @@ Element handles are a way to refer to an element inside a shadow tree from an ID
 
 **Goals**
 
-* Create a mechanism for elements to refer to each other across shadow root boundaries.
-* Preserve encapsulation of the shadow DOM. Do not allow elevated access to elements in shadow trees via their handle.
+* Create a mechanism for elements to refer to each other across shadow root boundaries through ID reference attributes like `aria-labelledby` or `for`.
+* The solution should work the same for both closed and open shadow roots.
+* Shadow DOM encapsulation should be preserved: Handles are an opaque reference to an element, and don't directly allow access to the underlying element without getting the underlying element from its shadow root, if the shadow root is available.
 
 **Non-Goals**
 
 * Handles are not for CSS styling. That is the role of shadow parts.
-* This does not help with aria attributes that aren't ID references, such as `aria-label`.
+* This proposal does not help with aria attributes that aren't ID references, such as `aria-label`.
 
 ### Defining handles
 
 Any element can have a handle by setting the attribute `handle="my-handle-name"`. The presence of the attribute makes that element accessible from outside the shadow tree via its handle (no additional exporting is necessary).
 
-An element can more than one handle, separated by whitespace: `handle="name1 name2 name3"`. However, each handle must be unique within a given shadow root (unlike `part`, which allows more than one element to have the same part name).
+An element can have more than one handle, separated by whitespace: `handle="name1 name2 name3"`. However, each handle must be unique within a given shadow root (unlike `part`, which allows more than one element to have the same part name).
 
 Handle names have restrictions on what characters are allowed, to avoid issues when parsing the `::handle()` syntax. The proposal is to only allow letters, numbers, underscores, and hyphens (regex for permitted names: `[A-Za-z0-9_-]+`). However, that restriction could be relaxed to allow other characters in the future.
 
@@ -84,7 +85,7 @@ The `::handle()` syntax so far only allows referring into a shadow tree from the
   
 The `importhandles` attribute specifies a mapping from `inner-handle: outer-idref`. The `inner-handle` names are determined by the web component author. The `outer-idref` names are provided by the user of the web component, and can be any element ID or handle using the `id::handle(...)` syntax.
 
-Inside the shadow tree, imported handles are referenced using the `:host::handle()` syntax, using the special ID `:host` to refer to handles imported on the host element.
+Inside the shadow tree, imported handles are referenced using the `:host::handle()` syntax, using the special ID `:host` to refer to handles imported on the host element. This syntax is analagous to the `:host::part()` CSS selector that can be used to select parts in the local tree.
 
 #### Example 3: Importing handles
 
@@ -162,7 +163,7 @@ Supporting handles in JavaScript requires several new APIs and updates to existi
 
 Find an Element by its handle name in the given document fragment (aka shadow root). Similar to [`DocumentFragment.getElementById`](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment/getElementById).
 
-In the event that the referenced handle was an exported handle, this returns the element that has the `exporthandles` attribute, and does _not_ drill into the nested shadow tree. If needed, it is possible for the caller to call `getElementByHandle` again with the .
+In the event that the referenced handle was an exported handle, this returns the element that has the `exporthandles` attribute, and does _not_ drill into the nested shadow tree. If needed, it is possible for the caller to call `getElementByHandle` again on the returned element's shadow root.
 
 #### `Element.handle` property
 
@@ -219,6 +220,8 @@ A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap
 #### `Element.importHandles` property
 
 A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) that reflects the `importhandles` attribute. Allows programmatic access to read and modify the list of imported handles.
+
+This is similar in function to the [`dataset` property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset), except there is no attempt to convert kebab-case to camelCase. All handle names are attributes as-is, and may need to be accessed using the `['']` syntax instead of the dot `.` syntax.
 
 #### Example 8: The `importHandles` property
 
@@ -282,9 +285,11 @@ No considerable privacy or security concerns are expected, but community feedbac
 
 ## Alternative Solutions
 
+### Other proposals for cross-root ARIA
+
 There have been a number of solutions proposed to allow referring to elements inside the shadow DOM. In general, they fall into one of two categories: either changing how attribute lookups work, or changing how ID reference lookup works.
 
-### Attribute lookup changes
+#### Attribute lookup changes
 
 In these solutions, attributes on the host element like `aria-labelledby` are delegated to an element inside the shadow tree. The delegate element is chosen by the author of the web component (not the user).
 
@@ -302,7 +307,7 @@ Proposals in this category include:
 - The component is in charge of picking the target of an attribute. For example, in the case of `aria-activedescendant`, it's up to the component to internally track the active descendant, and re-delegate the attribute to the correct element.
 - Potentially confusing which attributes are delegated; and it's not necessarily consistent between web components.
 
-### ID lookup changes
+#### ID lookup changes
 
 Provide a way for users to directly target elements in the shadow tree.
 
@@ -322,34 +327,35 @@ Proposals in this category include:
 
 ## Open Questions
 
+### Is the syntax too verbose?
+
+The specifics of the syntax will likely be a long-tail discussion of this proposal. Some early feedback for this proposal has centered around the verbosity of the syntax:
+
+* The `::handle()` part of the IDREF is not strictly necessary.
+   * For example: `host-id::handle(the-input)` could instead be shortened to `host-id::the-input`, or `host-id/the-input`.
+* The `:host` selector for imported handles seems surpurflous.
+   * Imported handles could start with `::`, or `../`, etc.: `aria-labelledby="../my-imported-handle"`.
+* For elements with the same value for `id`, `part`, and `handle`, it starts to get redundant:
+   * `<input id="my-input" part="my-input" handle="my-input">`
+
+The verbosity of the syntax has some **Pros**:
+* **Clarity**: more obvious that this is "special" syntax, and not just a developer's naming convention.
+* **Learnability**: It is easier to search for "What does ::handle mean?" instead of "What does :: mean?"
+* **Less likely for ID collisions**: Since this new syntax is being added to the same namespace as IDs, it could help to use a syntax that is unlikely to exist in any current website's IDREFs.
+
+There are also **Cons**:
+* **Page size**: Boilerplate text increases the size of the page source code. This affects the transfer time over the wire, but that can be mitigated by compression like gzip. It could also and parsing time/memory consumption, but the effects there may be negligible.
+* **Confusion**: The similarities to CSS selectors may indicate that other CSS-like selectors could be used in IDREFs. Also, the syntax is not exactly the same as CSS (e.g. no `#` before the id part: `#host-id::handle(the-input)`).
+* **More to type**: More keystrokes could be annoying after a while.
+
+See **Appendix A** below for an exploration of possible syntax alternatives.
+
+
 ### Can we export by `id` instead of adding a new `handle` attribute?
 
 Exporting elements from the shadow tree by `id` has the potential to be simpler than creating a new attribute `handle`. The component would need some way to opt into exporting IDs. In the case of `handle`, this is done simply by the existence of the `handle` attribute. Instead, there could be an attribute like `exportid` that makes the ID accessible outside of the shadow root.
 
-For example:
-
-```html
-<label for="x-input::the-input">Example</label>
-<x-input id="x-input">
-  #shadowRoot
-  | <input id="the-input" exportid />
-  </template>
-</x-input>
-```
-
-**Pros**
-
-* Doesn't introduce another "id-like" attribute (`handle`).
-* Still allows explicit opt-in to exporting elements by ID.
-
-**Cons**
-
-* Exported IDs don't work quite the same way as normal IDs; for example `getElementById('x-input::the-input')` can't return the actual `'the-input'` element, since that would break encapsulation. 
-  * The same fact is true for handles, but having a different name "handle" might make it clearer that it is different?
-* Does not support renaming the exported ID. Theoretically this could be supported with something like `exportid="renamed-id"`, but then the `exportid` property would function almost identically to the `handle` property in this proposal.
-   * That said, it may be worth considering renaming `handle` to `exportid` in this proposal?
-* Does not support having multiple exported IDs for a single element (this is a "nice to have" feature of handles, but certainly not "must have").
-* "Only" saves a little bit of typing. The equivalent of `<div id="some-id" exportid>` with handles is `<div id="some-id" handle="some-id">`.
+See **Appendix A** for an exploration of `exportid`.
 
 ### Could the syntax for `importhandles` be improved?
 
@@ -366,13 +372,28 @@ Brainstorming a few possible alternatives:
    <label id="the-label">Example Label</label>
    <x-input importid-my-labelledby="the-label">
      #shadowRoot
-     | <input aria-labelledby=":host::importid(my-labelledby)" type="text" />
+     | <input aria-labelledby="@importid-my-labelledby" type="text" />
    </x-input>
    ```
 
+See **Appendix A** for an exploration of `importid-*` attributes.
+
 ### Does `importhandles` need to support attributes with multiple IDs?
 
-The current syntax for `importhandles` doesn't support referencing multiple IDs from a single handle. This may be important for attributes like `aria-labelledby`, which can reference more than one element. For example, it won't work to write `importhandles="my-labelledby: first-label second-label"`. 
+The current syntax for `importhandles` doesn't support referencing multiple IDs from a single handle. This may be important for attributes like `aria-labelledby`, which can reference more than one element. For example, it won't work to write `importhandles="my-labelledby: label1 label2"`.
+
+This limitation would mainly affect component library authors, who want to create general-purpose web components that have parity with built-in controls. For example, it would not be possible to create a `<fancy-input>` that supports having an arbitrary number of elements for its `aria-labelledby`, in the way that the built-in `<input>` does.
+
+One workaround is to define multiple imported handles for each aria attribute. However, this requires the component to be specifically designed to support multiple handles, and still is limited to the number of elements that the component author supports. For example, with two labels:
+
+```html
+<label id="label1">Label 1</label>
+<label id="label2">Label 2</label>
+<x-input importhandles="my-label1: label1, my-label2: label2">
+  #shadowRoot
+  | <input aria-labelledby=":host::handle(my-label1) :host::handle(my-label2)" type="text">
+</x-input>
+```
 
 The only reason this restriction exists is because a single handle can't refer to multiple elements. This may be a further argument to change `importhandles` to something like `importids`, and allow a single import could refer to multiple IDs.
 
@@ -414,5 +435,177 @@ In that case, code that is unaware of `ElementHandle` would just see the host el
 
   // The attributes also allow an ElementHandle to be set on them
   combobox.ariaActiveDescendantElement = document.createElementHandle(document.getElementById('x-listbox-1'), 'opt2');
+</script>
+```
+
+
+## Appendix A: Rename this feature `exportid`, and syntax alternatives
+
+One goal of naming this feature `handle` is to make it clearer that it is distinct from IDs, and can't be interchanged with IDs. However, given the similar purpose, it may be ok and even desirable to give it a name that is similar to ID.
+
+This appendix explores what this proposal would look like if `handle` were renamed to `exportid`, and the syntax for `importhandles` and IDREFs were changed. It may be desired to mix and match the syntax from the main proposal and this appendix.
+
+Consider the same proposal as above, with these changes:
+* Rename HTML Attributes
+  * `handle` => `exportid`
+  * `exporthandles` => `reexportids`
+  * `importhandles` => `importid-*` family of custom attributes, similar to `data-*`
+* Update IDREF syntax
+  * `"my-host::handle(my-element)"` => `"my-host::my-element"`
+  * `":host::handle(my-label)"` => `"@importid-my-label"`
+* Rename JavaScript methods/attributes
+  * `getElementByHandle` => `getElementByExportId`
+  * `handle` => `exportId`
+  * `exportHandles` => `reexportIds`
+  * `importHandles`=> `importIds`
+* If the attribute `exportid` is specified but has no value, then it defaults to the `id`. For example, the following three are equivalent in terms of the exportid:
+  * `<input id="the-input" exportid />`
+  * `<input id="the-input" exportid="the-input" />`
+  * `<input exportid="the-input" />`
+
+Rewriting the examples from above in this syntax would look like this:
+
+#### Example 1a: Referring into the shadow tree using exportid
+
+```html
+<label for="x-input-1::the-input">Example Label</label>
+<x-input id="x-input-1">
+  #shadowRoot
+  | <input exportid="the-input" type="text" />
+</x-input>
+```
+
+#### Example 2a: Referring through multiple layers of shadow trees
+
+```html
+<label for="x-combobox::the-input">Example Label</label>
+<x-combobox id="x-combobox">
+  #shadowRoot
+  | <x-input id="x-input" reexportids="the-input">
+  |   #shadowRoot
+  |   | <input id="the-input" exportid type="text" />
+  | </x-input>
+</x-combobox>
+```
+
+#### Example 3a: Importing IDs
+
+```html
+<span id="the-span">Example Label</span>
+<x-input id="x-input" importid-my-labelledby="the-span">
+  #shadowRoot
+  | <input aria-labelledby="@importid-my-labelledby" type="text" />
+</x-input>
+```
+
+#### Example 4a: Label and Input in separate shadow trees
+
+```html
+<x-label id="x-label" importid-label-for="x-input::the-input">
+  #shadowRoot
+  | <label for="@importid-label-for">Example Label</label>
+</x-label>
+<x-input id="x-input">
+  #shadowRoot
+  | <input exportid="the-input" type="text" />
+</x-input>
+```
+
+#### Example 5a: Combobox
+
+```html
+<label for="x-combobox-1::the-input">Example combobox</label>
+<x-combobox id="x-combobox-1">
+  #shadowRoot
+  | <x-input 
+  |   reexportids="the-input"
+  |   importid-activedescendant="x-listbox-1::active"
+  |   importid-listbox="x-listbox-1::the-listbox">
+  |   #shadowRoot
+  |   | <input
+  |   |   role="combobox"
+  |   |   id="my-internal-id"
+  |   |   exportid="the-input"
+  |   |   aria-controls="@importid-listbox"
+  |   |   aria-activedescendant="@importid-activedescendant"
+  |   |   aria-expanded="true"
+  |   | />
+  | </x-input>
+  | <button aria-label="Open" aria-expanded="true">v</button>
+  |
+  | <x-listbox id="x-listbox-1">
+  |   #shadowRoot
+  |   | <div role="listbox" exportid="the-listbox">
+  |   |   <div role="option" id="opt1" exportid="opt1 active">Option 1</div>
+  |   |   <div role="option" id="opt2" exportid>Option 2</div>
+  |   |   <div role="option" id="opt3" exportid>Option 3</div>
+  |   | </div>
+  | </x-listbox>
+</x-combobox>
+```
+
+#### Example 6a: Using `getElementByExportId` and the `exportId` property
+
+```html
+<x-listbox id="x-listbox-1">
+  #shadowRoot
+  | <div role="listbox" exportid="the-listbox">
+  |   <div role="option" id="opt1" exportid="opt1 active">Option 1</div>
+  |   <div role="option" id="opt2" exportid>Option 2</div>
+  |   <div role="option" id="opt3" exportid>Option 3</div>
+  | </div>
+</x-listbox>
+<script>
+  const listbox = document.getElementById('x-listbox-1');
+  const opt1 = listbox.shadowRoot.getElementByExportId('opt1');
+  const opt2 = listbox.shadowRoot.getElementByExportId('opt2');
+
+  console.log(opt1.exportId); // ['opt1', 'active']
+  console.log(opt2.exportId); // ['opt2']
+
+  // Move the active exportId to opt2
+  opt1.exportId.remove('active');
+  opt2.exportId.add('active');
+
+  console.log(opt1.exportId); // ['opt1']
+  console.log(opt2.exportId); // ['opt2', 'active']
+</script>
+```
+
+#### Example 7: The `reexportIds` property
+
+```html
+<x-input id="x-input-1" reexportids="the-input, renamed-span: the-span">
+  #shadowRoot
+  | <div>
+  |   <input exportid="the-input" />
+  |   <span exportid="the-span"></span>
+  | </div>
+</x-input>
+<script>
+  const xInput = document.getElementById('x-input-1');
+  console.log(xInput.reexportIds); // { 'the-input': 'the-input', 'renamed-span': 'the-span' }
+</script>
+```
+
+#### Example 8a: The `importIds` property
+
+> _Note_: This may not be necessary? Would it work to just use `getAttribute`/`setAttribute` on the `importid-*` attributes instead?
+
+```html
+<x-input id="x-input-1" importid-my-listbox="listbox-1" importid-my-activedescendant="listbox-1::active">
+  <!-- ... contents are not important to this example ... -->
+</x-input>
+<script>
+  const xInput = document.getElementById('x-input-1');
+  console.log(xInput.importIds['my-listbox']); // 'listbox-1'
+  console.log(xInput.importIds['my-activedescendant']); // 'listbox-1::active'
+  
+  xInput.importIds['my-listbox'] = 'some-other-listbox';
+  delete xInput.importIds['my-activedescendant'];
+
+  // Changes are reflected back to the attributes
+  console.log(xInput.getAttribute('importid-my-listbox')); // 'some-other-listbox'
+  console.log(xInput.getAttribute('importid-my-activedescendant')); // null
 </script>
 ```
