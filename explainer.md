@@ -30,7 +30,7 @@
   - [Speculative, Blocked: Virtual Accessibility Nodes](#virtual-accessibility-nodes)
     - [Use case 4: Adding non-DOM nodes (“virtual nodes”) to the Accessibility tree](#use-case-4-adding-non-dom-nodes-virtual-nodes-to-the-accessibility-tree)
     - [Spec/implementation status](#specimplementation-status-4)
-  - [Full Introspection of an Accessibility Tree - `ComputedAccessibleNode`](#full-introspection-of-an-accessibility-tree---computedaccessiblenode)
+  - [Full Introspection of an Accessibility Tree](#full-introspection-of-an-accessibility-tree)
     - [Use case 5: Introspecting the computed tree](#use-case-5-introspecting-the-computed-tree)
     - [Spec/implementation status](#specimplementation-status-5)
     - [Why is accessing the computed properties being addressed last?](#why-is-accessing-the-computed-properties-being-addressed-last)
