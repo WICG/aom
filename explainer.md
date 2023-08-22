@@ -537,7 +537,7 @@ Not yet specced or implemented anywhere.
 
 ### Full Introspection of an Accessibility Tree
 
-This functionality is still being considered as part of [Issue #197](/WICG/aom/issues/197) but it is highly unlikely to land in a format similar to the API proposed below.
+This functionality is still being considered as part of [Issue #197](https://github.com/WICG/aom/issues/197) but it is highly unlikely to land in a format similar to the API proposed below.
 
 It may be approached initially as a testing-only API.
 
@@ -571,7 +571,7 @@ This could make it possible to:
 ##### WebDriver (Shipping in WebKit/Chromium/Gecko)
  - [computedrole](https://www.w3.org/TR/webdriver/#dfn-get-computed-role)
  - [computedlabel](https://www.w3.org/TR/webdriver/#dfn-get-computed-label)
- - Some discussion of [getting a backing accessibility reference (and parent/children) for tree access](/WICG/aom/issues/197)
+ - Some discussion of [getting a backing accessibility reference (and parent/children) for tree access](https://github.com/WICG/aom/issues/197)
  
 ##### WPT TestDriver (functional as of March 2023)
 Leverages WebDriver accessors for ease of test development.
@@ -663,7 +663,7 @@ These issues prompted a reassessment,
 and a simplification of the API based around the original set of use cases
 we were committed to addressing.
 
-[Update: April 2023] Similar functionality is being reconsidered as a test-only API in [Issue #197](/WICG/aom/issues/197)
+[Update: April 2023] Similar functionality is being reconsidered as a test-only API in [Issue #197](https://github.com/WICG/aom/issues/197)
 
 ## Next Steps
 
