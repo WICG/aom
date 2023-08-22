@@ -27,7 +27,7 @@
   - [Abandoned: New InputEvent types](#new-inputevent-types)
     - [Use case 3: Listening for events from Assistive Technology](#use-case-3-listening-for-events-from-assistive-technology)
     - [Spec/implementation status](#specimplementation-status-3)
-  - [Speculative: Virtual Accessibility Nodes](#virtual-accessibility-nodes)
+  - [Speculative, Blocked: Virtual Accessibility Nodes](#virtual-accessibility-nodes)
     - [Use case 4: Adding non-DOM nodes (“virtual nodes”) to the Accessibility tree](#use-case-4-adding-non-dom-nodes-virtual-nodes-to-the-accessibility-tree)
     - [Spec/implementation status](#specimplementation-status-4)
   - [Full Introspection of an Accessibility Tree - `ComputedAccessibleNode`](#full-introspection-of-an-accessibility-tree---computedaccessiblenode)
@@ -45,9 +45,9 @@
   - [Background: DOM tree, accessibility tree and platform accessibility APIs](#background-dom-tree-accessibility-tree-and-platform-accessibility-apis)
     - [Mapping native HTML to the accessibility tree](#mapping-native-html-to-the-accessibility-tree)
     - [ARIA](#aria)
-  - [Appendix: `AccessibleNode` naming](#appendix-accessiblenode-naming)
-  - [Appendix: Partial proposed IDL for virtual accessibility nodes](#appendix-partial-proposed-idl-for-virtual-accessibility-nodes)
-  - [Appendix: partial proposed IDL for `ComputedAccessibleNode`](#appendix-partial-proposed-idl-for-computedaccessiblenode)
+  - [Abandoned: Appendix: `AccessibleNode` naming](#appendix-accessiblenode-naming)
+  - [Abandoned: Appendix: Partial proposed IDL for virtual accessibility nodes](#appendix-partial-proposed-idl-for-virtual-accessibility-nodes)
+  - [Abandoned: Appendix: partial proposed IDL for `ComputedAccessibleNode`](#appendix-partial-proposed-idl-for-computedaccessiblenode)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -238,7 +238,7 @@ customElements.define("custom-tablist", CustomTabList);
 - There is an [open PR](https://github.com/whatwg/html/pull/4658) on the WHATWG HTML spec.
 - This is [currently being implemented in Blink](https://chromestatus.com/feature/5962105603751936).
 
-### User action events from Assistive Technology
+### Shipping, Needs Testing: User action events from Assistive Technology
 
 To preserve the privacy of assistive technology users, events from assistive technology
 will typically cause a synthesised DOM event to be triggered. The events are determined by
@@ -355,7 +355,9 @@ a `<input type="range">` _or_ an element with a role of `slider`
 an `input` event with a type of `increment` will be fired at the focused element
 along with the keypress sequence.
 
-#### Use case 3: Listening for events from Assistive Technology
+#### Abandoned Use case 3: Listening for events from Assistive Technology
+
+Note: This section is abandoned, as there is now no immediate plan to implement specific, direct events from Assistive Technology, but see earlier section, **User action events from Assistive Technology** for indirect events.
 
 For example:
 
@@ -409,12 +411,14 @@ customSlider.addEventListener('keydown', (event) => {
 
 Not yet specced or implemented anywhere.
 
-### Virtual Accessibility Nodes
+### Speculative, Blocked: Virtual Accessibility Nodes
 
 Important note: At this point, due to a number of complications including
 privacy concerns, the working group is not pursuing virtual nodes as
 intended. Instead, the goal is to focus on alternate solutions to valid
 use-cases.
+
+See: https://github.com/w3ctag/design-principles/issues/293
 
 Original idea: **Virtual Accessibility Nodes** would allow authors
 to expose "virtual" accessibility nodes,
@@ -514,6 +518,8 @@ Adding a permission dialog might help if virtual nodes were only truly
 needed on a small number of specialized websites, but that would
 preclude their use in any widget library.
 
+See: https://github.com/w3ctag/design-principles/issues/293
+
 #### Current thinking
 
 To avoid privacy concerns, the most likely path forwards for custom-drawn
@@ -529,9 +535,9 @@ with efforts to address weaknesses in this approach, such as:
 
 Not yet specced or implemented anywhere.
 
-### Full Introspection of an Accessibility Tree - `ComputedAccessibleNode`
+### Full Introspection of an Accessibility Tree
 
-This API is still being considered as part of [Issue #197](/WICG/aom/issues/197).
+This functionality is still being considered as part of [Issue #197](/WICG/aom/issues/197) but it is highly unlikely to land in a format similar to the API proposed below.
 
 It may be approached initially as a testing-only API.
 
@@ -562,16 +568,15 @@ This could make it possible to:
 
 #### Spec/implementation status
 
-##### WebDriver (Shipping in WebKit/Chrome, [implemented 20 Mar 2023 in Gecko](https://bugzilla.mozilla.org/show_bug.cgi?id=1585622#c22))
+##### WebDriver (Shipping in WebKit/Chromium/Gecko)
  - [computedrole](https://www.w3.org/TR/webdriver/#dfn-get-computed-role)
  - [computedlabel](https://www.w3.org/TR/webdriver/#dfn-get-computed-label)
- - Some discussion of [`getComputedAccessibilityNode` (and parent/children) for tree access](/WICG/aom/issues/197)
+ - Some discussion of [getting a backing accessibility reference (and parent/children) for tree access](/WICG/aom/issues/197)
  
 ##### WPT TestDriver (functional as of March 2023)
 Leverages WebDriver accessors for ease of test development.
- - [basic computedrole tests](https://wpt.fyi/results/wai-aria/role/basic.html)
- - [basic computedlabel test](https://wpt.fyi/results/accname/basic.html)
  - [WPT Interop 2023 Accessibility Investigation](https://github.com/web-platform-tests/interop-2023-accessibility-testing/issues/3)
+ - [WPT accessibility tests](https://wpt.fyi/results/?label=master&label=experimental&aligned&q=label%3Aaccessibility)
  
 ##### Legacy and abondoned implementations
 A purely experimental implementation exists in Blink,
@@ -658,7 +663,7 @@ These issues prompted a reassessment,
 and a simplification of the API based around the original set of use cases
 we were committed to addressing.
 
-[Update: April 2023] This is being reconsidered as a test-only API in [Issue #197](/WICG/aom/issues/197)
+[Update: April 2023] Similar functionality is being reconsidered as a test-only API in [Issue #197](/WICG/aom/issues/197)
 
 ## Next Steps
 
@@ -926,7 +931,7 @@ partial interface Element {
 }
 ```
 
-## Appendix: partial proposed IDL for `ComputedAccessibleNode`
+## Abandoned: Appendix: partial proposed IDL for `ComputedAccessibleNode`
 
 ```idl
 interface ComputedAccessibleNode {
