@@ -116,6 +116,8 @@ The `useids` attribute specifies a mapping from `inner-id: outer-idref`. The `in
 
 Inside the shadow tree, imported IDs are referenced using the `:host::id()` syntax, using the special 'ID' `:host` to refer to IDs specified by `useid` on the host element. This syntax is analagous to the `:host::part()` CSS selector that can be used to select parts in the local tree.
 
+Note: There is an open question below discussing an [alternative syntax for useids](#open-question-useids).
+
 #### Example 3: Importing IDs with `useids`
 
 This example shows how to import an ID called `"my-labelledby"` into a the x-input component, and reference it using the `":host::id()"` syntax.
@@ -271,24 +273,24 @@ When accessing a property that refers to an element inside another shadow tree (
 #### `getElementById`
 
 We do not want `getElementById('host::id(child)')` to be a way to break encapsulation of the shadow DOM and access elements inside a shadow root. As such, it can't return the child element. The two basic options are:
-1. Return `null` as this is not an exact match for an ID.
-   - **Pros**: The "safe" option. Parity with `querySelector` discussed below.
+1. **PROPOSED**: Return `null` as this is not an exact match for an ID.
+   - **Pros**: The "safe" option, as it does not modify the current behavior of `getElementById`. It has parity with `querySelector` discussed below.
    - **Cons**: Makes `getElementById` useless with exported IDREFs. Also, it means the following two are not the same:
       ```js
       const byId = document.getElementById(el.getAttribute('aria-activedescendant')); // = null
       const byAttr = el.activeDescendantElement; // = the host element
       ```
-2. Return the **host element** (`id="host"` in this example) - this is similar in concept to the retargeting proposed above for `ariaActiveDescendantElement`, etc.
-   - This is similar in functionality to **retargeting** described above for attributes like `ariaActiveDescendantElement`
-   - It is potentially confusing that the ID of the returned element doesn't match the ID passed in.
+2. Return the shadow host of the target element, using the [retargeting](https://dom.spec.whatwg.org/#retarget) algorithm.
+   - **Pros**: Parity with IDREF attributes like `ariaActiveDescendantElement`.
+   - **Cons**: It is potentially confusing that the ID of the returned element doesn't match the ID passed in.
 
-The proposal is to use option 2; see **Example 9** below.
-
-There are some other options discussed in **Open Questions** below; however, it's not immediately clear that it is necessary to augment `getElementById` at all, since there are other ways to get the element in question (see Example 10 below).
+The proposal is to use option 1 (return `null`); see [the example](#example-javascript-props) below. It may be possible to support option 2 later by adding an argument like `getElementById(id, { includeExportId: true })`. There is an open question below that discusses [other alternatives for getElementById](#open-question-getelementbyid) as well. However, any modification to `getElementById` would likely need to have a good motivating example.
 
 #### `querySelector`/`querySelectorAll`
 
 Exported IDs are NOT allowed to be used as CSS selectors, which means that `querySelector` and `querySelectorAll` will always return `null` when used with an exported IDREF.
+
+<a id="example-javascript-props"></a>
 
 #### Example 8: Accessing exported IDs by JavaScript properties
 
@@ -314,7 +316,7 @@ This is a simplified combobox example, to show the various methods of accessing 
   // <x-listbox id="x-listbox-1"> (Note this is the HOST element)
 
   console.log(document.getElementById("x-listbox-1::id(opt1)")); 
-  // <x-listbox id="x-listbox-1"> (Note this is the HOST element)
+  // null
 
   console.log(document.querySelector("#x-listbox-1::id(opt1)")); 
   // null
@@ -395,6 +397,8 @@ There are also **Cons**:
 * **Confusion**: The similarities to CSS selectors may indicate that other CSS-like selectors could be used in IDREFs. Also, the syntax is not exactly the same as CSS (e.g. no `#` before the id part: `#host-id::id(the-input)`).
 * **More to type**: More keystrokes could be annoying after a while.
 
+<a id="open-question-useids"></a>
+
 ### Could the syntax for `useids` be improved?
 
 The `useids` attribute is a part of the public API of a web component, and will be added every time a web component is _used_ (rather than once when the web component is _authored_). As proposed, the value for `useids` is a (potentially long) comma-separated string of name-value pairs. This could be cumbersome for web component users, especially if the string needs to be programmatically generated and/or parsed.
@@ -449,9 +453,12 @@ The equivalent with the `useids` as proposed above would look like this:
 **Cons**
 - Paraphrasing [a comment by @alice](https://github.com/WICG/aom/pull/200#issuecomment-1692489089): there is no precedent for referencing an _attribute_ in the value of another attribute in HTML. For example `aria-labelledby=":host[useid-labelexample]"` is referencing the value of the host's `useid-labelexample` attribute. This "crosses the streams" between attributes and their values.
 
+<a id="open-question-getelementbyid"></a>
+
 ### Does `getElementById` need a way to resolve the exported IDREF syntax?
 
 The proposal above does not have a way for `getElementById('host::id(child)')` to get the actual child element. We don't want to allow this by default because it would break shadow DOM encapsulation. It is already possible to access the element for open shadow roots using the following:
+
 ```js
 const host = document.getElementById('host');
 const child = host.shadowRoot.getElementById('child');
