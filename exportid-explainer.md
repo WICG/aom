@@ -1,20 +1,18 @@
 # Exporting IDs from shadow roots for cross-root ARIA
 
-Author: [Ben Howell](https://github.com/behowell)
-
-Special thanks to [Alice Boxhall](https://github.com/alice) for significant feedback.
+Authors: [Ben Howell](https://github.com/behowell), [Alice Boxhall](https://github.com/alice)
 
 ## Introduction
 
 The Shadow DOM provides a powerful way to encapsulate web components and keep their implementation details separate from other code on the page. However, this presents a problem for accessibility, which needs to establish semantic relationships between elements on the page. There is currently no way to refer to an element inside another shadow tree from an attribute like `aria-labelledby`. Referring to elements across shadow root boundaries is called "cross-root ARIA", although it affects non-ARIA properties like the label's `for` attribute as well.
 
-For more detailed background on the problem and other proposals to solve it, see Alice Boxhall's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). 
+For more detailed background on the problem and other proposals to solve it, see Alice Boxhall's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/).
 
 As laid out in the article, there are separate but related problems to solve:
 
 * [Referring into Shadow DOM](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-into-shadow-dom): An element in the light tree needs to create a relationship like `aria-activedescendant` to an element inside a shadow tree.
 * [Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards): An element inside a shadow tree needs to create a relationship like `aria-labelledby` with an element in the light tree.
-* There is also the combined case, where an element in one shadow tree needs to refer to an element in a sibling shadow tree (or any relationship that is not a direct ancestor/descendant relationship). A complete solution should work in this case as well. 
+* There is also the combined case, where an element in one shadow tree needs to refer to an element in a sibling shadow tree (or any relationship that is not a direct ancestor/descendant relationship). A complete solution should work in this case as well.
   * An example of when this is needed is described by Nolan Lawson: [ARIA element reflection across non-descendant/ancestor shadow roots](https://github.com/WICG/aom/issues/192).
 
 The cross-root ARIA problem has been discussed for several years, and there have been many proposed solutions. Existing proposals are described below, in the **Alternative Solutions** sections. This proposal draws on the ideas from many of the other proposals.
@@ -28,6 +26,11 @@ The `exportid` attribute is a way to allow an element inside a shadow tree to be
 * Create a mechanism for elements to refer to each other across shadow root boundaries through ID reference attributes like `aria-labelledby` or `for`.
 * The solution should work the same for both closed and open shadow roots.
 * Shadow DOM encapsulation should be preserved: Exporting an ID doesn't directly allow access to the underlying element. It is still required to have access to the shadow root to get the element.
+* The solution should allow creating references across multiple nested shadow roots,
+and across "sibling" shadow roots
+(i.e. from an element within one shadow root,
+to an element within a shadow root attached to an element in the light tree of the first shadow root).
+* The solution should be serializable, i.e. expressible in HTML only.
 
 **Non-Goals**
 
@@ -37,172 +40,181 @@ The `exportid` attribute is a way to allow an element inside a shadow tree to be
 
 ## Referring to elements in a shadow tree
 
-A new boolean attribute `exportid` specifies that an element is able to be referenced from outside of its shadow tree in attributes that support ID references. 
+A new boolean attribute `exportid` specifies that an element is able to be referenced from outside of its shadow tree in attributes that support ID references.
 
 Elements outside of the shadow tree can refer to an exported ID with the syntax `"thehost::id(thechild)"`. In this example, `"thehost"` is the ID of the element that contains the shadow root, and `"thechild"` is the ID of an element inside the shadow tree that also has `exportid`. See the example below.
 
 Exported ID references can be used in any attribute that refers to an element by ID, such as `for` or `aria-labelledby`.
 
-#### Example 1: Referring into the shadow tree using handles
+#### Example 1: Referring into the shadow tree using exportid
 
 ```html
-<label for="x-input-1::id(input-2)">Example Label</label>
-<x-input id="x-input-1">
+<label for="security::id(real-input)">What was the name of your first pet?</label>
+<x-input id="security">
   #shadowRoot
-  | <input id="input-2" exportid />
+  | <input id="real-input" exportid />
 </x-input>
 ```
 
-### Requirements for `exportid` 
-
-The element with `exportid` must also have an `id` that conforms to a more strict rules about what characters are allowed. Normally, [IDs are allowed to have any character except whitespace](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id). For `exportid` to work, the `id` can only have letters, numbers, underscores, and hyphens (regex for permitted names: `[A-Za-z0-9_-]+`).
-
-#### Example 1a: Invalid uses of `exportid`
-
-```html
-<x-input> <!-- Warning: The host must have an ID for elements inside to be referenced by exportid. -->
-  #shadowRoot
-  | <!-- Error: exportid requires an ID to be specified -->
-  | <input exportid />
-  |
-  | <!-- Error: Although this is a valid ID, it can't be exported because it contains colons and parentheses. -->
-  | <input id="::id(example)" exportid /> 
-</x-input>
-```
-
-#### Example 1b: Exact ID name matches win
-
-It is technically possible (though not recommended) that _another_ element could have an `id` that contains `::id(...)`, since colon and parentheses are valid characters in an ID. Referring to those elements by ID will continue to work as normal. The lookup algorithm will first check if there is an element with an exact ID match before trying to parse out the export ID syntax.
-
-```html
-<label for="x-input-1::id(input-2)">Example Label</label>
-
-<!-- The label applies to THIS input because its ID is an exact match. -->
-<input id="x-input-1::id(input-2)" />
-
-<x-input id="x-input-1">
-  #shadowRoot
-  | <!-- This label does NOT apply to this input. -->
-  | <input id="input-2" exportid />
-</x-input>
-```
+> Note: See the [Requirements for `exportid`](#requirements-for-exportid) section for details on `id` values used with `exportid`.
 
 ### Forwarding exported IDs
 
-Forwarding IDs is only necessary when there are multiple nested shadow trees, and will likely be relatively uncommon. It is not allowed to chain together multiple `::id()` values to refer into a nested shadow tree. For example, the following is not valid, and would not match anything: `for="x-combobox::id(x-input)::id(the-input)"`. This is to avoid exposing more structure than a component author may desire, and follows the same restrictions as the CSS `::part()` selector. 
+For the relatively uncommon case of nested shadow roots, IDs can be "forwarded" from the outer shadow root using the `forwardids` attribute,
+analogous to how CSS `part`s may be exported via [`exportparts`](https://drafts.csswg.org/css-shadow-parts/#exportparts-attr).
 
-Instead, exported IDs can be forwarded using `forwardids` to put them in the "namespace" of the parent component. This works similarly to [`exportparts`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/exportparts).
-
-Multiple IDs can be forwarded, separated by a comma. Forwarded IDs can also optionally be renamed: `forwardids="name1, inner-name2: outer-name2"`.
+> Note: It is not allowed to chain together multiple `::id()` values to refer into a nested shadow tree. For example, the following is not valid, and would not match anything: `for="x-combobox::id(x-input)::id(the-input)"`. This is to avoid exposing more structure than a component author may desire, and follows the same restrictions as the CSS `::part()` selector.
 
 #### Example 2: Referring through multiple layers of shadow trees
 
 ```html
-<label for="x-combobox-1::id(input-3)">Example Label</label>
-<x-combobox id="x-combobox-1">
+<label for="airports::id(real-input)">Destination:</label>
+<x-combobox id="airports">
   #shadowRoot
-  | <x-input id="x-input-2" forwardids="input-3">
+  | <x-input id="textbox" forwardids="real-input">
   |   #shadowRoot
-  |   | <input id="input-3" exportid />
+  |   | <input id="real-input" exportid />
   | </x-input>
+  | <x-listbox></x-listbox>
 </x-combobox>
+```
+
+Multiple IDs can be forwarded, separated by a comma; e.g. `forwardids="id1, id2"`.
+
+Forwarded IDs can also optionally be renamed: `forwardids="name1, inner-name2: outer-name2"`.
+
+#### Example 3: Renaming an exported ID to avoid a collision
+
+```html
+<!-- The <label> elements slotted in to the <x-address>
+     use aliased forwarded IDs for the inner <input>s. -->
+<x-address id="address">
+  #shadowRoot
+  | <slot name="street-address-label"></slot>
+  | <x-input id="street" forwardids="real-input: street-input">
+  |   #shadowRoot
+  |   | <input id="real-input" exportid>
+  | </x-input>
+  | <slot name="city-label"></slot>
+  | <x-input id="city" forwardids="real-input: city-input">
+  |   #shadowRoot
+  |   | <input id="real-input" exportid>
+  | </x-input>
+  #/shadowroot
+  <label for="address::id(street-input)">Street address:</label>
+  <label for="address::id(city-input)">City:</label>
+</x-address>
 ```
 
 ## Referring out of the shadow tree with `useids`
 
-The `::id()` syntax so far only allows referring into a shadow tree from the outside. However, it may also be necessary for an element inside a shadow tree to refer to an element outside. For example, using `aria-labelledby` or `aria-describedby` within a component to refer to external elements outside of the shadow tree.
-  
-The `useids` attribute specifies a mapping from `inner-id: outer-idref`. The `inner-id` names are determined by the web component author. The `outer-idref` names are provided by the user of the web component, and can be any element ID, including exported IDs using the `::id()` syntax.
+A much more common need is to refer from a shadow tree out into the light tree.
+This is already possible using [reflected `Element` IDL attributes](https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:element), e.g. `shadowInput.ariaDescribedByElement = lightDiv;`.
+However, this can't be serialized, and doesn't allow referring into "sibling" shadow roots.
 
-Inside the shadow tree, imported IDs are referenced using the `:host::id()` syntax, using the special 'ID' `:host` to refer to IDs specified by `useid` on the host element. This syntax is analagous to the `:host::part()` CSS selector that can be used to select parts in the local tree.
+The `useids` attribute "imports" IDs from the light tree into a shadow tree, via a mapping from `inner-id: outer-idref`.
+The `inner-id` names are determined by the web component author, much like a `slot` name;
+the `outer-idref` names are provided by the user of the web component to refer to some specific element outside the component.
+
+Within the component's shadow tree, imported IDs are referenced using the `:host::id()` syntax, using the special 'ID' `:host` to refer to IDs specified by `useid` on the host element. This syntax is analagous to the `:host::part()` CSS selector that can be used to select parts in the local tree.
 
 Note: There is an open question below discussing an [alternative syntax for useids](#open-question-useids).
 
-#### Example 3: Importing IDs with `useids`
+#### Example 4: Importing IDs with `useids`
 
-This example shows how to import an ID called `"my-labelledby"` into a the x-input component, and reference it using the `":host::id()"` syntax.
+This example shows how to import an ID called `"hint"` into the `<x-input-with-hint>` component, and reference it using the `":host::id()"` syntax.
 
 ```html
-<span id="span-1">Example Label</span>
-<x-input id="x-input-2" useids="my-labelledby: span-1">
+<x-input-with-hint id="name" useids="hint: name-hint">
   #shadowRoot
-  | <input aria-labelledby=":host::id(my-labelledby)" />
-</x-input>
+  | <input aria-describedby=":host::id(hint)" id="real-input" exportid>
+</x-input-with-hint>
+<span id="name-hint">Your name can be in any language.</span>
 ```
 
-#### Example 3a: Referring to multiple IDs via a single imported ID
+<!-- Comment from Alice: I'm not sure exactly how valuable this is either as a functionality or an example.
+     Couldn't you achieve the same thing (albeit with more verbosity) by importing each ID separately?
+
+#### Example 4a: Referring to multiple IDs via a single imported ID
 
 Some attributes like `aria-labelledby` allow multiple IDs to be specified in their values: `aria-labelledby="label-1 label-2"`. If a useid definition contains multiple whitespace-separated IDREFs, then those IDs are all applied to the attribute.
 
-In the following example, the computed label for the `<input>` is "One Two Three".
+The value of an imported ID can be a space-separated
+While it is possible to achieve the same result using multiple imported IDs, that requires the component to be specifically authored to support multiple IDs
+
+In the following example, the computed description for the `<input>` is "Please enter a name. Your name can be in any language."
 
 ```html
-<span id="span-1">One</span>
-<span id="span-2">Two</span>
-<x-input useids="my-labelledby: span-1 span-2">
+<x-input useids="hint: name-error name-hint">
   #shadowRoot
   | <span id="span-3">Three</span> 
-  | <input aria-labelledby=":host::id(my-labelledby) span-3" />
+  | <input aria-describedby=":host::id(hint)" />
 </x-input>
+<span id="name-error">Please enter a name.</span>
+<span id="name-hint">Your name can be in any language.</span>
 ```
+
+-->
 
 ### Referring across sibling shadow trees
 
-The `useids` attribute can also refer to an element inside another shadow tree. This allows references that don't strictly follow a descendant-ancestor relationship.
+When using `useids`, `outer-idref` values may be straightforward IDs,
+but also may use the `::id()` syntax to refer into sibling shadow roots.
 
-#### Example 4: Label and Input in separate shadow trees
+#### Example 5: `<label>` and `<input>` in separate shadow trees
 
-In this example, both the `label` and `input` are inside sibling shadow trees. The label uses `useids` and the `::id()` syntax to connect the two.
+In this example, both the `<label>` and `<input>` are inside sibling shadow trees.
+The `<label>` uses `useids` and the `::id()` syntax to connect the two.
 
 ```html
-<x-label id="x-label-1" useids="my-label-for: x-input-2::id(input-3)">
+<x-label useids="label-for: gender::id(real-input)">
   #shadowRoot
-  | <label for=":host::id(my-label-for)">Example Label</label>
+  | <label for=":host::id(label-for)">Gender</label>
 </x-label>
-<x-input id="x-input-2">
+<x-input id="gender">
   #shadowRoot
-  | <input id="input-3" exportid />
+  | <input id="real-input" exportid />
 </x-input>
 ```
 
-#### Example 5: A kitchen sink example of a Combobox
+#### Example 6: A kitchen sink example of a Combobox
 
-This is a more complex example utilizing several different features of exported/imported IDs. 
-* The **x-combobox** component contains an **x-input** and an **x-listbox** component.
-* The **x-input** has `forwardids="input-1"` so that the label's `for` attribute can refer to the input element.
-* The **x-input** uses two imported ids: `my-activedescendant` and `my-listbox`. They are each mapped to an element inside the **x-listbox**'s shadow tree.
+This is a more complex example utilizing several different features of exported/imported IDs.
+* The **x-contact-picker** component contains an **x-input** and an **x-listbox** component.
+* The **x-input** has `forwardids="real-input"` so that the label's `for` attribute can refer to the input element.
+* The **x-input** uses two imported ids: `selected-contact` and `contact-listbox`.
+  They are each mapped to an element inside the **x-listbox**'s shadow tree.
 
 ```html
-<label for="x-combobox-1::id(input-2)">Example combobox</label>
-<x-combobox id="x-combobox-1">
+<label for="contacts::id(real-input)">To:</label>
+<x-contact-picker id="contacts">
   #shadowRoot
-  | <x-input 
-  |   forwardids="input-2"
-  |   useids="my-activedescendant: x-listbox-3::id(option-A), my-listbox: x-listbox-3::id(listbox-4)">
+  | <x-input
+  |   forwardids="real-input"
+  |   useids="contact-listbox: people::id(real-listbox),
+  |           selected-contact: people::id(opt1)">
   |   #shadowRoot
   |   | <input
   |   |   role="combobox"
-  |   |   id="input-2"
-  |   |   exportid
-  |   |   aria-controls=":host::id(my-listbox)"
-  |   |   aria-activedescendant=":host::id(my-activedescendant)"
+  |   |   id="real-input" exportid
+  |   |   aria-controls=":host::id(contact-listbox)"
+  |   |   aria-activedescendant=":host::id(selected-contact)"
   |   |   aria-expanded="true"
   |   | />
   | </x-input>
   | <button aria-label="Open" aria-expanded="true">v</button>
   |
-  | <x-listbox id="x-listbox-3">
+  | <x-listbox id="people">
   |   #shadowRoot
-  |   | <div role="listbox" id="listbox-4" exportid>
-  |   |   <div role="option" id="option-A" exportid>Option A</div>
-  |   |   <div role="option" id="option-B" exportid>Option B</div>
-  |   |   <div role="option" id="option-C" exportid>Option C</div>
+  |   | <div role="listbox" id="real-listbox" exportid>
+  |   |    <div role="option" id="opt1">fish@marine.animals</div>
+  |   |    <div role="option" id="opt2">octopus@ocean.creatures</div>
   |   | </div>
   | </x-listbox>
 </x-combobox>
 ```
 
-## JavaScript API
+## JavaScript APIs
 
 Supporting exported and imported IDs in JavaScript requires several new APIs and updates to existing APIs.
 
@@ -212,44 +224,57 @@ A boolean property that reflects the `exportid` attribute.
 
 ### `Element.forwardIds` property
 
-A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) that reflects the `forwardids` attribute.
+Since `forwardids` represents a mapping from an internal ID to a (potentially renamed) external ID,
+it's reflected as a [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap).
+This also makes it easier to add and remove IDs from the set of forwarded IDs.
 
-#### Example 6: The `forwardIds` property
+This is similar in function to the [`dataset` property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset), except that kebab-case IDs are _NOT_ converted to camelCase. All imported ID names are attributes as-is, and may need to be accessed using the `['']` syntax instead of the dot `.` syntax if they contain hyphens.
+
+#### Example 7: The `forwardIds` property
 
 ```html
-<x-input id="x-input-1" forwardids="input-2, renamed-3: span-3">
+<x-multi-slider id="minmax" forwardids="track, low: min, high: max">
   #shadowRoot
   | <div>
-  |   <input id="input-2" exportid />
-  |   <span id="span-3" exportid>...</span>
+  |   <span id="track"></span>
+  |   <span id="low" exportid></span>
+  |   <span id="high" exportid></span>
   | </div>
-</x-input>
+</x-multi-slider>
 <script>
-  const xInput = document.getElementById('x-input-1');
-  console.log(xInput.forwardIds); // { 'input-2': 'input-2', 'renamed-3': 'span-3' }
+  const minmax = document.getElementById('minmax');
+  console.log(minmax.forwardIds); // { 'track': 'track', 'low': 'min', 'high': 'max' }
+
+  // change one of the names
+  minmax.forwardIds['low'] = 'minimum';
+
+  // delete one of the forwarded IDs
+  delete minmax.forwardIds['track'];
 </script>
 ```
 
 ### `Element.useIds` property
 
-A [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) that reflects the `useids` attribute. Allows programmatic access to read and modify the list of imported IDs.
+Likewise, `useids` is reflected as a [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) IDL attribute,
+without converting IDs to camelCase.
 
-This is similar in function to the [`dataset` property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset), except that convert kebab-case are _NOT_ converted to camelCase. All imported ID names are attributes as-is, and may need to be accessed using the `['']` syntax instead of the dot `.` syntax if they contain hyphens.
 
-#### Example 7: The `useIds` property
+#### Example 8: The `useIds` property
 
 ```html
-<x-input id="x-input-1" useids="my-listbox: listbox-1, my-activedescendant: listbox-1::id(option-A)" />
+<x-input id="contact-input"
+         useids="contact-listbox: people,
+                 selected-contact: people::id(opt1)">
 <script>
-  const xInput = document.getElementById('x-input-1');
-  console.log(xInput.useIds['my-listbox']); // 'listbox-1'
-  console.log(xInput.useIds['my-activedescendant']); // 'listbox-1::id(option-A)'
-  
-  xInput.useIds['my-listbox'] = 'some-other-listbox';
-  delete xInput.useIds['my-activedescendant'];
+  const contactInput = document.getElementById('contact-input');
+  console.log(contactInput.useIds['contact-listbox']); // 'people'
+  console.log(contactInput.useIds['selected-contact']); // 'people::id(opt1)'
+
+  contactInput.useIds['contact-listbox'] = 'some-other-listbox';
+  delete xInput.useIds['selected-contact'];
 
   // Changes are reflected back to the attribute
-  console.log(xInput.getAttribute('useids')); // 'my-listbox: some-other-listbox'
+  console.log(xInput.getAttribute('useids')); // 'contact-listbox: some-other-listbox'
 </script>
 ```
 
@@ -262,17 +287,35 @@ myLabel.htmlFor = 'x-input-1::id(input-2)';
 console.log(myLabel.htmlFor); // 'x-input-1::id(input-2)'
 ```
 
-### Properties that reflect IDREF attributes as Element objects
+### IDL attributes that reflect IDREF attributes as Element objects
 
-Some JavaScript attributes allow you to get the actual element object from an IDREF attribute, such as [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) or [`Element.ariaActiveDescendantElement`](https://w3c.github.io/aria/#dom-ariamixin-ariaactivedescendantelement) and other properties in ARIAMixin. To preserve encapsulation of the shadow DOM, these cannot return direct references to elements referred to by handles, since those elements may be inside shadow trees that are not accessible to the caller.
+To preserve encapsulation of the shadow DOM, reflected IDL attributes which return element references (such as [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) or [`Element.ariaActiveDescendantElement`](https://w3c.github.io/aria/#dom-ariamixin-ariaactivedescendantelement)) cannot return direct references to elements referred to by exported IDs, since those elements may be inside shadow trees that are not accessible to the caller.
 
 When accessing a property that refers to an element inside another shadow tree (using `::id()`), the returned element will be [retargeted](https://dom.spec.whatwg.org/#retarget) in the same way that's done for event targets in shadow DOM. In practice, this is typically the **host element** (i.e. the element specified before `::id()`), but it is more complex when using `useids`.
 
 > **Note**: This solution borrows from Alice Boxhall's recommendation for [Encapsulation-preserving IDL Element reference attributes](https://github.com/WICG/aom/issues/195).
 
+#### Example 9: Getting `htmlFor` which refers to an element inside a shadow root
+
+```html
+<label for="airports::id(real-input)">Destination:</label>
+<x-combobox id="airports">
+  #shadowRoot
+  | <x-input id="textbox" forwardids="real-input">
+  |   #shadowRoot
+  |   | <input id="real-input" exportid />
+  | </x-input>
+  | <x-listbox></x-listbox>
+</x-combobox>
+<script>
+console.log(document.querySelector('label').htmlFor);
+// logs the <x-combobox id="airports"> element
+</script>
+```
+
 #### `getElementById`
 
-We do not want `getElementById('host-1::id(child-2)')` to be a way to break encapsulation of the shadow DOM and access elements inside a shadow root. As such, it can't return the child element. The two basic options are:
+We do not want `getElementById('host-id::id(child)')` to be a way to break encapsulation of the shadow DOM and access elements inside a shadow root. As such, it can't return the child element. The two basic options are:
 1. **PROPOSED**: Return `null` as this is not an exact match for an ID.
    - **Pros**: The "safe" option, as it does not modify the current behavior of `getElementById`. It has parity with `querySelector` discussed below.
    - **Cons**: Makes `getElementById` useless with exported IDREFs. Also, it means the following two are not the same:
@@ -284,49 +327,82 @@ We do not want `getElementById('host-1::id(child-2)')` to be a way to break enca
    - **Pros**: Parity with IDREF attributes like `ariaActiveDescendantElement`.
    - **Cons**: It is potentially confusing that the ID of the returned element doesn't match the ID passed in.
 
-The proposal is to use option 1 (return `null`); see [the example](#example-javascript-props) below. It may be possible to support option 2 later by adding an argument like `getElementById(id, { includeExportId: true })`. There is an open question below that discusses [other alternatives for getElementById](#open-question-getelementbyid) as well. However, any modification to `getElementById` would likely need to have a good motivating example.
+The proposal is to use option 1 (return `null`); see [Example 10](#example-javascript-props) below. It may be possible to support option 2 later by adding an argument like `getElementById(id, { includeExportId: true })`. There is an open question below that discusses [other alternatives for getElementById](#open-question-getelementbyid) as well. However, any modification to `getElementById` would likely need to have a good motivating example.
 
 #### `querySelector`/`querySelectorAll`
 
 Exported IDs are NOT allowed to be used as CSS selectors, which means that `querySelector` and `querySelectorAll` will always return `null` when used with an exported IDREF.
 
-<a id="example-javascript-props"></a>
-
-#### Example 8: Accessing exported IDs by JavaScript properties
+#### <a id="example-javascript-props"></a> Example 10: Accessing exported IDs by JavaScript properties 
 
 This is a simplified combobox example, to show the various methods of accessing the `aria-activedescendant` element.
 
 ```html
-<input id="combobox-1" role="combobox" aria-activedescendant="x-listbox-2::id(option-A)" />
+<input id="combo-textfield" role="combobox" aria-activedescendant="combo-listbox::id(opt1)" />
 
-<x-listbox id="x-listbox-2">
+<x-listbox id="combo-listbox">
   #shadowRoot
   | <div role="listbox">
-  |   <div role="option" id="option-A" exportid>Option A</div>
+  |   <div role="option" id="opt1" exportid>Peaches</div>
+  |   <div role="option" id="opt2" exportid>Plums</div>
   | </div>
 </x-listbox>
 
 <script>
-  const combobox = document.getElementById('combobox-1');
+  const combobox = document.getElementById('combo-textfield');
 
-  console.log(combobox.getAttribute('aria-activedescendant')); 
-  // "x-listbox-2::id(option-A)"
+  console.log(combobox.getAttribute('aria-activedescendant'));
+  // "combo-listbox::id(opt1)"
 
-  console.log(combobox.ariaActiveDescendantElement); 
-  // <x-listbox id="x-listbox-2"> (Note this is the HOST element)
+  console.log(combobox.ariaActiveDescendantElement);
+  // <x-listbox id="combo-listbox"> (Note this is the HOST element)
 
-  console.log(document.getElementById("x-listbox-2::id(option-A)")); 
+  console.log(document.getElementById("combo-listbox::id(opt1)"));
   // null
 
-  console.log(document.querySelector("#x-listbox-2::id(option-A)")); 
+  console.log(document.querySelector("#combo-listbox::id(opt1)"));
   // null
 
-  // If the shadow root is open (or the code has access to the shadowRoot in another way), 
+  // If the shadow root is open (or the code has access to the shadowRoot in another way),
   // then the actual element can be accessed like so.
   // Note: this is not a new proposed feature; it works prior to this proposal.
-  console.log(document.getElementById('x-listbox-2').shadowRoot.getElementById('option-A')); 
-  // <div id="option-A">
+  console.log(document.getElementById('combo-listbox').shadowRoot.getElementById('opt1'));
+  // <div role="option" id="opt1" exportid>Peaches</div>
 </script>
+```
+
+### Requirements for `exportid`
+
+The element with `exportid` must also have an `id` that conforms to a more strict rules about what characters are allowed. Normally, [IDs are allowed to have any character except whitespace](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id). For `exportid` to work, the `id` can only have letters, numbers, underscores, and hyphens (regex for permitted names: `[A-Za-z0-9_-]+`).
+
+#### Example 11: Invalid uses of `exportid`
+
+```html
+<x-input> <!-- Warning: The host must have an ID for elements inside to be referenced by exportid. -->
+  #shadowRoot
+  | <!-- Error: exportid requires an ID to be specified -->
+  | <input exportid />
+  |
+  | <!-- Error: Although this is a valid ID, it can't be exported because it contains colons and parentheses. -->
+  | <input id="::id(example)" exportid />
+</x-input>
+```
+
+#### Example 12: Exact ID name matches win
+
+It is technically possible (though not recommended) that _another_ element could have an `id` that contains `::id(...)`, since colon and parentheses are valid characters in an ID. Referring to those elements by ID will continue to work as normal. The lookup algorithm will first check if there is an element with an exact ID match before trying to parse out the export ID syntax.
+
+```html
+<label for="x-input-1::id(the-input)">Example Label</label>
+
+<!-- The label applies to THIS input because its ID is an exact match. -->
+<input id="x-input-1::id(the-input)" />
+
+<x-input id="x-input-1">
+  #shadowRoot
+  | <!-- This label does NOT apply to this input. -->
+  | <input id="the-input" exportid />
+</x-input>
 ```
 
 ## Privacy and Security Considerations
@@ -411,8 +487,8 @@ For example:
 
 ```html
 <x-comboboxinput
-  useid-labelexample="label-2"
-  useid-activeitem="x-listbox-1::id(option-A)"
+  useid-labelexample="my-label"
+  useid-activeitem="x-listbox-1::id(opt1)"
   useid-dropdownlistbox="x-listbox-1"
 >
   #shadowRoot
@@ -428,14 +504,14 @@ For example:
 
 The equivalent with the `useids` as proposed above would look like this:
 ```html
-<x-comboboxinput 
-  useids="labelexample: label-2, activeitem: x-listbox-1::id(option-A), dropdownlistbox: x-listbox-1"
+<x-comboboxinput
+  useids="labelexample: my-label, activeitem: x-listbox-1::id(opt1), dropdownlistbox: x-listbox-1"
 >
   #shadowRoot
   | <input
   |   role="combobox"
   |   aria-labelledby=":host::id(labelexample)"
-  |   aria-activedescendant=":host::id(useid-activeitem)"
+  |   aria-activedescendant=":host::id(activeitem)"
   |   aria-controls=":host::id(dropdownlistbox)"
   |   aria-expanded="true"
   | />
