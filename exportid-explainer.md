@@ -177,7 +177,7 @@ The `<label>` uses `useids` and the `::id()` syntax to connect the two.
 </x-input>
 ```
 
-#### Example 6: A kitchen sink example of a Combobox
+#### Example 6: A kitchen sink example: Contact Picker
 
 This is a more complex example utilizing several different features of exported/imported IDs.
 * The **x-contact-picker** component contains an **x-input** and an **x-listbox** component.
@@ -211,7 +211,7 @@ This is a more complex example utilizing several different features of exported/
   |   |    <div role="option" id="opt2">octopus@ocean.creatures</div>
   |   | </div>
   | </x-listbox>
-</x-combobox>
+</x-contact-picker>
 ```
 
 ## JavaScript APIs
@@ -257,7 +257,6 @@ This is similar in function to the [`dataset` property](https://developer.mozill
 
 Likewise, `useids` is reflected as a [`DOMStringMap`](https://developer.mozilla.org/en-US/docs/Web/API/DOMStringMap) IDL attribute,
 without converting IDs to camelCase.
-
 
 #### Example 8: The `useIds` property
 
@@ -333,7 +332,9 @@ The proposal is to use option 1 (return `null`); see [Example 10](#example-javas
 
 Exported IDs are NOT allowed to be used as CSS selectors, which means that `querySelector` and `querySelectorAll` will always return `null` when used with an exported IDREF.
 
-#### <a id="example-javascript-props"></a> Example 10: Accessing exported IDs by JavaScript properties 
+<a id="example-javascript-props"></a> 
+
+#### Example 10: Accessing exported IDs by JavaScript properties 
 
 This is a simplified combobox example, to show the various methods of accessing the `aria-activedescendant` element.
 
@@ -461,7 +462,7 @@ The specifics of the syntax will likely be a long-tail discussion of this propos
 * The `::id()` part of the IDREF is not strictly necessary.
    * For example: `host-1::id(child-2)` could instead be shortened to `host-1::child-2`, or `host-1/child-2`.
 * The `:host` selector for imported IDs (via `useid`) may be surpurflous.
-   * Imported IDs could start with `::`, or `../`, etc.: `aria-labelledby="::my-imported-handle"`.
+   * Imported IDs could start with `::`, or `../`, etc.: `aria-labelledby="::my-imported-id"`.
 
 The verbosity of the syntax has some **Pros**:
 * **Clarity**: more obvious that this is "special" syntax, and not just a developer's naming convention.
