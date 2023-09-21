@@ -1,8 +1,6 @@
 # Exporting IDs from shadow roots for cross-root ARIA
 
-Author: [Ben Howell](https://github.com/behowell)
-
-Special thanks to [Alice Boxhall](https://github.com/alice) for significant feedback.
+Authors: [Ben Howell](https://github.com/behowell), [Alice Boxhall](https://github.com/alice)
 
 ## Introduction
 
@@ -120,35 +118,40 @@ the `outer-idref` names are provided by the user of the web component to refer t
 
 Within the component's shadow tree, imported IDs are referenced using the `:host::id()` syntax, using the special 'ID' `:host` to refer to IDs specified by `useid` on the host element. This syntax is analagous to the `:host::part()` CSS selector that can be used to select parts in the local tree.
 
+Note: There is an open question below discussing an [alternative syntax for useids](#open-question-useids).
+
 #### Example 4: Importing IDs with `useids`
 
-This example shows how to import an ID called `"my-labelledby"` into a the x-input component, and reference it using the `":host::id()"` syntax.
+This example shows how to import an ID called `"hint"` into the `<x-input-with-hint>` component, and reference it using the `":host::id()"` syntax.
 
 ```html
 <x-input-with-hint id="name" useids="hint: name-hint">
   #shadowRoot
   | <input aria-describedby=":host::id(hint)" id="real-input" exportid>
-</x-input>
+</x-input-with-hint>
 <span id="name-hint">Your name can be in any language.</span>
 ```
 
 <!-- Comment from Alice: I'm not sure exactly how valuable this is either as a functionality or an example.
      Couldn't you achieve the same thing (albeit with more verbosity) by importing each ID separately?
 
-#### Example 5: Referring to multiple IDs via a single imported ID
+#### Example 4a: Referring to multiple IDs via a single imported ID
 
-Some attributes like `aria-labelledby` allow multiple IDs to be specified in their values: `aria-labelledby="label1 label2"`. If a useid definition contains multiple whitespace-separated IDREFs, then those IDs are all applied to the attribute.
+Some attributes like `aria-labelledby` allow multiple IDs to be specified in their values: `aria-labelledby="label-1 label-2"`. If a useid definition contains multiple whitespace-separated IDREFs, then those IDs are all applied to the attribute.
 
-In the following example, the computed label for the `<input>` is "First Second Inner".
+The value of an imported ID can be a space-separated
+While it is possible to achieve the same result using multiple imported IDs, that requires the component to be specifically authored to support multiple IDs
+
+In the following example, the computed description for the `<input>` is "Please enter a name. Your name can be in any language."
 
 ```html
-<span id="label1">First</span>
-<span id="label2">Second</span>
-<x-input id="x-input" useids="my-labelledby: label1 label2">
+<x-input useids="hint: name-error name-hint">
   #shadowRoot
-  | <span id="inner-label">Inner</span>
-  | <input aria-labelledby=":host::id(my-labelledby) inner-label" />
+  | <span id="span-3">Three</span> 
+  | <input aria-describedby=":host::id(hint)" />
 </x-input>
+<span id="name-error">Please enter a name.</span>
+<span id="name-hint">Your name can be in any language.</span>
 ```
 
 -->
@@ -177,7 +180,7 @@ The `<label>` uses `useids` and the `::id()` syntax to connect the two.
 #### Example 6: A kitchen sink example of a Combobox
 
 This is a more complex example utilizing several different features of exported/imported IDs.
-* The **x-combobox** component contains an **x-input** and an **x-listbox** component.
+* The **x-contact-picker** component contains an **x-input** and an **x-listbox** component.
 * The **x-input** has `forwardids="real-input"` so that the label's `for` attribute can refer to the input element.
 * The **x-input** uses two imported ids: `selected-contact` and `contact-listbox`.
   They are each mapped to an element inside the **x-listbox**'s shadow tree.
@@ -239,14 +242,14 @@ This is similar in function to the [`dataset` property](https://developer.mozill
   | </div>
 </x-multi-slider>
 <script>
-  const xInput = document.getElementById('minmax');
-  console.log(xInput.forwardIds); // { 'track': 'track', 'thumb1': 'min', 'thumb2': 'max' }
+  const minmax = document.getElementById('minmax');
+  console.log(minmax.forwardIds); // { 'track': 'track', 'low': 'min', 'high': 'max' }
 
   // change one of the names
-  xInput.forwardIds['low'] = 'minimum';
+  minmax.forwardIds['low'] = 'minimum';
 
   // delete one of the forwarded IDs
-  delete xInput.forwardIds['track'];
+  delete minmax.forwardIds['track'];
 </script>
 ```
 
@@ -280,8 +283,8 @@ without converting IDs to camelCase.
 Exported ID references work as expected when setting or getting them on DOMString properties like [`HTMLLabelElement.htmlFor`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/htmlFor). The `::id()` syntax will continue to work as it does when setting the attributes in HTML markup.
 
 ```js
-myLabel.htmlFor = 'x-input::id(the-input)';
-console.log(myLabel.htmlFor); // 'x-input::id(the-input)'
+myLabel.htmlFor = 'x-input-1::id(input-2)';
+console.log(myLabel.htmlFor); // 'x-input-1::id(input-2)'
 ```
 
 ### IDL attributes that reflect IDREF attributes as Element objects
@@ -313,29 +316,24 @@ console.log(document.querySelector('label').htmlFor);
 #### `getElementById`
 
 We do not want `getElementById('host-id::id(child)')` to be a way to break encapsulation of the shadow DOM and access elements inside a shadow root. As such, it can't return the child element. The two basic options are:
-1. Return `null` as this is not an exact match for an ID.
-   - **Pros**: The "safe" option. Parity with `querySelector` discussed below.
+1. **PROPOSED**: Return `null` as this is not an exact match for an ID.
+   - **Pros**: The "safe" option, as it does not modify the current behavior of `getElementById`. It has parity with `querySelector` discussed below.
    - **Cons**: Makes `getElementById` useless with exported IDREFs. Also, it means the following two are not the same:
       ```js
       const byId = document.getElementById(el.getAttribute('aria-activedescendant')); // = null
       const byAttr = el.activeDescendantElement; // = the host element
       ```
-2. Return the **host element** (`id="host"` in this example) - this is similar in concept to the retargeting proposed above for `ariaActiveDescendantElement`, etc.
-   - This is similar in functionality to **retargeting** described above for attributes like `ariaActiveDescendantElement`
-   - It is potentially confusing that the ID of the returned element doesn't match the ID passed in.
+2. Return the shadow host of the target element, using the [retargeting](https://dom.spec.whatwg.org/#retarget) algorithm.
+   - **Pros**: Parity with IDREF attributes like `ariaActiveDescendantElement`.
+   - **Cons**: It is potentially confusing that the ID of the returned element doesn't match the ID passed in.
 
-The proposal is to use option 2; see **Example 10** below.
-
-There are some other options discussed in **Open Questions** below; however, it's not immediately clear that it is necessary to augment `getElementById()` at all, since there are other ways to get the element in question.
-<!-- Alice: I can't see what this may have been referring to...
-(see Example 10 below)
--->
+The proposal is to use option 1 (return `null`); see [Example 10](#example-javascript-props) below. It may be possible to support option 2 later by adding an argument like `getElementById(id, { includeExportId: true })`. There is an open question below that discusses [other alternatives for getElementById](#open-question-getelementbyid) as well. However, any modification to `getElementById` would likely need to have a good motivating example.
 
 #### `querySelector`/`querySelectorAll`
 
 Exported IDs are NOT allowed to be used as CSS selectors, which means that `querySelector` and `querySelectorAll` will always return `null` when used with an exported IDREF.
 
-#### Example 10: Accessing exported IDs by JavaScript properties
+#### <a id="example-javascript-props"></a> Example 10: Accessing exported IDs by JavaScript properties 
 
 This is a simplified combobox example, to show the various methods of accessing the `aria-activedescendant` element.
 
@@ -360,7 +358,7 @@ This is a simplified combobox example, to show the various methods of accessing 
   // <x-listbox id="combo-listbox"> (Note this is the HOST element)
 
   console.log(document.getElementById("combo-listbox::id(opt1)"));
-  // <x-listbox id="combo-listbox"> (Note this is the HOST element)
+  // null
 
   console.log(document.querySelector("#combo-listbox::id(opt1)"));
   // null
@@ -461,7 +459,7 @@ Proposals in this category include:
 The specifics of the syntax will likely be a long-tail discussion of this proposal. Some early feedback for this proposal has centered around the verbosity of the syntax:
 
 * The `::id()` part of the IDREF is not strictly necessary.
-   * For example: `host-id::id(the-input)` could instead be shortened to `host-id::the-input`, or `host-id/the-input`.
+   * For example: `host-1::id(child-2)` could instead be shortened to `host-1::child-2`, or `host-1/child-2`.
 * The `:host` selector for imported IDs (via `useid`) may be surpurflous.
    * Imported IDs could start with `::`, or `../`, etc.: `aria-labelledby="::my-imported-handle"`.
 
@@ -472,8 +470,10 @@ The verbosity of the syntax has some **Pros**:
 
 There are also **Cons**:
 * **Page size**: Boilerplate text increases the size of the page source code. This affects the transfer time over the wire, but that can be mitigated by compression like gzip. It could also and parsing time/memory consumption, but the effects there may be negligible.
-* **Confusion**: The similarities to CSS selectors may indicate that other CSS-like selectors could be used in IDREFs. Also, the syntax is not exactly the same as CSS (e.g. no `#` before the id part: `#host-id::id(the-input)`).
+* **Confusion**: The similarities to CSS selectors may indicate that other CSS-like selectors could be used in IDREFs. Also, the syntax is not exactly the same as CSS (e.g. no `#` before the id part: `#host-1::id(child-2)`).
 * **More to type**: More keystrokes could be annoying after a while.
+
+<a id="open-question-useids"></a>
 
 ### Could the syntax for `useids` be improved?
 
@@ -489,13 +489,11 @@ For example:
 <x-comboboxinput
   useid-labelexample="my-label"
   useid-activeitem="x-listbox-1::id(opt1)"
-  useid-dropdownlistbox="x-listbox-1::id(the-listbox)"
+  useid-dropdownlistbox="x-listbox-1"
 >
   #shadowRoot
   | <input
   |   role="combobox"
-  |   id="the-input"
-  |   exportid
   |   aria-labelledby=":host[useid-labelexample]"
   |   aria-activedescendant=":host[useid-activeitem]"
   |   aria-controls=":host[useid-dropdownlistbox]"
@@ -507,15 +505,13 @@ For example:
 The equivalent with the `useids` as proposed above would look like this:
 ```html
 <x-comboboxinput
-  useids="labelexample: my-label, activeitem: x-listbox-1::id(opt1), dropdownlistbox: x-listbox-1::id(the-listbox)"
+  useids="labelexample: my-label, activeitem: x-listbox-1::id(opt1), dropdownlistbox: x-listbox-1"
 >
   #shadowRoot
   | <input
   |   role="combobox"
-  |   id="the-input"
-  |   exportid
   |   aria-labelledby=":host::id(labelexample)"
-  |   aria-activedescendant=":host::id(useid-activeitem)"
+  |   aria-activedescendant=":host::id(activeitem)"
   |   aria-controls=":host::id(dropdownlistbox)"
   |   aria-expanded="true"
   | />
@@ -529,21 +525,24 @@ The equivalent with the `useids` as proposed above would look like this:
 **Cons**
 - Paraphrasing [a comment by @alice](https://github.com/WICG/aom/pull/200#issuecomment-1692489089): there is no precedent for referencing an _attribute_ in the value of another attribute in HTML. For example `aria-labelledby=":host[useid-labelexample]"` is referencing the value of the host's `useid-labelexample` attribute. This "crosses the streams" between attributes and their values.
 
+<a id="open-question-getelementbyid"></a>
+
 ### Does `getElementById` need a way to resolve the exported IDREF syntax?
 
-The proposal above does not have a way for `getElementById('host::id(child)')` to get the actual child element. We don't want to allow this by default because it would break shadow DOM encapsulation. It is already possible to access the element for open shadow roots using the following:
+The proposal above does not have a way for `getElementById('host-1::id(child-2)')` to get the actual child element. We don't want to allow this by default because it would break shadow DOM encapsulation. It is already possible to access the element for open shadow roots using the following:
+
 ```js
-const host = document.getElementById('host');
-const child = host.shadowRoot.getElementById('child');
+const host = document.getElementById('host-1');
+const child = host.shadowRoot.getElementById('child-2');
 ```
 
 One possibility is to add an argument to `getElementById`, which is a list of shadow roots that may contain the child element. If the actual element is inside one of the provided shadow roots, then it can be returned directly.
 
 ```js
-const host = document.getElementById('host');
-const child = document.getElementById('host::id(child)', { shadowRoots: [host.shadowRoot] });
+const host = document.getElementById('host-1');
+const child = document.getElementById('host::id(child-2)', { shadowRoots: [host.shadowRoot] });
 ```
 
-The main argument against that is that it's more complicated than the original example that called `host.shadowRoot.getElementById('child')`, although it does not require potentially parsing out the child ID from a string like `"host::id(child)"`.
+The main argument against that is that it's more complicated than the original example that called `host.shadowRoot.getElementById('child-2')`, although it does not require potentially parsing out the child ID from a string like `"host-1::id(child-2)"`.
 
 This feature is something that could be added later in a backwards-compatible way, so it may be best to not include it in the initial Export IDs.
