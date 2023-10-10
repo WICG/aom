@@ -8,7 +8,7 @@ Last updated: April 15, 2022
 
 | | Chrome | Safari | Firefox |
 | --- | --- | --- | --- |
-| Phase 1: Reflect simple ARIA attributes on DOM nodes. | **Yes** | **Yes** | **No** |
+| Phase 1: Reflect simple ARIA attributes on DOM nodes. | **Yes** | **Yes** | **Yes** |
 | Phase 2: Reflect element references for IDREF attributes | **No** | **No** | **No** |
 | Phase 2: Synthesized keyboard events aka User action events from Assistive Technology | **No** | **Yes** | **No** |
 | Phase 2: Custom element semantics on `ElementInternals` | **Yes** | **No** | **No** |
@@ -20,7 +20,7 @@ Last updated: April 15, 2022
 
 * Safari/WebKit (supported)
 * Chrome/Chromium (supported)
-* Firefox/Gecko (unsupported)
+* Firefox/Gecko (supported) ([Shipping in 119](https://bugzilla.mozilla.org/show_bug.cgi?id=1785412) but [some remaining WPT test failures in 120](https://bugzilla.mozilla.org/show_bug.cgi?id=1858211))
 
 ```js
 element.role = "button";
