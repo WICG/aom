@@ -14,7 +14,7 @@ Last updated: April 15, 2022
 | Phase 2: Custom element semantics on `ElementInternals` | **Yes** | **No** | **No** |
 | Phase 2: New accessibilty-specific InputEvent types | **Abandoned** | **Abandoned** | **Abandoned** |
 | Phase 3: Build virtual accessible nodes. | **No** | **No** | **No** |
-| Phase 4: Query computed accessibility tree. | **Yes**, out-of-date syntax | **No** | **Yes**, out-of-date syntax |
+| Phase 4: Query computed accessibility tree/properties. | **Partial** | **Partial** | **Partial** |
 
 ### Phase 1: Reflect simple ARIA attributes on DOM nodes.
 
@@ -123,11 +123,17 @@ class CustomTab extends HTMLElement {
 
 Blocked by https://github.com/w3ctag/design-principles/issues/293
 
-### Phase 4: Query computed accessibility tree.
+### Phase 4: Query computed accessibility tree/properties.
 
-Speculative long-term goal. 
+Partial testing context in [WebDriver (`computedRole`/`computedLabel`)](https://wpt.fyi/results/?label=master&label=experimental&aligned&q=label%3Aaccessibility) is already shipping in all implementations.
 
-Testing contexts (e.g. WebDriver `computedRole`/`computedLabel` likely to stabilize sooner)
+Investigation into [additional follow-on WebDriver interfaces for accessibilty](https://github.com/WICG/aom/issues/203).
+
+#### Full Tree Access
+
+Interop investigation into test-only interface for [Accessibilty Tree Dump API](https://github.com/web-platform-tests/interop-2023-accessibility-testing/issues/51)
+
+##### Prior, Abandoned Approaches
 
 *Chrome (speculative syntax, pass `--enable-blink-features=AccessibilityObjectModel`)*:
 
