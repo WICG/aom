@@ -23,7 +23,7 @@
   - [Default semantics for Custom Elements via the `ElementInternals` object](#default-semantics-for-custom-elements-via-the-elementinternals-object)
     - [Use case 1: Setting non-reflected (“default”) accessibility properties for Web Components](#use-case-1-setting-non-reflected-default-accessibility-properties-for-web-components)
     - [Spec/implementation status](#specimplementation-status-2)
-  - [Shipping, Needs Testing: User action events from Assistive Technology](#shipping-needs-testing-user-action-events-from-assistive-technology)
+  - [Shipping, Needs Testing: User action events from Assistive Technology](#user-action-events-from-assistive-technology)
   - [Abandoned: New InputEvent types](#new-inputevent-types)
     - [Use case 3: Listening for events from Assistive Technology](#use-case-3-listening-for-events-from-assistive-technology)
     - [Spec/implementation status](#specimplementation-status-3)
@@ -238,7 +238,9 @@ customElements.define("custom-tablist", CustomTabList);
 - There is an [open PR](https://github.com/whatwg/html/pull/4658) on the WHATWG HTML spec.
 - This is [currently being implemented in Blink](https://chromestatus.com/feature/5962105603751936).
 
-### Shipping, Needs Testing: User action events from Assistive Technology
+### User action events from Assistive Technology
+
+(Shipping, Needs Testing)
 
 To preserve the privacy of assistive technology users, events from assistive technology
 will typically cause a synthesised DOM event to be triggered. The events are determined by
