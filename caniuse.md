@@ -13,7 +13,7 @@ Last updated: April 15, 2022
 | Phase 2: Synthesized keyboard events aka User action events from Assistive Technology | **No** | **Yes** | **No** |
 | Phase 2: Custom element semantics on `ElementInternals` | **Yes** | **No** | **No** |
 | Phase 2: New accessibilty-specific InputEvent types | **Abandoned** | **Abandoned** | **Abandoned** |
-| Phase 3: Build virtual accessible nodes. | **No** | **No** | **No** |
+| Phase 3: Build virtual accessible nodes. | **Blocked** | **Blocked** | **Blocked** |
 | Phase 4: Query computed accessibility tree/properties. | **Partial** | **Partial** | **Partial** |
 
 ### Phase 1: Reflect simple ARIA attributes on DOM nodes.
