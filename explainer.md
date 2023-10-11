@@ -240,7 +240,7 @@ customElements.define("custom-tablist", CustomTabList);
 
 ### User action events from Assistive Technology
 
-(Shipping, Needs Testing)
+(Partially Shipping, [Needs Testing](https://github.com/web-platform-tests/interop-2023-accessibility-testing/issues/66))
 
 To preserve the privacy of assistive technology users, events from assistive technology
 will typically cause a synthesised DOM event to be triggered. The events are determined by
