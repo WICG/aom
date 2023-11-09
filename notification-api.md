@@ -1,4 +1,5 @@
 # Accessibility (ARIA) Notification API
+**Note: This explainer is no longer being maintained. For the most up-to-date version of this feature, please [click here](https://github.com/WICG/accessible-notifications).**
 
 Authors: 
 * [Daniel Libby](https://github.com/dlibby-), Microsoft
