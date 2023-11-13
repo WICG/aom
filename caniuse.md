@@ -131,7 +131,7 @@ Investigation into [additional follow-on WebDriver interfaces for accessibilty](
 
 #### Full Tree Access
 
-Interop investigation into test-only interface for [Accessibilty Tree Dump API](https://github.com/web-platform-tests/interop-2023-accessibility-testing/issues/51)
+Interop investigation into test-only interface for [Accessibilty Tree Dump API](https://github.com/web-platform-tests/interop-accessibility/issues/51)
 
 ##### Prior, Abandoned Approaches
 
