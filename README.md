@@ -33,8 +33,10 @@ to direct UI changes).
 
 ### Editors:
 
+* Sara Tang, Microsoft, sartang@microsoft.com
+* Doug Geoffray, Microsoft, doug.geoffray@microsoft.com
+* Alison Maher, Microsoft, almaher@microsoft.com
 * Travis Leithead, Microsoft, travil@microsoft.com
-* Sara Tang, Microsoft
 * Daniel Libby, Microsoft
 
 ### Details

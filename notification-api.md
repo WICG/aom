@@ -2,8 +2,8 @@
 **Note: This explainer is no longer being maintained. For the most up-to-date version of this feature, please [click here](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/AriaNotify/explainer.md).**
 
 Authors: 
-* [Daniel Libby](https://github.com/dlibby-), Microsoft
 * [Sara Tang](https://github.com/sartang), Microsoft
+* [Daniel Libby](https://github.com/dlibby-), Microsoft
 * [Travis Leithead](https://github.com/travisleithead), Microsoft
 
 
