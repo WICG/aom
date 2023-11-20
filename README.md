@@ -25,6 +25,8 @@ Read the [Spec](https://wicg.github.io/aom/spec/) - note, not up-to-date
 
 ## Accessibility (ARIA) Notification API
 
+**Note notification-api.md is outdated. For the up-to-date explainer of this initiative, please [click here](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/AriaNotify/explainer.md).**
+
 This effort aims to create a JavaScript API to allow developers to
 initiate notifications that confirm user actions (not necessarily tied 
 to direct UI changes).
