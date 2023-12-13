@@ -161,28 +161,25 @@ This example shows a `<description-with-tooltip>` component that contains a "Mor
 This feature is intended to work with **all** attributes that refer to another element by ID string. These are:
 
 * ARIA
-  * [`aria-activedescendant`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-activedescendant)
-  * [`aria-controls`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-controls)
-  * [`aria-describedby`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-describedby)
-  * [`aria-details`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-details)
-  * [`aria-errormessage`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-errormessage)
-  * [`aria-flowto`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-flowto)
-  * [`aria-labelledby`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-labelledby)
-  * [`aria-owns`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-owns)
+  * `aria-activedescendant`
+  * `aria-controls`
+  * `aria-describedby`
+  * `aria-details`
+  * `aria-errormessage`
+  * `aria-flowto`
+  * `aria-labelledby`
+  * `aria-owns`
 * Inputs
-  * [`for`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label#for) (also supports the click behavior of labels)
-  * [`form`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#form)
-  * [`list`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#list)
-  * [`popovertarget`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#popovertarget)
-  * [`invoketarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
-  * [`interesttarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
+  * `for` (also supports the click behavior of labels)
+  * `form`
+  * `list`
+  * `popovertarget`
+  * `invoketarget` (proposed)
+  * `interesttarget` (proposed)
 * Tables
-  * [`headers`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td#headers)
+  * `headers`
 * Microdata
-  * [`itemref`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemref)
-
-  
-
+  * `itemref`
 
 > _Please comment if there are any attributes missing from this list._
 
@@ -222,10 +219,10 @@ Reference delegate does not change the behavior of the host element when it is n
 
 Some JavaScript attributes reflect HTML attributes as Element objects rather than ID strings. These include:
 * ARIAMixin attributes like `ariaActiveDescendantElement`
-* [`HTMLButtonElement.popoverTargetElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement/popoverTargetElement)
-* [`HTMLInputElement.form`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#form)
-* [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels)
-* [`HTMLLabelElement.control`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control)
+* `HTMLButtonElement.popoverTargetElement`
+* `HTMLInputElement.form`
+* `HTMLInputElement.labels`
+* `HTMLLabelElement.control`
 * _(This list is not exhaustive)_
 
 These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceDelegate element directly.  This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
