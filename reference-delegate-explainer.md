@@ -1,5 +1,7 @@
 # Reference Delegate for cross-root ARIA
 
+Author: [Ben Howell](https://github.com/behowell)
+
 ## Introduction
 
 Reference Delegate is a new HTML feature that solves the cross-root ARIA problem. For background on the problem, see @alice's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). The article describes the two main problems that need to be solved: [Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards) and [Referring into Shadow DOM](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-into-shadow-dom).
@@ -49,7 +51,9 @@ customElements.define("fancy-input",
 <fancy-input labelledby="label"></fancy-input>
 ```
 
-## Proposal: Reference Delegate
+## Proposal
+
+### Reference Delegate
 
 Reference Delegate is a new feature that enables creating ARIA links to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM.
 
@@ -209,6 +213,10 @@ This feature is intended to work with **all** attributes that refer to another e
 
 ### Interaction with other features
 
+#### Using reference delegate on a form-associated custom element
+
+A [form-associated custom element](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-element) supports being the target of a label's `for` attribute. But if the element has a Reference Delegate for the `for` attribute, then the label applies to the delegate instead. There are no other changes to the behavior of a form-associated custom element.
+
 #### Nesting inside `<label>`
 
 If a shadow tree delegates the `for` attribute (either implicitly with `referenceDelegate` or explicitly with `referenceDelegateMap`), then that also applies when the host element is nested inside a label. The label becomes associated with the reference delegate element.
@@ -226,6 +234,12 @@ In the following example, the label of `<input id="real-input" />` is "Fancy inp
   </fancy-input>
 </label>
 ```
+
+#### Nesting inside `<form>`
+
+Reference delegate does not change the behavior of the host element when it is nested inside a form. It does _not_ implicitly associate the delegate element with the form.
+
+> Note: This could be explored further, but it seems like linking the delegate to the form would have too much overlap/conflict with form-associated custom elements.
 
 #### Interaction with ARIAMixin attributes
 
@@ -353,7 +367,7 @@ Reflected by JavaScript attributes `ShadowRoot.delegatesAriaActiveDescendant="id
 #### Pros
 
 * Simpler parsing: no need to parse a comma-separated list of colon-separated map entries.
-* Works with IDs that contain colons and commas.
+* Works with IDs that contain commas.
 
 #### Cons
 
