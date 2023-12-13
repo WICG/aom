@@ -258,7 +258,7 @@ The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API
 
 No considerable privacy or security concerns are expected, but community feedback is welcome.
 
-## Discarded Design Alternatives
+## Considered Alternatives
 
 This section covers some design alternatives, along with discussion of their Pros and Cons, and why they were not included in the design.
 
