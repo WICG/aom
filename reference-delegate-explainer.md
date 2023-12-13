@@ -174,8 +174,8 @@ This feature is intended to work with **all** attributes that refer to another e
   * `form`
   * `list`
   * `popovertarget`
-  * `invoketarget` (proposed)
-  * `interesttarget` (proposed)
+  * [`invoketarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
+  * [`interesttarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
 * Tables
   * `headers`
 * Microdata
