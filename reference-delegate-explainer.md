@@ -10,47 +10,6 @@ The Reference Delegate proposal is based heavily on @Westbrook's [Cross-root ARI
 
 A complete solution to cross-root ARIA combines the existing [**ARIAMixin IDL attributes**](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) to solve the "Referring from Shadow DOM outwards" problem, and introduce a new feature **Reference Delegate** to solve the "Referring into Shadow DOM" problem, which is compatible with the ARIA.
 
-## Background
-
-### Using ARIAMixin to refer out of the shadow DOM
-
-The new proposed Reference Delegate feature is intended to be used alongside ARIAMixin attributes like `ariaLabelledbyElements` and `ariaActiveDescendantElement`. So it's worthwhile giving a brief summary of a way to use of those attributes to allow an element inside the shadow DOM refer to the light DOM.
-
-Here we define a custom element `<fancy-input>` with custom attributes to define the ARIA relationships for the `<input>` that is in its shadow DOM. This allows the links to be created OUT from the shadow DOM.
-
-> Note: The following example shows what is possible _without_ the Reference Delegate feature. It does not include any proposed features, and is included as background information.
-
-```html
-<template id="t-fancy-input">
-  <input id="real-input" type="text" />
-</template>
-
-<script>
-customElements.define("fancy-input", 
-  class FancyInput extends HTMLElement {
-    static observedAttributes = ["labelledby"];
-
-    constructor() {
-      super();
-      this.shadowRoot_ = this.attachShadow({ mode: "closed" });
-      this.shadowRoot_.appendChild(
-        document.getElementById("t-fancy-input").content.cloneNode(true));
-      this.input_ = this.shadowRoot_.getElementById('real-input');
-    }
-
-    attributeChangedCallback(attr, _oldValue, value) {
-      if (attr === "labelledby") {
-        this.input_.ariaLabelledbyElements = 
-          value.split(" ").map(id => this.getRootNode().getElementById(id));
-      }
-    }
-  });
-</script>
-
-<label id="label">Fancy input</label>
-<fancy-input labelledby="label"></fancy-input>
-```
-
 ## Proposal
 
 ### Reference Delegate
