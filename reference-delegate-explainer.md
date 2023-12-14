@@ -4,11 +4,37 @@ Author: [Ben Howell](https://github.com/behowell)
 
 ## Introduction
 
-Reference Delegate is a new HTML feature to help solve the cross-root ARIA problem. For background on cross-root ARIA, see @alice's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). The article describes the two main problems that need to be solved: [Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards) and [Referring into Shadow DOM](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-into-shadow-dom).
+Reference Delegate is a feature to enable using IDREF attribtues such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
 
-The Reference Delegate proposal is based heavily on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
+This proposal is based on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
 
-A complete solution to cross-root ARIA combines the existing [**ARIAMixin IDL attributes**](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) to solve the "Referring from Shadow DOM outwards" problem, and introduce a new feature **Reference Delegate** to solve the "Referring into Shadow DOM" problem, which is compatible with the ARIA.
+## Background
+
+### Cross-root ARIA
+
+For an in-depth description the cross-root ARIA problem, see @alice's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). The article describes the two main problems that need to be solved: [Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards) and [Referring into Shadow DOM](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-into-shadow-dom).
+
+The existing [ARIAMixin IDL attributes](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) unlock part of the solution to the cross-root ARIA problem. They allow for an element inside a shadow DOM to create an ARIA link to an element outside that shadow DOM. However, they are limited in that they can't reference an element inside another component's shadow DOM. The specifics of this limitation are described in more detail in @alice's article.
+
+The "missing piece" to solving the cross-root ARIA problem is the ability to refer into Shadow DOM. The Reference Delegate feature described in this explainer intends to solve this problem in a way that is compatible with the ARIAMixin attributes.
+
+When Reference Delegate is used in conjunction with ARIAMixin, it is possible to create references between elements in sibiling shadow DOMs, or between any two unrelated shadow DOMs on the page, as long as the components have provided the API to do so, through reference delegates and custom attributes.
+
+### Web components as drop-in replacements for builtins
+
+Web components have an increasing number of features that allow them to work and act like builtin components. For example:
+
+* [Form-Associated Custom Elements](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-element) can participate in forms like a builtin input.
+* [delegatesFocus](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus) allows a component to work better with keyboard navigation.
+
+However, there are still missing pieces that prevent a web component from truly being a drop-in replacement for a built-in, including:
+
+* Can't create ID reference links to elements inside the shadow DOM.
+* Can't use built-in attributes like `aria-label` or `role` on the host and have them apply to an element inside the shadow DOM.
+* Non-trivial amount of code required to hook up custom attributes on the host to ARIAMixin attributes on an element inside the shadow DOM.
+* Can't get form-association for "free" by delegating to an input inside.
+
+This proposal solves only the first problem of ID references, and leaves the other problems to be solved by other features. While all of the problems may seem related, they can be designed separately.
 
 ## Proposal
 
@@ -18,6 +44,7 @@ Reference Delegate is a new feature that enables creating ARIA links to elements
 
 **Goals**
 
+- Solve only the "missing piece" of cross-root ARIA: how to handle IDREF attributes referring into the shadow DOM. Avoid scope creep.
 - Create a mechanism for ID reference attributes like `aria-activedescendant` and `for` to refer to an element inside a component's shadow DOM.
 - Should be compatible with the ARIAMixin attributes such as `ariaActiveDescendantElement`, to create a complete solution to cross-root ARIA.
 - Should work the same for both closed and open shadow roots.
@@ -28,7 +55,8 @@ Reference Delegate is a new feature that enables creating ARIA links to elements
 **Non-Goals**
 
 - This is scoped to only solve the problem of referring _into_ the shadow DOM. It relies on ARIAMixin to refer _out_ of the shadow DOM.
-- This proposal does not delegate ARIA attributes that aren't ID references, such as `aria-label`.
+- This feature does not solve the [bottleneck effect](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#limitations-of-these-apis). It is difficult to find a compelling real-world example where this is a problem.
+- This does not affect the how attributes set on the host element work. For example, this does not tackle the problem of forwarding `role` or `aria-label`, etc. from the host element to an element inside.
 
 ### The `referenceDelegate` attribute
 
@@ -174,8 +202,8 @@ This feature is intended to work with **all** attributes that refer to another e
   * `form`
   * `list`
   * `popovertarget`
-  * [`invoketarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
-  * [`interesttarget`](https://open-ui.org/components/invokers.explainer/) (proposed)
+  * `invoketarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
+  * `interesttarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
 * Tables
   * `headers`
 * Microdata
