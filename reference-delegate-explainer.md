@@ -450,37 +450,32 @@ It would be possible to use exported IDs instead of `referenceDelegateMap` if/wh
 
 ## Appendix A: Combobox Example
 
-This "kitchen sink" example implements a `<fancy-combobox>` using two subcomponents: `<combobox-input>` and `<combobox-listbox>`. It demonstrates:
+This "kitchen sink" example implements a `<fancy-combobox>` using two components: `<fancy-input>` and `<fancy-listbox>`. It demonstrates:
 * Delegating references through multiple layers of shadow DOM.
-   * A label in the light DOM refers to the `<input>` inside the `<combobox-input>`, which is itself inside the `<fancy-combobox>`.
+   * A label in the light DOM refers to the `<input>` inside the `<fancy-input>`, which is itself inside the `<fancy-combobox>`.
 * Referring to an element in a sibling shadow tree. 
-   * Uses `ariaActiveDescendantElement` in `<combobox-input>` along with `referenceDelegateMap` in `<combobox-listbox>` to connect the `<input>` with a `<div role="option">`.
+   * Uses `ariaActiveDescendantElement` in `<fancy-input>` along with `referenceDelegateMap` in `<fancy-listbox>` to connect the `<input>` with a `<div role="option">`.
 * Using a custom prop to control the target of `referenceDelegateMap`.
-   * `<combobox-listbox>` allows the target of its `aria-activedescendant` to be controlled externally via its custom `activeitem` attribute.
+   * `<fancy-listbox>` allows the target of its `aria-activedescendant` to be controlled externally via its custom `activeitem` attribute.
 
-#### `<combobox-input>`
+#### `<fancy-input>`
 
-This component is a wrapper around an `<input>` for use by a combobox.
+This component is a wrapper around an `<input>`, similar to the one in the examples above with a few additional features.
 
 1. It delegates all references to the input. This lets, for example, a label for this component to be applied to the input.
 2. A custom attribute `listbox` is hooked up to both `ariaControlsElements` and `ariaActiveDescendantElement`.
-   * The listbox delegates the two attributes to different elements inside (see `<combobox-listbox>` below), but this component references the parent listbox for both.
+   * The listbox delegates the two attributes to different elements inside (see `<fancy-listbox>` below), but this component references the parent listbox for both.
+3. It observes the `role` attribute to set the `role` of the internal input.
 
-```html
-<template id="t-combobox-input">
-  <input id="real-input" role="combobox" type="text" />
-</template>
-
-<script>
-customElements.define("combobox-input", 
-  class ComboboxInput extends HTMLElement {
-    static observedAttributes = ["listbox"];
+```js
+customElements.define("fancy-input", 
+  class FancyInput extends HTMLElement {
+    static observedAttributes = ["role", "listbox"];
 
     constructor() {
       super();
       this.shadowRoot_ = this.attachShadow({ mode: "closed" });
-      this.shadowRoot_.appendChild(
-        document.getElementById("t-combobox-input").content.cloneNode(true));
+      this.shadowRoot_.innerHTML = `<input id="real-input" />`;
       this.shadowRoot_.referenceDelegate = "real-input"; // (1)
       this.input_ = this.shadowRoot_.getElementById('real-input');
     }
@@ -492,36 +487,36 @@ customElements.define("combobox-input",
         this.input_.ariaControlsElements = [listbox];
         this.input_.ariaActiveDescendantElement = listbox;
       }
+      else if (attr === "role") {
+        // (3)
+        this.input_.role = value;
+        this.role = "none"; // Remove the role from the host
+      }
     }
   });
-</script>
 ```
 
-#### `<combobox-listbox>`
+#### `<fancy-listbox>`
 
 This component is a wrapper around `<div role="listbox">` and the `<div role="option">` items inside.
 
 1. It delegates all references _except_ `aria-activedescendant` to the `<div role="listbox">` using `referenceDelegate`.
 2. It has a custom attribute `activeitem`, which is used to control which item gets the `aria-activedescendant` delegation using `referenceDelegateMap`. This lets the parent component control the active item.
 
-```html
-<template id="t-combobox-listbox">
-  <div id="real-listbox" role="listbox">
-    <div id="option-1" role="option">Option 1</div>
-    <div id="option-2" role="option">Option 2</div>
-  </div>
-</template>
-
-<script>
-customElements.define("combobox-listbox", 
-  class ComboboxListbox extends HTMLElement {
+```js
+customElements.define("fancy-listbox", 
+  class FancyListbox extends HTMLElement {
     static observedAttributes = ["activeitem"];
 
     constructor() {
       super();
       this.shadowRoot_ = this.attachShadow({ mode: "closed" });
-      this.shadowRoot_.appendChild(
-        document.getElementById("t-combobox-listbox").content.cloneNode(true));
+      this.shadowRoot_.innerHTML = `
+        <div id="real-listbox" role="listbox">
+          <div id="option-1" role="option">Option 1</div>
+          <div id="option-2" role="option">Option 2</div>
+        </div>
+      `;
       this.shadowRoot_.referenceDelegate = "real-listbox"; // (1)
     }
 
@@ -536,39 +531,25 @@ customElements.define("combobox-listbox",
 
 #### `<fancy-combobox>`
 
-This component combines the two subcomponents above into a combobox.
+This component combines the two components above into a combobox.
 
-1. It hooks up the listbox to the input using the `<combobox-input>`'s custom `listbox` attribute.
-2. It controls which item inside the listbox is the `aria-activedescendant` of the input using the `<combobox-listbox>`'s custom `activeitem` attribute.
+1. It hooks up the listbox to the input using the `<fancy-input>`'s custom `listbox` attribute.
+2. It controls which item inside the listbox is the `aria-activedescendant` of the input using the `<fancy-listbox>`'s custom `activeitem` attribute.
 3. It delegates all references to the `"combo-input"` component, which itself delegates to the `"real-input"` inside.
-
-```html
-<template id="t-fancy-combobox">
-  <combobox-input id="combo-input" 
-                  listbox="combo-listbox"> <!-- (1) -->
-  </combobox-input>
-  <combobox-listbox id="combo-listbox"
-                    activeitem="option-1"> <!-- (2) -->
-  </combobox-listbox>
-</template>
-
-<script>
-customElements.define("fancy-combobox", 
-  class FancyCombobox extends HTMLElement {
-    constructor() {
-      super();
-      this.shadowRoot_ = this.attachShadow({ mode: "closed" });
-      this.shadowRoot_.appendChild(
-        document.getElementById("t-fancy-combobox").content.cloneNode(true));
-      this.shadowRoot_.referenceDelegate = "combo-input"; // (3)
-    }
-  });
-</script>
-```
-
-Using a label's `for` attribute with the fancy-combobox pierces two layers of shadow DOM to apply the label to the `<input id="real-input">`.
+4. Using a label's `for` attribute with the fancy-combobox pierces two layers of shadow DOM to apply the label to the `<input id="real-input">`.
 
 ```html
 <label for="combobox">Combobox</label>
-<fancy-combobox id="combobox"></fancy-combobox>
+<fancy-combobox id="combobox">
+  <template shadowrootmode="closed"
+            shadowrootreferencedelegate="combo-input"> <!-- (3) -->
+    <div>
+      <!-- (1) -->
+      <fancy-input id="combo-input" role="combobox" listbox="combo-listbox"></fancy-input>
+
+      <!-- (2) -->
+      <fancy-listbox id="combo-listbox" activeitem="option-1"></fancy-listbox>
+    </div>
+  </template>
+</fancy-combobox>
 ```
