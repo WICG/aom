@@ -67,18 +67,13 @@ The shadow root specifies the ID of the delegate element inside the shadow DOM. 
 JavaScript example:
 
 ```html
-<template id="t-fancy-input">
-  <input id="real-input" />
-</template>
-
 <script>
 customElements.define("fancy-input", 
   class FancyInput extends HTMLElement {
     constructor() {
       super();
       this.shadowRoot_ = this.attachShadow({ mode: "closed" });
-      this.shadowRoot_.appendChild(
-        document.getElementById("t-fancy-input").content.cloneNode(true));
+      this.shadowRoot_.innerHTML = `<input id="real-input" />`;
       this.shadowRoot_.referenceDelegate = "real-input";
     }
   });
@@ -104,9 +99,12 @@ Equivalent with declarative shadow DOM:
 
 There are situations where it is necessary to delegate different reference types to different elements. For example, a listbox may want to delegate `aria-controls` to its root, and `aria-activedescendant` to one of the items inside the listbox.
 
-The `ShadowRoot.referenceDelegateMap` attribute allows for specifying elements based on the attribute that is being used to reference the host.
+The `ShadowRoot.referenceDelegateMap` attribute allows for specifying delegate elements based on the attribute that is being used to reference the host.
 
 The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which is a comma-separated list of attribute to ID mappings.
+
+> Note: the syntax of `shadowrootreferencedelegatemap` is based on the [`exportparts`](https://drafts.csswg.org/css-shadow-parts/#exportparts-attr) attribute that contains a comma-separated map of part names.
+
 
 ```html
 <input role="combobox"
@@ -115,7 +113,7 @@ The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which 
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="closed"
             shadowrootreferencedelegatemap="aria-controls: real-listbox,
-                                            aria-activedescendant: option-2">
+                                            aria-activedescendant: option-1">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
       <div id="option-2" role="option">Option 2</div>
@@ -124,13 +122,27 @@ The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which 
 </fancy-listbox>
 ```
 
-Declaring the mappings using the JavaScript API would look like:
+The JavaScript API reflects the mappings using camelCase names for the properties:
+
 ```js
-this.shadowRoot_.referenceDelegateMap['aria-controls'] = 'real-listbox';
-this.shadowRoot_.referenceDelegateMap['aria-activedescendant'] = 'option-2';
+this.shadowRoot_.referenceDelegateMap.ariaControls = 'real-listbox';
+this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = 'option-1';
 ```
 
-> Note: the syntax of `shadowrootreferencedelegatemap` is based on the [`exportparts`](https://drafts.csswg.org/css-shadow-parts/#exportparts-attr) attribute that contains a comma-separated map of part names.
+#### Live references
+
+Reference delegates are a "live reference": if the host internally changes its reference delegate mapping, any element that references the host will use the updated mapping. 
+
+In the example above, if the `aria-activedescendant` mapping is changed, then the `aria-activedescendant` of `<input>` will be changed to refer to the newly-mapped element.
+
+```js
+// Using `aria-activedescendant="fancy-listbox"` initially maps to 'option-1'
+
+// fancy-listbox internally updates its mapping
+this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = 'option-2';
+
+// Using `aria-activedescendant="fancy-listbox"` now maps to 'option-2'
+ ```
 
 #### Combining `referenceDelegate` and `referenceDelegateMap`
 
@@ -515,7 +527,7 @@ customElements.define("combobox-listbox",
 
     attributeChangedCallback(attr, _oldValue, value) {
       if (attr === "activeitem") {
-        this.shadowRoot_.referenceDelegateMap['aria-activedescendant'] = value; // (2)
+        this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = value; // (2)
       }
     }
   });
