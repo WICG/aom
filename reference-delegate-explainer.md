@@ -4,9 +4,9 @@ Author: [Ben Howell](https://github.com/behowell)
 
 ## Introduction
 
-Reference Target is a feature to enable using IDREF attribtues such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
+Reference Target is a feature to enable using IDREF attributes such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
 
-This proposal is based on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
+This proposal is based on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) proposal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
 
 ## Background
 
@@ -18,11 +18,11 @@ The existing [ARIAMixin IDL attributes](https://w3c.github.io/aria/#ARIAMixin) (
 
 The "missing piece" to solving the cross-root ARIA problem is the ability to refer into Shadow DOM. The Reference Target feature described in this explainer intends to solve this problem in a way that is compatible with the ARIAMixin attributes.
 
-When Reference Target is used in conjunction with ARIAMixin, it is possible to create references between elements in sibiling shadow DOMs, or between any two unrelated shadow DOMs on the page, as long as the components have provided the API to do so, through reference targets and custom attributes.
+When Reference Target is used in conjunction with ARIAMixin, it is possible to create references between elements in sibling shadow DOMs, or between any two unrelated shadow DOMs on the page, as long as the components have provided the API to do so, through reference targets and custom attributes.
 
-### Web components as drop-in replacements for builtins
+### Web components as drop-in replacements for builtin elements
 
-Web components have an increasing number of features that allow them to work and act like builtin components. For example:
+Web components have an increasing number of features that allow them to work and act like builtin elements. For example:
 
 * [Form-Associated Custom Elements](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-element) can participate in forms like a builtin input.
 * [delegatesFocus](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus) allows a component to work better with keyboard navigation.
@@ -334,7 +334,7 @@ This section covers some design alternatives, along with discussion of their Pro
 The name "reference target" (`shadowrootreferencetarget`) follows the naming convention of other newer attributes used for IDREFs, such as `popovertarget` or `invoketarget`. Some possible alternative names:
 * "Reference Delegate" - `shadowrootreferencedelegate="id"` - original name for this proposal
 * "Delegates References" - `shadowrootdelegatesreferences="id"` - more similar wording to `shadowrootdelegatesfocus`.
-* "Reflects References" - `shadowrootreflectsreferences="id"` - borrowing from the [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal.
+* "Reflects References" - `shadowrootreflectsreferences="id"` - borrowing from the [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) proposal.
 * "Forwards References" - `shadowrootforwardsreferences="id"` - borrowing from ["forwardRef" in React](https://react.dev/reference/react/forwardRef).
 
 Ultimately, the name "reference target" is the most concise and consistent, and conveys the intent of the feature. However, community feedback is welcome on the name.
@@ -484,11 +484,14 @@ customElements.define("fancy-input",
     attributeChangedCallback(attr, _oldValue, value) {
       if (attr === "listbox") {
         // (2)
-        const listbox = this.getRootNode().getElementById(value);
-        this.input_.ariaControlsElements = [listbox];
+        // Note: A real implementation will need to use connectedCallback and 
+        // MutationObserver to correctly set the listbox. This is just an 
+        // example of how ariaControlsElements might be updated.
+        const listbox = value ? this.getRootNode().getElementById(value) : null;
+        this.input_.ariaControlsElements = listbox ? [listbox] : null;
         this.input_.ariaActiveDescendantElement = listbox;
       }
-      else if (attr === "role") {
+      else if (attr === "role" && value !== "none") {
         // (3)
         this.input_.role = value;
         this.role = "none"; // Remove the role from the host
