@@ -1,10 +1,10 @@
-# Reference Delegate for Cross-root ARIA
+# Reference Target for Cross-root ARIA
 
 Author: [Ben Howell](https://github.com/behowell)
 
 ## Introduction
 
-Reference Delegate is a feature to enable using IDREF attribtues such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
+Reference Target is a feature to enable using IDREF attribtues such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
 
 This proposal is based on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
 
@@ -16,9 +16,9 @@ For an in-depth description the cross-root ARIA problem, see @alice's article [H
 
 The existing [ARIAMixin IDL attributes](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) unlock part of the solution to the cross-root ARIA problem. They allow for an element inside a shadow DOM to create an ARIA link to an element outside that shadow DOM. However, they are limited in that they can't reference an element inside another component's shadow DOM. The specifics of this limitation are described in more detail in @alice's article.
 
-The "missing piece" to solving the cross-root ARIA problem is the ability to refer into Shadow DOM. The Reference Delegate feature described in this explainer intends to solve this problem in a way that is compatible with the ARIAMixin attributes.
+The "missing piece" to solving the cross-root ARIA problem is the ability to refer into Shadow DOM. The Reference Target feature described in this explainer intends to solve this problem in a way that is compatible with the ARIAMixin attributes.
 
-When Reference Delegate is used in conjunction with ARIAMixin, it is possible to create references between elements in sibiling shadow DOMs, or between any two unrelated shadow DOMs on the page, as long as the components have provided the API to do so, through reference delegates and custom attributes.
+When Reference Target is used in conjunction with ARIAMixin, it is possible to create references between elements in sibiling shadow DOMs, or between any two unrelated shadow DOMs on the page, as long as the components have provided the API to do so, through reference targets and custom attributes.
 
 ### Web components as drop-in replacements for builtins
 
@@ -38,9 +38,9 @@ This proposal solves only the first problem of ID references, and leaves the oth
 
 ## Proposal
 
-### Reference Delegate
+### Reference Target
 
-Reference Delegate is a new feature that enables creating ARIA links to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM.
+Reference Target is a new feature that enables creating ARIA links to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM.
 
 **Goals**
 
@@ -58,11 +58,11 @@ Reference Delegate is a new feature that enables creating ARIA links to elements
 - This feature does not solve the [bottleneck effect](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#limitations-of-these-apis). It is difficult to find a compelling real-world example where this is a problem.
 - This does not affect the how attributes set on the host element work. For example, this does not tackle the problem of forwarding `role` or `aria-label`, etc. from the host element to an element inside.
 
-### The `referenceDelegate` attribute
+### The `referenceTarget` attribute
 
-A component can specify an element in its shadow tree to act as its "reference delegate". When the host component is the target of a IDREF like a label's `for` attribute, the delegate becomes the true target.
+A component can specify an element in its shadow tree to act as its "reference target". When the host component is the target of a IDREF like a label's `for` attribute, the referenceTarget becomes the effective target of the label.
 
-The shadow root specifies the ID of the delegate element inside the shadow DOM. This is done either in JavaScript with the `referenceDelegate` attribute on the `ShadowRoot` object, or in HTML markup using the `shadowrootreferencedelegate` attribute on the `<template>` element.
+The shadow root specifies the ID of the target element inside the shadow DOM. This is done either in JavaScript with the `referenceTarget` attribute on the `ShadowRoot` object, or in HTML markup using the `shadowrootreferencetarget` attribute on the `<template>` element.
 
 JavaScript example:
 
@@ -74,7 +74,7 @@ customElements.define("fancy-input",
       super();
       this.shadowRoot_ = this.attachShadow({ mode: "closed" });
       this.shadowRoot_.innerHTML = `<input id="real-input" />`;
-      this.shadowRoot_.referenceDelegate = "real-input";
+      this.shadowRoot_.referenceTarget = "real-input";
     }
   });
 </script>
@@ -89,21 +89,21 @@ Equivalent with declarative shadow DOM:
 <label for="fancy-input">Fancy input</label>
 <fancy-input id="fancy-input">
   <template shadowrootmode="closed"
-            shadowrootreferencedelegate="real-input">
+            shadowrootreferencetarget="real-input">
     <input id="real-input" />
   </template>
 </fancy-input>
 ```
 
-### The `referenceDelegateMap` attribute
+### The `referenceTargetMap` attribute
 
-There are situations where it is necessary to delegate different reference types to different elements. For example, a listbox may want to delegate `aria-controls` to its root, and `aria-activedescendant` to one of the items inside the listbox.
+There are situations where it is necessary to target different reference types to different elements. For example, a listbox may want to target `aria-controls` to its root, and `aria-activedescendant` to one of the items inside the listbox.
 
-The `ShadowRoot.referenceDelegateMap` attribute allows for specifying delegate elements based on the attribute that is being used to reference the host.
+The `ShadowRoot.referenceTargetMap` attribute allows for specifying target elements based on the attribute that is being used to reference the host.
 
-The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which is a comma-separated list of attribute to ID mappings.
+The equivalent declarative attribute is `shadowrootreferencetargetmap`, which is a comma-separated list of attribute to ID mappings.
 
-> Note: the syntax of `shadowrootreferencedelegatemap` is based on the [`exportparts`](https://drafts.csswg.org/css-shadow-parts/#exportparts-attr) attribute that contains a comma-separated map of part names.
+> Note: the syntax of `shadowrootreferencetargetmap` is based on the [`exportparts`](https://drafts.csswg.org/css-shadow-parts/#exportparts-attr) attribute that contains a comma-separated map of part names.
 
 
 ```html
@@ -112,7 +112,7 @@ The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which 
        aria-activedescendant="fancy-listbox" />
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="closed"
-            shadowrootreferencedelegatemap="aria-controls: real-listbox,
+            shadowrootreferencetargetmap="aria-controls: real-listbox,
                                             aria-activedescendant: option-1">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
@@ -125,13 +125,13 @@ The equivalent declarative attribute is `shadowrootreferencedelegatemap`, which 
 The JavaScript API reflects the mappings using camelCase names for the properties:
 
 ```js
-this.shadowRoot_.referenceDelegateMap.ariaControls = 'real-listbox';
-this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = 'option-1';
+this.shadowRoot_.referenceTargetMap.ariaControls = 'real-listbox';
+this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = 'option-1';
 ```
 
 #### Live references
 
-Reference delegates are a "live reference": if the host internally changes its reference delegate mapping, any element that references the host will use the updated mapping. 
+Reference targets are a "live reference": if the host internally changes its reference target mapping, any element that references the host will use the updated mapping. 
 
 In the example above, if the `aria-activedescendant` mapping is changed, then the `aria-activedescendant` of `<input>` will be changed to refer to the newly-mapped element.
 
@@ -139,16 +139,16 @@ In the example above, if the `aria-activedescendant` mapping is changed, then th
 // Using `aria-activedescendant="fancy-listbox"` initially maps to 'option-1'
 
 // fancy-listbox internally updates its mapping
-this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = 'option-2';
+this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = 'option-2';
 
 // Using `aria-activedescendant="fancy-listbox"` now maps to 'option-2'
  ```
 
-#### Combining `referenceDelegate` and `referenceDelegateMap`
+#### Combining `referenceTarget` and `referenceTargetMap`
 
-In the case where both attributes are specified, `referenceDelegateMap` takes priority for individual attributes, and `referenceDelegate` acts as the fallback for attributes that are not specified.
+In the case where both attributes are specified, `referenceTargetMap` takes priority for individual attributes, and `referenceTarget` acts as the fallback for attributes that are not specified.
 
-In the example below, `"real-listbox"` is the delegate for all attributes _except_ `aria-activedescendant`, which is delegated to `"option-2"`.
+In the example below, `"real-listbox"` is the target for all attributes _except_ `aria-activedescendant`, which is targeted to `"option-2"`.
 
 ```html
 <input role="combobox"
@@ -156,8 +156,8 @@ In the example below, `"real-listbox"` is the delegate for all attributes _excep
        aria-activedescendant="fancy-listbox" />
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="open"
-            shadowrootreferencedelegate="real-listbox"
-            shadowrootreferencedelegatemap="aria-activedescendant: option-2">
+            shadowrootreferencetarget="real-listbox"
+            shadowrootreferencetargetmap="aria-activedescendant: option-2">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
       <div id="option-2" role="option">Option 2</div>
@@ -168,9 +168,9 @@ In the example below, `"real-listbox"` is the delegate for all attributes _excep
 
 #### Delegating to multiple elements
 
-Some attributes such as `aria-labelledby`, `aria-describedby`, etc. support multiple targets. Using `referenceDelegateMap` with those attributes support a space-separated list of IDs.
+Some attributes such as `aria-labelledby`, `aria-describedby`, etc. support multiple targets. Using `referenceTargetMap` with those attributes support a space-separated list of IDs.
 
-This example shows a `<description-with-tooltip>` component that contains a "More Info" button to show the tooltip but is not intended to be included in the description text. It delegates `aria-describedby: message tooltip` to forward to only the content that should be included in the description text.
+This example shows a `<description-with-tooltip>` component that contains a "More Info" button to show the tooltip but is not intended to be included in the description text. It targets `aria-describedby: message tooltip` to forward to only the content that should be included in the description text.
 
 ```html
 <input aria-describedby="description-with-tooltip" />
@@ -180,7 +180,7 @@ This example shows a `<description-with-tooltip>` component that contains a "Mor
 -->
 <description-with-tooltip id="description-with-tooltip">
   <template shadowrootmode="closed"
-            shadowrootreferencedelegatemap="aria-describedby: message tooltip">
+            shadowrootreferencetargetmap="aria-describedby: message tooltip">
     <div>
       <span id="message">
         Inline description text.
@@ -227,11 +227,11 @@ This feature is intended to work with **all** attributes that refer to another e
 
 #### Form-associated custom elements
 
-A [form-associated custom element](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-element) supports being the target of a label's `for` attribute. But if the element has a Reference Delegate for the `for` attribute, then the label applies to the delegate instead. There are no other changes to the behavior of a form-associated custom element.
+A [form-associated custom element](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-element) supports being the target of a label's `for` attribute. But if the element has a Reference Target for the `for` attribute, then the label applies to the target instead. There are no other changes to the behavior of a form-associated custom element.
 
 #### Nesting inside `<label>`
 
-If a shadow tree delegates the `for` attribute (either implicitly with `referenceDelegate` or explicitly with `referenceDelegateMap`), then that also applies when the host element is nested inside a label. The label becomes associated with the reference delegate element.
+If a shadow tree targets the `for` attribute (either implicitly with `referenceTarget` or explicitly with `referenceTargetMap`), then that also applies when the host element is nested inside a label. The label becomes associated with the reference target element.
 
 In the following example, the label of the `<input>` is "Fancy input".
 
@@ -240,20 +240,20 @@ In the following example, the label of the `<input>` is "Fancy input".
   Fancy input
   <fancy-input id="fancy-input">
     <template shadowrootmode="closed"
-              shadowrootreferencedelegate="real-input">
+              shadowrootreferencetarget="real-input">
       <input />
     </template>
   </fancy-input>
 </label>
 ```
 
-> Note: This behavior may need to be reconsidered. It deviates from the rest of the referenceDelegate feature, which only applies to IDREF attributes. It is also possible for authors to use the `for` attribute even when the input is nested inside the label.
+> Note: This behavior may need to be reconsidered. It deviates from the rest of the referenceTarget feature, which only applies to IDREF attributes. It is also possible for authors to use the `for` attribute even when the input is nested inside the label.
 
 #### Nesting inside `<form>`
 
-Reference delegate does not change the behavior of the host element when it is nested inside a form. It does _not_ implicitly associate the delegate element with the form.
+Reference target does not change the behavior of the host element when it is nested inside a form. It does _not_ implicitly associate the target element with the form.
 
-> Note: This could be explored further, but it seems like linking the delegate to the form would have too much overlap/conflict with form-associated custom elements.
+> Note: This could be explored further, but it seems like linking the target to the form would have too much overlap/conflict with form-associated custom elements.
 
 #### Interaction with JavaScript attributes/functions that reflect Elements
 
@@ -265,15 +265,15 @@ Some JavaScript attributes reflect HTML attributes as Element objects rather tha
 * `HTMLLabelElement.control`
 * _(This list is not exhaustive)_
 
-These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceDelegate element directly.  This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
+These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceTarget element directly.  This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
 
-In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox>` element that was targeted by `aria-activedescendant="fancy-listbox"`, even though the active descendant is internally delegated to `<div id="option-2">`.
+In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox>` element that was targeted by `aria-activedescendant="fancy-listbox"`, even though the active descendant internally targets `<div id="option-2">`.
 
 ```html
 <input id="input" aria-activedescendant="fancy-listbox" />
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="open"
-            shadowrootreferencedelegatemap="aria-activedescendant: option-2">
+            shadowrootreferencetargetmap="aria-activedescendant: option-2">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
       <div id="option-2" role="option">Option 2</div>
@@ -291,13 +291,13 @@ In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox
 
 #### Interaction with `HTMLInputElement.labels`
 
-The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) attribute returns list of the label elements targeting a certain input element. This API should continue to work if the input element is itself the delegate of a custom element.
+The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) attribute returns list of the label elements targeting a certain input element. This API should continue to work if the input element is itself the target of a custom element.
 
 ```html
 <label id="outer-label" for="fancy-input">Outer Label</label>
 <fancy-input id="fancy-input">
   <template shadowrootmode="open"
-            shadowrootreferencedelegate="real-input">
+            shadowrootreferencetarget="real-input">
     <label id="inner-label" for="real-input">Inner Label</label>
     <input id="real-input" />
   </template>
@@ -313,13 +313,13 @@ The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API
   console.log(fancyInput.labels);
   // undefined (`labels` is not an attribute of HTMLElement)
   // If fancyInput were a form-associated custom element, then elementInternals.labels
-  // would return an empty list [] because the labels are delegated to realInput.
+  // would return an empty list [] because the labels are targeted to realInput.
 </script>
 ```
 
 #### Interaction with CSS Selectors
 
-The referenceDelegate has no interaction with CSS. An ID selector will target the host element, and _not_ its referenceDelegate.
+The referenceTarget has no interaction with CSS. An ID selector will target the host element, and _not_ its referenceTarget.
 
 ## Privacy and Security Considerations
 
@@ -329,38 +329,39 @@ No considerable privacy or security concerns are expected, but community feedbac
 
 This section covers some design alternatives, along with discussion of their Pros and Cons, and why they were not included in the design.
 
-### Alternative names for the feature "Reference Delegate"
+### Alternative names for the feature "Reference Target"
 
-The name "reference delegate" (`shadowrootreferencedelegate`) is intended to indicate that the specified element acts as the delegate for references to the host element. Some possible alternative names:
+The name "reference target" (`shadowrootreferencetarget`) follows the naming convention of other newer attributes used for IDREFs, such as `popovertarget` or `invoketarget`. Some possible alternative names:
+* "Reference Delegate" - `shadowrootreferencedelegate="id"` - original name for this proposal
 * "Delegates References" - `shadowrootdelegatesreferences="id"` - more similar wording to `shadowrootdelegatesfocus`.
 * "Reflects References" - `shadowrootreflectsreferences="id"` - borrowing from the [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) propsal.
 * "Forwards References" - `shadowrootforwardsreferences="id"` - borrowing from ["forwardRef" in React](https://react.dev/reference/react/forwardRef).
 
-Ultimately, the name "reference delegate" is the most concise and conveys the intent of the feature. However, community feedback is welcome on the name.
+Ultimately, the name "reference target" is the most concise and consistent, and conveys the intent of the feature. However, community feedback is welcome on the name.
 
-### Omit the "catch-all" `referenceDelegate` attribute
+### Omit the "catch-all" `referenceTarget` attribute
 
-It is technically possible to require all attributes to be individually delegated via `referenceDelegateMap`, rather than also allowing `referenceDelegate` as a "catch-all" for every attribute.
+It is technically possible to require all attributes to be individually targeted via `referenceTargetMap`, rather than also allowing `referenceTarget` as a "catch-all" for every attribute.
 
 #### Pros
 
-* The main argument to omit `referenceDelegate` is that the semantics could change if more delegated attributes are added in the future. This could break existing websites by changing the target of an attribute, if it is added to `referenceDelegate` support in the future.
-* It makes it more difficult for browser vendors to incrementally implement reference delegate, since adding support for additional attributes is a breaking change.
+* The main argument to omit `referenceTarget` is that the semantics could change if more targeted attributes are added in the future. This could break existing websites by changing the target of an attribute, if it is added to `referenceTarget` support in the future.
+* It makes it more difficult for browser vendors to incrementally implement reference target, since adding support for additional attributes is a breaking change.
 
 #### Cons
 
-* The Reference Delegate feature is intended to support all attributes that use ID references. Thus, the only time a new attribute will be supported by Reference Delegate is when it is a completely new attribute in the HTML spec. There is no backwards compatibility concern, since no websites will be using the new attribute before is is supported.
+* The Reference Target feature is intended to support all attributes that use ID references. Thus, the only time a new attribute will be supported by Reference Target is when it is a completely new attribute in the HTML spec. There is no backwards compatibility concern, since no websites will be using the new attribute before is is supported.
 * It is beneficial that this feature automatically supports future attributes added to the HTML spec. It will not require any developer work to update to support new features.
 * Including an easy-to-use catch-all attribute supports the HTML design principle of [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies). It priorities users of the feature, over browser implementors and theoretical concerns.
 
-### Add `referenceDelegateElement` attribute that targets an element object
+### Add `referenceTargetElement` attribute that targets an element object
 
-The current API of `referenceDelegate` is a string only, and targets the element by ID. An alternative would be to include an attribute like `referenceDelegateElement`, which allows specifying element objects (without an ID).
+The current API of `referenceTarget` is a string only, and targets the element by ID. An alternative would be to include an attribute like `referenceTargetElement`, which allows specifying element objects (without an ID).
 
 ```js
 const input = document.createElement('input');
 this.shadowRoot_.appendChild(input);
-this.shadowRoot_.referenceDelegateElement = input;
+this.shadowRoot_.referenceTargetElement = input;
 ```
 
 #### Pros
@@ -369,33 +370,33 @@ this.shadowRoot_.referenceDelegateElement = input;
 
 #### Cons
 
-* It requires adding support for [attribute sprouting](https://wicg.github.io/aom/aria-reflection-explainer.html#sprouting-relationship-attributes) to sync the `shadowrootreferencedelegate` attribute with `referenceDelegateElement`. This adds complexity to the spec.
-* It does not unlock any net-new functionality. Since `referenceDelegate` only works with elements inside the shadow root, every element that could be a delegate is accessible by a string ID reference.
+* It requires adding support for [attribute sprouting](https://wicg.github.io/aom/aria-reflection-explainer.html#sprouting-relationship-attributes) to sync the `shadowrootreferencetarget` attribute with `referenceTargetElement`. This adds complexity to the spec.
+* It does not unlock any net-new functionality. Since `referenceTarget` only works with elements inside the shadow root, every element that could be a target is accessible by a string ID reference.
   > Note: This is in contrast to the ARIAMixin attributes like `ariaLabelledByElements`, which _do_ unlock the new functionality of referring out of the shadow DOM. In that case, the complexity is worthwhile to include in the ARIAMixin design.
-* At a basic level, Reference Delegate is augmenting the existing functionality of referring to elements by ID string. It seems in line with the design to require using ID strings.
+* At a basic level, Reference Target is augmenting the existing functionality of referring to elements by ID string. It seems in line with the design to require using ID strings.
 
 ### Use separate attributes for each forwarded attribute
 
-An alternative to a single attribute `shadowrootreferencedelegatemap` / `ShadowRoot.referenceDelegateMap` would be to have individual attributes for each forwarded attribute:
-* `shadowrootariaactivedescendantdelegate`
-* `shadowrootariacontrolsdelegate`
-* `shadowrootariadescribedbydelegate`
-* `shadowrootariadetailsdelegate`
-* `shadowrootariaerrormessagedelegate`
-* `shadowrootariaflowtodelegate`
-* `shadowrootarialabelledbydelegate`
-* `shadowrootariaownsdelegate`
-* `shadowrootfordelegate`
-* `shadowrootformdelegate`
-* `shadowrootlistdelegate`
-* `shadowrootpopovertargetdelegate`
-* `shadowrootinvoketargetdelegate`
-* `shadowrootinteresttargetdelegate`
-* `shadowrootheadersdelegate`
-* `shadowrootitemrefdelegate`
-* `shadowrootreferencedelegate` -- all other references except the ones specified above
+An alternative to a single attribute `shadowrootreferencetargetmap` / `ShadowRoot.referenceTargetMap` would be to have individual attributes for each forwarded attribute:
+* `shadowrootariaactivedescendanttarget`
+* `shadowrootariacontrolstarget`
+* `shadowrootariadescribedbytarget`
+* `shadowrootariadetailstarget`
+* `shadowrootariaerrormessagetarget`
+* `shadowrootariaflowtotarget`
+* `shadowrootarialabelledbytarget`
+* `shadowrootariaownstarget`
+* `shadowrootfortarget`
+* `shadowrootformtarget`
+* `shadowrootlisttarget`
+* `shadowrootpopovertargettarget`
+* `shadowrootinvoketargettarget`
+* `shadowrootinteresttargettarget`
+* `shadowrootheaderstarget`
+* `shadowrootitemreftarget`
+* `shadowrootreferencetarget` -- all other references except the ones specified above
 
-Reflected by JavaScript attributes `ShadowRoot.ariaActiveDescendantDelegate`, etc.
+Reflected by JavaScript attributes `ShadowRoot.ariaActiveDescendantTarget`, etc.
 
 #### Pros
 
@@ -405,7 +406,7 @@ Reflected by JavaScript attributes `ShadowRoot.ariaActiveDescendantDelegate`, et
 #### Cons
 
 * Adds 15+ new attributes instead of 2.
-* Less clear(?) that `shadowrootreferencedelegate` only forwards references that are not explicitly specified by other elements.
+* Less clear(?) that `shadowrootreferencetarget` only forwards references that are not explicitly specified by other elements.
 
 ### Designate target elements using attributes instead of IDREF
 
@@ -435,7 +436,7 @@ The [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-ari
 
 The [ExportID explainer](https://github.com/WICG/aom/blob/gh-pages/exportid-explainer.md) proposes a way to refer to elements inside the shadow DOM by name. For example, `"fancy-input::id(real-input)"` to refer to a specific `<input>` element inside a `<fancy-input>`.
 
-It would be possible to use exported IDs instead of `referenceDelegateMap` if/when it is necessary to refer to an element other than the primary reference delegate.
+It would be possible to use exported IDs instead of `referenceTargetMap` if/when it is necessary to refer to an element other than the primary reference target.
 
 #### Pros
 
@@ -454,17 +455,17 @@ This "kitchen sink" example implements a `<fancy-combobox>` using two components
 * Delegating references through multiple layers of shadow DOM.
    * A label in the light DOM refers to the `<input>` inside the `<fancy-input>`, which is itself inside the `<fancy-combobox>`.
 * Referring to an element in a sibling shadow tree. 
-   * Uses `ariaActiveDescendantElement` in `<fancy-input>` along with `referenceDelegateMap` in `<fancy-listbox>` to connect the `<input>` with a `<div role="option">`.
-* Using a custom prop to control the target of `referenceDelegateMap`.
+   * Uses `ariaActiveDescendantElement` in `<fancy-input>` along with `referenceTargetMap` in `<fancy-listbox>` to connect the `<input>` with a `<div role="option">`.
+* Using a custom prop to control the target of `referenceTargetMap`.
    * `<fancy-listbox>` allows the target of its `aria-activedescendant` to be controlled externally via its custom `activeitem` attribute.
 
 #### `<fancy-input>`
 
 This component is a wrapper around an `<input>`, similar to the one in the examples above with a few additional features.
 
-1. It delegates all references to the input. This lets, for example, a label for this component to be applied to the input.
+1. It sets the input as the reference target. This lets, for example, a label for this component to be applied to the input.
 2. A custom attribute `listbox` is hooked up to both `ariaControlsElements` and `ariaActiveDescendantElement`.
-   * The listbox delegates the two attributes to different elements inside (see `<fancy-listbox>` below), but this component references the parent listbox for both.
+   * The listbox targets the two attributes to different elements inside (see `<fancy-listbox>` below), but this component references the parent listbox for both.
 3. It observes the `role` attribute to set the `role` of the internal input.
 
 ```js
@@ -476,7 +477,7 @@ customElements.define("fancy-input",
       super();
       this.shadowRoot_ = this.attachShadow({ mode: "closed" });
       this.shadowRoot_.innerHTML = `<input id="real-input" />`;
-      this.shadowRoot_.referenceDelegate = "real-input"; // (1)
+      this.shadowRoot_.referenceTarget = "real-input"; // (1)
       this.input_ = this.shadowRoot_.getElementById('real-input');
     }
 
@@ -500,8 +501,8 @@ customElements.define("fancy-input",
 
 This component is a wrapper around `<div role="listbox">` and the `<div role="option">` items inside.
 
-1. It delegates all references _except_ `aria-activedescendant` to the `<div role="listbox">` using `referenceDelegate`.
-2. It has a custom attribute `activeitem`, which is used to control which item gets the `aria-activedescendant` delegation using `referenceDelegateMap`. This lets the parent component control the active item.
+1. It sets `<div role="listbox">` as the reference target for all references _except_ `aria-activedescendant`.
+2. It has a custom attribute `activeitem`, which is used to control which item gets the `aria-activedescendant` delegation using `referenceTargetMap`. This lets the parent component control the active item.
 
 ```js
 customElements.define("fancy-listbox", 
@@ -517,12 +518,12 @@ customElements.define("fancy-listbox",
           <div id="option-2" role="option">Option 2</div>
         </div>
       `;
-      this.shadowRoot_.referenceDelegate = "real-listbox"; // (1)
+      this.shadowRoot_.referenceTarget = "real-listbox"; // (1)
     }
 
     attributeChangedCallback(attr, _oldValue, value) {
       if (attr === "activeitem") {
-        this.shadowRoot_.referenceDelegateMap.ariaActiveDescendant = value; // (2)
+        this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = value; // (2)
       }
     }
   });
@@ -535,14 +536,14 @@ This component combines the two components above into a combobox.
 
 1. It hooks up the listbox to the input using the `<fancy-input>`'s custom `listbox` attribute.
 2. It controls which item inside the listbox is the `aria-activedescendant` of the input using the `<fancy-listbox>`'s custom `activeitem` attribute.
-3. It delegates all references to the `"combo-input"` component, which itself delegates to the `"real-input"` inside.
+3. It forwards all references to the `"combo-input"` component inside, which itself forwards references to the `"real-input"` inside.
 4. Using a label's `for` attribute with the fancy-combobox pierces two layers of shadow DOM to apply the label to the `<input id="real-input">`.
 
 ```html
 <label for="combobox">Combobox</label>
 <fancy-combobox id="combobox">
   <template shadowrootmode="closed"
-            shadowrootreferencedelegate="combo-input"> <!-- (3) -->
+            shadowrootreferencetarget="combo-input"> <!-- (3) -->
     <div>
       <!-- (1) -->
       <fancy-input id="combo-input" role="combobox" listbox="combo-listbox"></fancy-input>
