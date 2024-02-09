@@ -144,7 +144,7 @@ The equivalent declarative attribute is `shadowrootreferencetargetmap`, which is
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="closed"
             shadowrootreferencetargetmap="aria-controls: real-listbox,
-                                            aria-activedescendant: option-1">
+                                          aria-activedescendant: option-1">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
       <div id="option-2" role="option">Option 2</div>
@@ -153,11 +153,12 @@ The equivalent declarative attribute is `shadowrootreferencetargetmap`, which is
 </fancy-listbox>
 ```
 
-The JavaScript API reflects the mappings using camelCase names for the properties:
+The JavaScript API reflects the mappings using camelCase names for the properties, and `htmlFor` for `for`:
 
 ```js
 this.shadowRoot_.referenceTargetMap.ariaControls = 'real-listbox';
 this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = 'option-1';
+this.shadowRoot_.referenceTargetMap.htmlFor = 'real-input';
 ```
 
 #### Live references
@@ -166,14 +167,12 @@ Reference targets are a "live reference": if the host internally changes its ref
 
 In the example above, if the `aria-activedescendant` mapping is changed, then the `aria-activedescendant` of `<input>` will be changed to refer to the newly-mapped element.
 
-```js
-// Using `aria-activedescendant="fancy-listbox"` initially maps to 'option-1'
-
-// fancy-listbox internally updates its mapping
-this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = 'option-2';
-
-// Using `aria-activedescendant="fancy-listbox"` now maps to 'option-2'
- ```
+- **Before**: `aria-activedescendant="fancy-listbox"` initially maps to 'option-1'
+- fancy-listbox internally updates its mapping:
+  ```js
+  this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = 'option-2';
+  ```
+- **After**: `aria-activedescendant="fancy-listbox"` now maps to 'option-2'
 
 #### Combining `referenceTarget` and `referenceTargetMap`
 
@@ -289,13 +288,13 @@ Some JavaScript attributes reflect HTML attributes as Element objects rather tha
 
 These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceTarget element directly. This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
 
-In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox>` element that was targeted by `aria-activedescendant="fancy-listbox"`, even though the active descendant internally targets `<div id="option-2">`.
+In the example below, `input.ariaControlsElements` is the `<fancy-listbox>` element that was targeted by `aria-activedescendant="fancy-listbox"`, even though the active descendant internally targets `<div id="option-2">`.
 
 ```html
-<input id="input" aria-activedescendant="fancy-listbox" />
+<input id="input" aria-controls="fancy-listbox" />
 <fancy-listbox id="fancy-listbox">
   <template shadowrootmode="open"
-            shadowrootreferencetargetmap="aria-activedescendant: option-2">
+            shadowrootreferencetarget="real-listbox">
     <div id="real-listbox" role="listbox">
       <div id="option-1" role="option">Option 1</div>
       <div id="option-2" role="option">Option 2</div>
@@ -306,38 +305,50 @@ In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox
 <script>
   const input = document.getElementById('input');
   
-  console.log(input.ariaActiveDescendantElement);
-  // <fancy-listbox id="fancy-listbox">
+  console.log(input.ariaControlsElements);
+  // [<fancy-listbox id="fancy-listbox">]
 </script>
 ```
 
-#### Interaction with `HTMLInputElement.labels`
+#### Interaction with `HTMLInputElement.labels` and `ElementInternals.labels`
 
-The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) attribute returns list of the label elements targeting a certain input element. This API should continue to work if the input element is itself the target of a custom element.
+The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/labels) attribute returns list of the label elements targeting a certain input element. This API should continue to work if the input element is itself the target of a custom element. The labels will be in [shadow-including tree order](https://dom.spec.whatwg.org/#concept-shadow-including-tree-order).
+
+Since custom elements inherit from `HTMLElement` and _not_ `HTMLInputElement`, they don't have a `labels` attribute. However, if the custom element is form-associated _and_ has a `referenceTarget`, then [`ElementInternals.labels`](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/labels) will return an empty list `[]`, since all labels are forwarded to the reference target and not associated with the custom element itself.
 
 ```html
-<label id="outer-label" for="fancy-input">Outer Label</label>
-<fancy-input id="fancy-input">
-  <template shadowrootmode="open"
-            shadowrootreferencetarget="real-input">
-    <label id="inner-label" for="real-input">Inner Label</label>
-    <input id="real-input" />
-  </template>
-</fancy-input>
+<script>
+  customElements.define("form-input",
+  class FormInput extends HTMLElement {
+    static formAssociated = true;
+    constructor() {
+      super();
+      this.attachShadow({ mode: "open" });
+      this.internals = this.attachInternals();
+      this.shadowRoot.innerHTML = `
+        <label id="inner" for="real-input">Inner</label>
+        <input id="real-input" />
+      `;
+      this.shadowRoot.referenceTarget = "real-input";
+    }
+  });
+</script>
+
+<label id="before" for="form-input">Before</label>
+<form-input id="form-input"></form-input>
+<label id="after" for="form-input">After</label>
 
 <script>
-  const fancyInput = document.getElementById('fancy-input');
-  const realInput = fancyInput.shadowRoot.getElementById('real-input');
+  const formInput = document.getElementById("form-input");
+  console.log(formInput.labels);
+  // undefined
 
-  console.log(realInput.labels); 
-  // [<label id="outer-label">, <label id="inner-label">]
+  console.log(formInput.internals.labels);
+  // []
 
-  console.log(fancyInput.labels);
-  // undefined 
-
-  // Note: `labels` is not an attribute of `HTMLElement`.
-  // If fancyInput were a form-associated custom element, then elementInternals.labels
-  // would return an empty list [] because the labels target realInput, not fancyInput.
+  const realInput = formInput.shadowRoot.getElementById("real-input");
+  console.log(realInput.labels);
+  // [<label id="before">, <label id="inner">, <label id="after">]
 </script>
 ```
 
@@ -375,10 +386,10 @@ this.shadowRoot_.referenceTargetElement = input;
 
 #### Cons
 
-* It requires adding support for [attribute sprouting](https://wicg.github.io/aom/aria-reflection-explainer.html#sprouting-relationship-attributes) to sync the `shadowrootreferencetarget` attribute with `referenceTargetElement`. This adds complexity to the spec.
 * It does not unlock any net-new functionality. Since `referenceTarget` only works with elements inside the shadow root, every element that could be a target is accessible by a string ID reference.
-  > Note: This is in contrast to the ARIAMixin attributes like `ariaLabelledByElements`, which _do_ unlock the new functionality of referring out of the shadow DOM. In that case, the complexity is worthwhile to include in the ARIAMixin design.
+  > Note: This is in contrast to the ARIAMixin attributes like `ariaLabelledByElements`, which _do_ unlock the new functionality of referring out of the shadow DOM. In that case, the complexity is necessary to include in the ARIAMixin design.
 * At a basic level, Reference Target is augmenting the existing functionality of referring to elements by ID string. It seems in line with the design to require using ID strings.
+* It requires adding support for [attribute sprouting](https://wicg.github.io/aom/aria-reflection-explainer.html#sprouting-relationship-attributes) to sync the `shadowrootreferencetarget` attribute with `referenceTargetElement`. This adds complexity to the spec.
 
 ### Use separate attributes for each forwarded attribute
 
