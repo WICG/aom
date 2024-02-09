@@ -6,15 +6,19 @@ Author: [Ben Howell](https://github.com/behowell)
 
 Reference Target is a feature to enable using IDREF attributes such as `for` and `aria-labelledby` to refer to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM. The main goal of this feature is to enable ARIA to work across shadow root boundaries.
 
-This proposal is based on @Westbrook's [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) proposal, as well as borrowing ideas from @alice's [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
+This proposal is based on [@Westbrook](https://github.com/Westbrook)'s [Cross-root ARIA Reflection API](https://github.com/Westbrook/cross-root-aria-reflection/blob/main/cross-root-aria-reflection.md) proposal, as well as borrowing ideas from [@alice](https://github.com/alice)'s [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) proposal.
 
 ## Background
 
 ### Cross-root ARIA
 
-For an in-depth description the cross-root ARIA problem, see @alice's article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). The article describes the two main problems that need to be solved: [Referring from Shadow DOM outwards](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-from-shadow-dom-outwards) and [Referring into Shadow DOM](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#referring-into-shadow-dom).
+For an in-depth description the cross-root ARIA problem, see [@alice](https://github.com/alice)'s article [How Shadow DOM and accessibility are in conflict](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/). The article describes the two main problems that need to be solved: 
 
-The existing [ARIAMixin IDL attributes](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) unlock part of the solution to the cross-root ARIA problem. They allow for an element inside a shadow DOM to create an ARIA link to an element outside that shadow DOM. However, they are limited in that they can't reference an element inside another component's shadow DOM. The specifics of this limitation are described in more detail in @alice's article.
+#### 1. Referring from Shadow DOM outwards
+
+The existing [ARIAMixin IDL attributes](https://w3c.github.io/aria/#ARIAMixin) (such as `ariaLabelledbyElements` and `ariaActiveDescendantElement`) unlock part of the solution to the cross-root ARIA problem. They allow for an element inside a shadow DOM to create an ARIA link to an element outside that shadow DOM. However, they are limited in that they can't reference an element inside another component's shadow DOM. The specifics of this limitation are described in more detail in _How Shadow DOM and accessibility are in conflict_.
+
+#### 2. Referring into Shadow DOM
 
 The "missing piece" to solving the cross-root ARIA problem is the ability to refer into Shadow DOM. The Reference Target feature described in this explainer intends to solve this problem in a way that is compatible with the ARIAMixin attributes.
 
@@ -34,7 +38,7 @@ However, there are still missing pieces that prevent a web component from truly 
 3. Non-trivial amount of code required to hook up custom attributes on the host to ARIAMixin attributes on an element inside the shadow DOM.
 4. Can't get form-association for "free" by delegating to an input inside.
 
-This proposal solves **only the first problem** of ID references, and leaves the other problems to be solved by other features. While all of the problems may seem related, they can be designed separately.
+This proposal solves only the first problem: referring into the shadow DOM. It leaves the other problems to be solved by other features. While all of the problems may seem related, they can be designed separately.
 
 ## Proposal: Reference Target
 
@@ -47,7 +51,7 @@ Reference Target is a new feature that enables creating ARIA links to elements i
 - Should work the same for both closed and open shadow roots.
 - Shadow DOM encapsulation should be preserved: No direct access to any elements inside the shadow tree, and no implementation details leaked into a web component's API.
 - Should allow creating references into multiple nested shadow roots, and across "sibling" shadow roots that don't have a direct parent/child relationship.
-- The solution should be serializable, i.e. support declarative syntax that is expressible in HTML only.
+- The solution should be serializable, i.e. support declarative syntax that is expressible in HTML without needing JavaScript.
 
 #### Non-Goals
 
@@ -59,7 +63,7 @@ Reference Target is a new feature that enables creating ARIA links to elements i
 
 This proposal is broken into two phases:
 
-- [Phase 1](#phase-1) adds the ability to designate a single element as the target for ALL IDREF properties that refer to the host.
+- [Phase 1](#phase-1) adds the ability to designate a single element as the target for _all_ IDREF properties that refer to the host.
 - [Phase 2](#phase-2) adds a way to re-target specific properties (like `aria-activedescendant`) to refer a separate element.
 
 The goal of breaking it into phases is to get the simpler and less controversial ideas working first. The solutions to Phase 2 are more complex and may need more discussion before they are ready.
@@ -174,12 +178,12 @@ Reference targets are a "live reference": if the host internally changes its ref
 
 In the example above, if the `aria-activedescendant` mapping is changed, then the `aria-activedescendant` of `<input>` will be changed to refer to the newly-mapped element.
 
-- **Before**: `aria-activedescendant="fancy-listbox"` initially maps to 'option-1'
+- **Before**: `<input aria-activedescendant="fancy-listbox">` initially maps to 'option-1'.
 - fancy-listbox internally updates its mapping:
   ```js
   this.shadowRoot_.referenceTargetMap.ariaActiveDescendant = "option-2";
   ```
-- **After**: `aria-activedescendant="fancy-listbox"` now maps to 'option-2'
+- **After**: `<input aria-activedescendant="fancy-listbox">` now maps to 'option-2', without needing to update the input element itself.
 
 #### Combining `referenceTarget` and `referenceTargetMap`
 
@@ -262,19 +266,15 @@ There is no special support for an element nested inside a label. The label must
   );
 </script>
 
-<!--
-  ❌ This label isn't associated with anything because it doesn't use `for`, 
-    and fancy-input is not form-associated.
--->
+<!-- ❌ This label isn't associated with anything because it doesn't use `for`, 
+     and fancy-input is not form-associated. -->
 <label>
   Fancy Input
   <fancy-input></fancy-input>
 </label>
 
-<!--
-  ✅ This label is applied to the inner `<input id="real-input" />`, which is 
-    fancy-input's referenceTarget.
--->
+<!-- ✅ This label is applied to the inner `<input id="real-input" />`, which is 
+     fancy-input's referenceTarget. -->
 <label for="fancy-input">
   Fancy Input
   <fancy-input id="fancy-input"></fancy-input>
