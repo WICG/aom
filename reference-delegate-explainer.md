@@ -29,36 +29,41 @@ Web components have an increasing number of features that allow them to work and
 
 However, there are still missing pieces that prevent a web component from truly being a drop-in replacement for a built-in, including:
 
-* Can't create ID reference links to elements inside the shadow DOM.
-* Can't use built-in attributes like `aria-label` or `role` on the host and have them apply to an element inside the shadow DOM.
-* Non-trivial amount of code required to hook up custom attributes on the host to ARIAMixin attributes on an element inside the shadow DOM.
-* Can't get form-association for "free" by delegating to an input inside.
+1. Can't create ID reference links to elements inside the shadow DOM.
+2. Can't use built-in attributes like `aria-label` or `role` on the host and have them apply to an element inside the shadow DOM.
+3. Non-trivial amount of code required to hook up custom attributes on the host to ARIAMixin attributes on an element inside the shadow DOM.
+4. Can't get form-association for "free" by delegating to an input inside.
 
-This proposal solves only the first problem of ID references, and leaves the other problems to be solved by other features. While all of the problems may seem related, they can be designed separately.
+This proposal solves **only the first problem** of ID references, and leaves the other problems to be solved by other features. While all of the problems may seem related, they can be designed separately.
 
-## Proposal
-
-### Reference Target
+## Proposal: Reference Target
 
 Reference Target is a new feature that enables creating ARIA links to elements inside a component's shadow DOM, while maintaining encapsulation of the internal details of the shadow DOM.
 
-**Goals**
+#### Goals
 
 - Solve only the "missing piece" of cross-root ARIA: how to handle IDREF attributes referring into the shadow DOM. Avoid scope creep.
 - Create a mechanism for ID reference attributes like `aria-activedescendant` and `for` to refer to an element inside a component's shadow DOM.
-- Should be compatible with the ARIAMixin attributes such as `ariaActiveDescendantElement`, to create a complete solution to cross-root ARIA.
 - Should work the same for both closed and open shadow roots.
 - Shadow DOM encapsulation should be preserved: No direct access to any elements inside the shadow tree, and no implementation details leaked into a web component's API.
 - Should allow creating references into multiple nested shadow roots, and across "sibling" shadow roots that don't have a direct parent/child relationship.
 - The solution should be serializable, i.e. support declarative syntax that is expressible in HTML only.
 
-**Non-Goals**
+#### Non-Goals
 
 - This is scoped to only solve the problem of referring _into_ the shadow DOM. It relies on ARIAMixin to refer _out_ of the shadow DOM.
 - This feature does not solve the [bottleneck effect](https://alice.pages.igalia.com/blog/how-shadow-dom-and-accessibility-are-in-conflict/#limitations-of-these-apis). It is difficult to find a compelling real-world example where this is a problem.
 - This does not affect the how attributes set on the host element work. For example, this does not tackle the problem of forwarding `role` or `aria-label`, etc. from the host element to an element inside.
 
-### The `referenceTarget` attribute
+#### Phases
+
+This proposal is broken into two phases:
+* [Phase 1](#phase-1) adds the ability to designate a single element as the target for ALL IDREF properties that refer to the host.
+* [Phase 2](#phase-2) adds a way to re-target specific properties (like `aria-activedescendant`) to refer a separate element.
+
+The goal of breaking it into phases is to get the simpler and less controversial ideas working first. The solutions to Phase 2 are more complex and may need more discussion before they are ready.
+
+### <a id="phase-1"></a> Phase 1: ShadowRoot `referenceTarget` attribute
 
 A component can specify an element in its shadow tree to act as its "reference target". When the host component is the target of a IDREF like a label's `for` attribute, the referenceTarget becomes the effective target of the label.
 
@@ -95,7 +100,33 @@ Equivalent with declarative shadow DOM:
 </fancy-input>
 ```
 
-### The `referenceTargetMap` attribute
+#### Supported attributes
+
+This feature is intended to work with **all** attributes that refer to another element by ID string. These are:
+
+* ARIA
+  * `aria-activedescendant`
+  * `aria-controls`
+  * `aria-describedby`
+  * `aria-details`
+  * `aria-errormessage`
+  * `aria-flowto`
+  * `aria-labelledby`
+  * `aria-owns`
+* Inputs
+  * `for` (also supports the click behavior of labels)
+  * `form`
+  * `list`
+  * `popovertarget`
+  * `invoketarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
+  * `interesttarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
+* Tables
+  * `headers`
+
+> _Please comment if there are any attributes missing from this list._
+
+
+### <a id="phase-2"></a> Phase 2: ShadowRoot `referenceTargetMap` attribute
 
 There are situations where it is necessary to target different reference types to different elements. For example, a listbox may want to target `aria-controls` to its root, and `aria-activedescendant` to one of the items inside the listbox.
 
@@ -196,34 +227,11 @@ This example shows a `<description-with-tooltip>` component that contains a "Mor
 </description-with-tooltip>
 ```
 
-### Supported attributes
-
-This feature is intended to work with **all** attributes that refer to another element by ID string. These are:
-
-* ARIA
-  * `aria-activedescendant`
-  * `aria-controls`
-  * `aria-describedby`
-  * `aria-details`
-  * `aria-errormessage`
-  * `aria-flowto`
-  * `aria-labelledby`
-  * `aria-owns`
-* Inputs
-  * `for` (also supports the click behavior of labels)
-  * `form`
-  * `list`
-  * `popovertarget`
-  * `invoketarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
-  * `interesttarget` (proposed in [Invokers Explainer](https://open-ui.org/components/invokers.explainer/))
-* Tables
-  * `headers`
-* Microdata
-  * `itemref`
-
-> _Please comment if there are any attributes missing from this list._
-
 ### Interaction with other features
+
+#### Interaction with CSS Selectors
+
+The referenceTarget does not affect CSS selectors in any way. An ID selector will target the host element that has the matching `id` attribute, and _not_ its referenceTarget.
 
 #### Form-associated custom elements
 
@@ -231,31 +239,45 @@ A [form-associated custom element](https://html.spec.whatwg.org/dev/custom-eleme
 
 #### Nesting inside `<label>`
 
-If a shadow tree targets the `for` attribute (either implicitly with `referenceTarget` or explicitly with `referenceTargetMap`), then that also applies when the host element is nested inside a label. The label becomes associated with the reference target element.
-
-In the following example, the label of the `<input>` is "Fancy input".
+There is no special support for an element nested inside a label. The label must use the `for` attribute to work with `referenceTarget`. It is still ok to nest the custom element inside the label, but it must also use `for`.
 
 ```html
+<script>
+customElements.define("fancy-input", 
+  class FancyInput extends HTMLElement {
+    constructor() {
+      super();
+      this.shadowRoot_ = this.attachShadow({ mode: "closed" });
+      this.shadowRoot_.innerHTML = `<input id="real-input" />`;
+      this.shadowRoot_.referenceTarget = "real-input";
+    }
+  });
+</script>
+
+<!--
+  ❌ This label isn't associated with anything because it doesn't use `for`, 
+    and fancy-input is not form-associated.
+-->
 <label>
-  Fancy input
-  <fancy-input id="fancy-input">
-    <template shadowrootmode="closed"
-              shadowrootreferencetarget="real-input">
-      <input />
-    </template>
-  </fancy-input>
+  Fancy Input
+  <fancy-input></fancy-input>
+</label>
+
+<!--
+  ✅ This label is applied to the inner `<input id="real-input" />`, which is 
+    fancy-input's referenceTarget.
+-->
+<label for="fancy-input">
+  Fancy Input
+  <fancy-input id="fancy-input"></fancy-input>
 </label>
 ```
 
-> Note: This behavior may need to be reconsidered. It deviates from the rest of the referenceTarget feature, which only applies to IDREF attributes. It is also possible for authors to use the `for` attribute even when the input is nested inside the label.
-
 #### Nesting inside `<form>`
 
-Reference target does not change the behavior of the host element when it is nested inside a form. It does _not_ implicitly associate the target element with the form.
+Reference target does not change the behavior of the host element when it is nested inside a form. It does _not_ implicitly associate the target element with the form if it is not a form-associated custom element.
 
-> Note: This could be explored further, but it seems like linking the target to the form would have too much overlap/conflict with form-associated custom elements.
-
-#### Interaction with JavaScript attributes/functions that reflect Elements
+#### JavaScript attributes that reflect `Element` objects
 
 Some JavaScript attributes reflect HTML attributes as Element objects rather than ID strings. These include:
 * ARIAMixin attributes like `ariaActiveDescendantElement`
@@ -265,7 +287,7 @@ Some JavaScript attributes reflect HTML attributes as Element objects rather tha
 * `HTMLLabelElement.control`
 * _(This list is not exhaustive)_
 
-These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceTarget element directly.  This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
+These will _always_ refer to the **host** element that they're targeting, and _never_ the referenceTarget element directly. This behavior maintains the design that an [IDL attribute with type Element](https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element) can only refer to an element that is a descendant of a [shadow-including ancestor](https://dom.spec.whatwg.org/#concept-shadow-including-ancestor) of the element hosting the attribute.
 
 In the example below, `input.ariaActiveDescendantElement` is the `<fancy-listbox>` element that was targeted by `aria-activedescendant="fancy-listbox"`, even though the active descendant internally targets `<div id="option-2">`.
 
@@ -311,15 +333,13 @@ The [`HTMLInputElement.labels`](https://developer.mozilla.org/en-US/docs/Web/API
   // [<label id="outer-label">, <label id="inner-label">]
 
   console.log(fancyInput.labels);
-  // undefined (`labels` is not an attribute of HTMLElement)
+  // undefined 
+
+  // Note: `labels` is not an attribute of `HTMLElement`.
   // If fancyInput were a form-associated custom element, then elementInternals.labels
-  // would return an empty list [] because the labels are targeted to realInput.
+  // would return an empty list [] because the labels target realInput, not fancyInput.
 </script>
 ```
-
-#### Interaction with CSS Selectors
-
-The referenceTarget has no interaction with CSS. An ID selector will target the host element, and _not_ its referenceTarget.
 
 ## Privacy and Security Considerations
 
@@ -338,21 +358,6 @@ The name "reference target" (`shadowrootreferencetarget`) follows the naming con
 * "Forwards References" - `shadowrootforwardsreferences="id"` - borrowing from ["forwardRef" in React](https://react.dev/reference/react/forwardRef).
 
 Ultimately, the name "reference target" is the most concise and consistent, and conveys the intent of the feature. However, community feedback is welcome on the name.
-
-### Omit the "catch-all" `referenceTarget` attribute
-
-It is technically possible to require all attributes to be individually targeted via `referenceTargetMap`, rather than also allowing `referenceTarget` as a "catch-all" for every attribute.
-
-#### Pros
-
-* The main argument to omit `referenceTarget` is that the semantics could change if more targeted attributes are added in the future. This could break existing websites by changing the target of an attribute, if it is added to `referenceTarget` support in the future.
-* It makes it more difficult for browser vendors to incrementally implement reference target, since adding support for additional attributes is a breaking change.
-
-#### Cons
-
-* The Reference Target feature is intended to support all attributes that use ID references. Thus, the only time a new attribute will be supported by Reference Target is when it is a completely new attribute in the HTML spec. There is no backwards compatibility concern, since no websites will be using the new attribute before is is supported.
-* It is beneficial that this feature automatically supports future attributes added to the HTML spec. It will not require any developer work to update to support new features.
-* Including an easy-to-use catch-all attribute supports the HTML design principle of [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies). It priorities users of the feature, over browser implementors and theoretical concerns.
 
 ### Add `referenceTargetElement` attribute that targets an element object
 
@@ -402,6 +407,7 @@ Reflected by JavaScript attributes `ShadowRoot.ariaActiveDescendantTarget`, etc.
 
 * Syntax is more in line with other HTML attributes, rather than using a comma-separated list of colon-separated map entries.
 * Works with IDs that contain commas.
+* It is possible to scope support for properties where this behavior has a real use-case, such as `aria-activedescendant`. This would limit the number of new properties to only a handful.
 
 #### Cons
 
@@ -448,6 +454,22 @@ It would be possible to use exported IDs instead of `referenceTargetMap` if/when
 * Exposes some of the internal details of a control and does not give a way for the control to encapsulate those details.
 * Incompatible with ARIAMixin attributes, which don't allow directly referencing elements inside other shadow trees.
    * It may be possible to work around this limitation, but it would require a change to the behavior of the ARIAMixin attributes, as well as new JavaScript APIs to resolve an IDREF like `"fancy-input::id(real-input)"` into an "ElementHandle" type object that references the element without giving full access to it (which would break shadow DOM encapsulation).
+
+
+### Omit the "catch-all" `referenceTarget` attribute
+
+It is technically possible to require all attributes to be individually targeted via `referenceTargetMap`, rather than also allowing `referenceTarget` as a "catch-all" for every attribute.
+
+#### Pros
+
+* The main argument to omit `referenceTarget` is that the semantics could change if more targeted attributes are added in the future. This could break existing websites by changing the target of an attribute, if it is added to `referenceTarget` support in the future.
+* It makes it more difficult for browser vendors to incrementally implement reference target, since adding support for additional attributes is a breaking change.
+
+#### Cons
+
+* The Reference Target feature is intended to support all attributes that use ID references. Thus, the only time a new attribute will be supported by Reference Target is when it is a completely new attribute in the HTML spec. There is no backwards compatibility concern, since no websites will be using the new attribute before is is supported.
+* It is beneficial that this feature automatically supports future attributes added to the HTML spec. It will not require any developer work to update to support new features.
+* Including an easy-to-use catch-all attribute supports the HTML design principle of [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies). It priorities users of the feature, over browser implementors and theoretical concerns.
 
 ## Appendix A: Combobox Example
 
