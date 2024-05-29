@@ -250,7 +250,9 @@ A [form-associated custom element](https://html.spec.whatwg.org/dev/custom-eleme
 
 #### Nesting inside `<label>`
 
-There is no special support for an element nested inside a label. The label must use the `for` attribute to work with `referenceTarget`. It is still ok to nest the custom element inside the label, but it must also use `for`.
+Reference Target allows for labels to be implicitly associated with the target element when the host is nested inside a `<label>` element. The shadow tree's reference target will be associated with the label that contains the element. If the shadow tree is using `referenceTargetMap`, this uses the `for` attribute from the map.
+
+In the following example, the label of the `<input id="real-input">` is "Fancy input".
 
 ```html
 <script>
@@ -262,23 +264,16 @@ There is no special support for an element nested inside a label. The label must
         this.shadowRoot_ = this.attachShadow({ mode: "closed" });
         this.shadowRoot_.innerHTML = `<input id="real-input" />`;
         this.shadowRoot_.referenceTarget = "real-input";
+        // Alternatively, set the referenceTargetMap with the `for` attribute:
+        // this.shadowRoot_.referenceTargetMap.htmlFor = "real-input";
       }
     }
   );
 </script>
 
-<!-- ❌ This label isn't associated with anything because it doesn't use `for`, 
-     and fancy-input is not form-associated. -->
 <label>
-  Fancy Input
+  Fancy input
   <fancy-input></fancy-input>
-</label>
-
-<!-- ✅ This label is applied to the inner `<input id="real-input" />`, which is 
-     fancy-input's referenceTarget. -->
-<label for="fancy-input">
-  Fancy Input
-  <fancy-input id="fancy-input"></fancy-input>
 </label>
 ```
 
