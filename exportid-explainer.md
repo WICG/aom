@@ -1,5 +1,5 @@
 > [!CAUTION]  
-> The Export ID proposal is no longer planned. It has been replaced by the [Reference Target](reference-target-explainer.md) proposal.
+> The Export ID proposal is no longer planned. It has been replaced by the [Reference Target](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/reference-target-explainer.md) proposal.
 
 # Exporting IDs from shadow roots for cross-root ARIA
 
