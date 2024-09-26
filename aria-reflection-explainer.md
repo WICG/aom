@@ -160,7 +160,7 @@ assert_equals(input.ariaLabelledByElements[1], l2);
 
 #### Sprouting relationship attributes
 
-When using reflection to set ARIA relationship properties, the element may "sprout" new attributes.
+When using reflection to set ARIA relationship properties, the element (MUST NOT|SHOULD NOT) "sprout" new attributes. This is different than the reflection of simple ARIA attributes (because reasons). 
 
 ```html
 <div id='fruitbowl' role='listbox'>
@@ -174,14 +174,11 @@ fruitbowl.ariaActiveDescendantElement = apple;
 
 // We can observe the relationship.
 assert_equals(fruitbowl.ariaActiveDescendantElement, apple);
-// The fruitbowl has even sprouted a matching content attribute.
+// The fruitbowl has not sprouted a matching content attribute. This assertion will fail.
 assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "apple");
 ```
 
-Attributes sprout only at the time the relationship is set, and only if certain conditions are met.
-
-If the target element does not
-have an ID attribute, no content attribute will sprout, even though the relationship will still be
+Although the content attribute will not sprout, the relationship will still be
 communicated correctly to assistive technology.
 
 ```html
@@ -208,8 +205,7 @@ assert_equals(fruitbowl.getAttribute("aria-activedescendant"), "");
 In this example, attempting to set a relationship to an element that's not
 attached to the document yet will not sprout an attribute - and subsequently
 if the target element is added to the DOM, it still won't have a content
-attribute because content attributes are only sprouted at the time
-the property is set.
+attribute.
 
 ```html
 <div id='fruitbowl' role='listbox'>
